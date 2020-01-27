@@ -1,0 +1,78 @@
+#+latex_class_options: [fleqn, twocolumn]
+#+latex_header: \usepackage{../homework}
+#+bind: org-latex-default-figure-position "H"
+#+bind: org-latex-image-default-width ".66\\linewidth"
+
+#+title: EE381: Homework 1
+#+author: Lewis Collum
+#+date: Updated: \today
+
+#+exclude_tags: unfinished
+
+* 1.4
+  \[2\sin\left(2\pi\left(2t + 5x\right)\right)\]
+
+  a. Along the negative \(x\) direction.
+  b. \(\boxed{\phi = 0}\)
+  c. \(f = \boxed{2 \si{Hz}}\)
+  d. \(\lambda = \boxed{\frac{1}{5} \si{\centi\meter}}\)
+  e. \(u = \lambda f = \boxed{\frac{2}{5} \si{\centi\meter\per\second}}\)
+
+* 1.7                                                            :unfinished:
+** (a)
+   \[y_1 = A\cos\left(\omega t - \beta x\right)\]
+   \[y_2 = A\cos\left(\omega t + \beta x\right)\]
+** (b)
+   #+begin_src python :results file :var file="1.7.b.png"
+import matplotlib.pyplot as pyplot
+import numpy
+
+x = numpy.arange(-numpy.pi*4, 0, 0.01)
+y1 = numpy.cos(numpy.pi/4 - x)
+y2 = numpy.cos(numpy.pi/4 + x)
+ys = y1 + y2
+
+pyplot.plot(x, y1, x, y2)
+pyplot.savefig(file)
+return file
+   #+end_src
+
+   #+RESULTS:
+   [[file:1.7.b.png]]
+
+* 1.8
+** (a)
+   \(y_1\) is headed right.
+   \(y_2\) is headed left.
+** (b)                                                           :unfinished:
+   #+begin_src python :results file :var file="test.png"
+import matplotlib.pyplot as pyplot
+import numpy
+
+x = numpy.arange(0.1, 0.4, 0.005)
+y1 = 4 * numpy.cos(20*numpy.pi/50 - 30*x)
+y2 = -4 * numpy.cos(20*numpy.pi/50 + 30*x)
+
+pyplot.plot(x, y1, x, y2)
+pyplot.savefig(file)
+return file
+   #+end_src
+   
+   #+RESULTS:
+   [[file:test.png]]
+
+* 1.14
+  [[./figure/1.14.png]]
+* 1.16
+  [[./figure/1.16.a-b.png]]
+  [[./figure/1.16.c-e.png]]
+  [[./figure/1.16.f-g.png]]
+* 1.17
+  [[./figure/1.17.a-c.png]]
+  [[./figure/1.17.d-e.png]]
+* 1.25
+  [[./figure/1.25.png]]
+* 1.26
+  [[./figure/1.26.png]]
+* 1.29
+  [[./figure/1.29.png]]

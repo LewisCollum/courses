@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+courseName="$1"
+
+templateFile=~/course/.homeworkTemplate.org
+styleFile=~/course/latex_styles/homework.sty
+makeHomeworkFile=~/course/.makeHomework
+
+if [ ! -d "$courseName" ]; then
+    mkdir "$courseName"
+    mkdir "$courseName"/homework
+    ln -s $makeHomeworkFile "$courseName"/homework/make
+    ln -s $templateFile "$courseName"/homework/template.org
+    ln -s $styleFile "$courseName"/homework/homework.sty
+fi;
+
+
+    
+    

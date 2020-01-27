@@ -1,0 +1,27 @@
+# Temporary Files
+*~
+\#*
+.\#*
+
+# Misc Data Formats
+**.data
+**.plt
+
+# Python artifacts
+__pycache__/
+
+# LaTex artifacts
+**ltximg/
+**_minted*
+
+# Org-Mode generated files
+*.html
+*.tex
+
+# Scrap Files
+*scrap*
+
+# Krita
+.kra_autosave.kra
+
+clean
