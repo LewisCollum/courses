@@ -1,0 +1,33 @@
+Lab 1: Creating Three Shapes in 2D
+
+Write a WebGL application that will display three different 2D shapes on your canvas together, with one color for each shape. The JavaScript libraries you must use are webgl-utils.js, initShaders.js and MV.js from Angel & Shreiner (shared via Moodle in the file CodeTemplate.zip).
+
+Preparatory Material:
+1) Code covered in class:
+2) Code practice material at: https://www.cs.unm.edu/~angel/BOOK/INTERACTIVE_COMPUTER_GRAPHICS/SEVENTH_EDITION/CODE/02/
+(gasket1.html, gasket1.js, gasket2.html, gasket2.js).
+
+Requirements:
+1) Only one of the shapes can have 4 vertices or lesser, the rest should have more than 4 vertices.
+2) One shape must be an ellipse. You can use one of the following equations for the ellipse. They are very minor alterations to the equations for the circle discussed in class:
+
+Either: ((x-a)^2)/c^2 + ((y-b)^2)/d^2 = 1
+
+Or: x = c cos(theta) + a
+    y = d sin(theta) + b
+
+The above equations are in the general form. You should make sure that your ellipse fits within the clipspace. This would need you to figure out values for c, d, a, and b that make the ellipse fit in the clipspace. The values of c and d should NOT BE THE SAME: if they are the same, you get a circle.
+
+3) One of the three shapes should be drawn using LINE_LOOP or LINE_STRIP, i.e., should not be filled. Another shape must be drawn using TRIANGLE_FAN or TRIANGLE_STRIP. The remaining shape can be drawn as you like.
+
+4) Provide your name with your description in the README.txt file for the lab. This is required.
+
+5) You should submit three files to Moodle: lab1.html, lab1.js, and README.txt. Make sure that you put your name in the comments section of the lab1.js file.
+
+
+Scoring Rubric: Total - 20 points, scaled to 4 points.
+
+1) Each shape drawn correctly is 4 points. If you do not have an ellipse, you will lose 4 points. If more than one shape has 4 or less vertices, you will lose 4 points.
+2) The ellipse should have more than 5 vertices.
+3) Description in the README.txt file is worth 4 points.
+4) Each shape should have a different color. One color per shape gets you 4 points.

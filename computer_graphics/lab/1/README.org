@@ -1,0 +1,11 @@
+#+latex_class_options: [fleqn]
+#+latex_header: \usepackage{../homework}
+
+#+title: Lab 1
+#+author: Lewis Collum
+#+date: 2020-01-21
+
+* Test
+** duishud
+* TEtsyu
+** dwijdioj
