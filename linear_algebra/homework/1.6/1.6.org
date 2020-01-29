@@ -1,0 +1,48 @@
+#+latex_class_options: [fleqn]
+#+latex_header: \usepackage{../homework}
+
+#+title: 
+#+author: Lewis Collum
+#+date: Updated: \today"
+
+* 3
+#+begin_src python :results output
+import sympy
+
+a = sympy.Matrix([
+    [1, 0, 1, 0, 40],
+    [1, 1, 0, 0, 50],
+    [0, 1, -1, -1, 0]])
+
+print(a.rref())
+#+end_src
+
+#+RESULTS:
+: (Matrix([
+: [1, 0,  1, 0, 40],
+: [0, 1, -1, 0, 10],
+: [0, 0,  0, 1, 10]]), (0, 1, 3))
+* 4
+  #+begin_src python :results output
+import sympy
+
+a = sympy.Matrix([
+    [1, 0, 0, 0, 0, -1, 110],
+    [1, -1, 0, 0, 0, 0, 110],
+    [0, -1, 1, 0, 0, 0, 30],
+    [0, 0, 1, -1, 0, 0, 110],
+    [0, 0, 0, -1, 1, 0, 150],
+    [0, 0, 0, 0, 1, -1, 70]
+])
+
+print(a.rref())
+  #+end_src
+
+  #+RESULTS:
+  : (Matrix([
+  : [1, 0, 0, 0, 0, -1, 110],
+  : [0, 1, 0, 0, 0, -1,   0],
+  : [0, 0, 1, 0, 0, -1,  30],
+  : [0, 0, 0, 1, 0, -1, -80],
+  : [0, 0, 0, 0, 1, -1,  70],
+  : [0, 0, 0, 0, 0,  0,   0]]), (0, 1, 2, 3, 4))
