@@ -1,0 +1,61 @@
+\ProvidesPackage{homework}[2019/02/03 Package for homeworks]
+\usepackage[
+  letterpaper,
+  hmargin=.33in,
+  top=0.4in,
+  bottom=\dimexpr0.33in+1.2\baselineskip\relax,
+  includefoot]{geometry}
+
+\usepackage{siunitx}
+\usepackage{titlesec}
+\usepackage[default]{opensans}
+\usepackage{xcolor}
+
+\usepackage{enumitem}
+\setlist[itemize]{noitemsep, \normalsize}
+
+% https://latex.org/forum/viewtopic.php?f=46&t=8144
+\newlength\dlf 
+\newcommand\alignedbox[2]{&{
+    \settowidth\dlf{$\displaystyle #1$}  
+    \addtolength\dlf{\fboxsep+\fboxrule}  
+    \hspace{-\dlf}  
+    \boxed{#1 #2}
+  }
+}
+
+\setlength\parindent{0pt}
+
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+\begin{flushleft}
+  \textbf{\@title}
+
+  \@author
+
+  \@date
+\end{flushleft}\egroup
+}
+
+\titleformat{\section}{\scshape}{}{0pt}{\titlerule[0.4pt]\leavevmode \\}{}
+\titlespacing{\section}{0pt}{5pt}{0pt}
+
+\titleformat{\subsection}{\small\bfseries}{}{0pt}{}{}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\titleformat{\subsubsection}{\small\bfseries}{}{0pt}{}{}
+\titlespacing{\subsubsection}{0pt}{10pt}{5pt}
+
+\makeatother
+
+\AtBeginDocument{
+  \setlength\abovedisplayskip{2pt}
+  \setlength\belowdisplayskip{2pt}
+  \setlength\abovedisplayshortskip{2pt}
+  \setlength\belowdisplayshortskip{5pt}
+}
+
+\definecolor{codeBackground}{rgb}{0.95,0.95,0.95}
+
+\linespread{1.2}
+\setlength{\mathindent}{0.25in}
