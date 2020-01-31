@@ -52,3 +52,16 @@
    
    
    
+
+* 7
+  - \(R\): Event of a woman wearing a ring
+  - \(N\): Event of a woman wearing a necklace
+  - \(P(R^C \cap N^C) = P((R \cup N)^C) = 0.4\)
+  - \(P(R) = 0.5\)
+  - \(P(N) = 0.2\)
+** (a) \(P(R \cup N) = 1 - P((R \cup N)^C) = \boxed{0.6}\)
+** (b) \(P(R \cap N) = P(R) P(N) = 0.5\cdot 0.2 = \boxed{0.1}\)
+** (c) \(P(R|N) = \dfrac{P(R \cap N)}{P(N)} = \dfrac{0.1}{0.2} = \boxed{0.5}\)
+** (d) \(P(N|R) = \dfrac{P(N \cap R)}{P(R)} = \dfrac{0.1}{0.5} = \boxed{0.2}\)
+** (e) Yes
+   
