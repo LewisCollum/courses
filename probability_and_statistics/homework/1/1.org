@@ -1,14 +1,54 @@
 #+latex_class_options: [fleqn, twocolumn]
 #+latex_header: \usepackage{../homework}
+#+property: header-args :results output
 
-#+title: Homework 1
-#+author: Lewis Collum
+#+title: Homework 1 
+#+author: Lewis Collum (Section 01)
 #+date: Updated: \today
 
-* 1 (Mutually Exclusive)
+* 1                                                                :noexport:
+  (Mutually Exclusive)
 ** (a) \(P(\emptyset) = 0\)
 ** (b) \(P(A) + P(B) = 0.9\)
 ** (c) \(0.5\)
 ** (d) \(1 - P(A) - P(B) = 0.1\)
 ** (e) \(0.5\)
   
+* 4
+  - \(S\): Event of sensor triggering
+  - \(D\): Event of dangerous conditions
+  - \(D^C\): Event of normal conditions
+
+  - \(P(D) = 0.05\)
+  - \(P(D^C) = 0.95\)
+  - \(P(S|D) = 0.95\)
+  - \(P(S|D^C) = 0.05\)
+
+** (a) \(P(S|D^C) = \boxed{0.05}\)
+** (b) \(P(D | S^C)\)
+  #+begin_export latex
+  \begin{align*}
+    P(S) &= P(S \cap D) + P(S \cap D^C) \\
+         &= P(S|D) P(D) + P(S|D^C) P(D^C) \\
+         &= 0.95 \cdot 0.05 + 0.05 \cdot 0.95 \\
+         &= 0.095
+  \end{align*}
+  #+end_export
+  
+  \[P(S^C) = 1 - P(S) = 0.905\]
+
+  #+begin_export latex
+  \begin{align*}
+    P(D | S^C) &= \frac{P(D) P(S^C | D)}{P(S^C)} \\
+               &= \frac{P(D) (1 - P(S | D))}{P(S^C)} \\
+               &= \frac{0.05 (1 - 0.95)}{0.905} \\
+               &= \boxed{0.0028}
+  \end{align*}
+  #+end_export
+
+** (c) 
+   An unidentified critical condition since this means that the sensor
+   would not alarm in the case of a dangerous event.
+   
+   
+   
