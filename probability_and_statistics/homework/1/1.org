@@ -1,0 +1,14 @@
+#+latex_class_options: [fleqn, twocolumn]
+#+latex_header: \usepackage{../homework}
+
+#+title: Homework 1
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* 1 (Mutually Exclusive)
+** (a) \(P(\emptyset) = 0\)
+** (b) \(P(A) + P(B) = 0.9\)
+** (c) \(0.5\)
+** (d) \(1 - P(A) - P(B) = 0.1\)
+** (e) \(0.5\)
+  
