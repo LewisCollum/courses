@@ -5,7 +5,7 @@
 #+author: Lewis Collum
 #+date: Updated: \today"
 
-#+begin_src python :results output
+#+begin_src python :results output :async
 import numpy
 import matplotlib.pyplot as pyplot
 
@@ -26,8 +26,13 @@ for rIndex, r in enumerate(R):
         X[i] = A.dot(X[i-1])
     table[r] = X
 
-print(table[0.18])
-pyplot.plot(numpy.arange(2000, 2030), table[0.18])
+r = 0.30
+print(table[r])
+pyplot.title(f"Spotted Owl Populations: r = {r}")
+pyplot.xlabel('year')
+pyplot.ylabel('population')
+pyplot.plot(numpy.arange(2000, 2030), table[r])
+pyplot.legend(('juvenile', 'subadult', 'adult'))
 pyplot.show()
 #+end_src
 
