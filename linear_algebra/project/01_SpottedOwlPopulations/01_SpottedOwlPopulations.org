@@ -1,22 +1,28 @@
 #+latex_class_options: [fleqn]
 #+latex_header: \usepackage{../homework}
+#+bind: org-latex-default-figure-position "H"
+#+bind: org-latex-image-default-width "0.7\\linewidth"
+#+bind: org-latex-minted-options (("bgcolor" "codeBackground"))
 
-#+title: Spotted Owl Populations
+#+title: MA339 Project 1: Spotted Owl Populations
 #+author: Lewis Collum
-#+date: Updated: \today"
+#+date: Updated: \today
 
-#+begin_src python :results output :async
+[[./r0.18.png]]
+[[./r0.30.png]]
+
+
+#+begin_src python :results output :async :tangle table.py :results silent
 import numpy
-import matplotlib.pyplot as pyplot
-
-R = numpy.arange(0.18, 0.32, 0.2)
-X = numpy.empty((30, 3))
-
-X[0] = numpy.asarray([100, 100, 100])
 
 table = {}
 
-for rIndex, r in enumerate(R):
+R = numpy.arange(0.18, 0.31, 0.02)
+
+for r in R:
+    X = numpy.empty((31, 3))
+    X[0] = numpy.asarray([100, 100, 100])
+
     for i in range(1, len(X)):
         A = numpy.asarray([
             [0, 0, 0.33],
@@ -24,48 +30,108 @@ for rIndex, r in enumerate(R):
             [0, 0.71, 0.94]])
         
         X[i] = A.dot(X[i-1])
-    table[r] = X
+    table[round(r, 2)] = X
+#+end_src
+
+#+begin_src python :async :results silent
+import numpy
+import matplotlib.pyplot as pyplot
+
+from table import table
 
 r = 0.30
-print(table[r])
+
 pyplot.title(f"Spotted Owl Populations: r = {r}")
 pyplot.xlabel('year')
 pyplot.ylabel('population')
-pyplot.plot(numpy.arange(2000, 2030), table[r])
+pyplot.plot(numpy.arange(2000, 2031), table[round(r, 2)])
 pyplot.legend(('juvenile', 'subadult', 'adult'))
 pyplot.show()
 #+end_src
 
+#+begin_src python :results output :exports none
+from table import table
+import numpy
+
+r = 0.18
+years = [2000, 2001, 2002, 2003, 2010, 2020, 2030]
+
+for year in years:
+    tableAtYear = numpy.round(table[round(r, 2)][year-2000])
+    total = sum(tableAtYear)
+    print(f"{year}: {tableAtYear}, {total}")
+#+end_src
+
 #+RESULTS:
-#+begin_example
-[[100.         100.         100.        ]
- [ 33.          18.         165.        ]
- [ 54.45         5.94       167.88      ]
- [ 55.4004       9.801      162.0246    ]
- [ 53.468118     9.972072   159.261834  ]
- [ 52.55640522   9.62426124 156.78629508]
- [ 51.73947738   9.46015294 154.21234286]
- [ 50.89007314   9.31310593 151.67631087]
- [ 50.05318259   9.16021317 149.18803743]
- [ 49.23205235   9.00957287 146.74050653]
- [ 48.42436715   8.86176942 144.33287287]
- [ 47.62984805   8.71638609 141.96475679]
- [ 46.84836974   8.57337265 139.63550551]
- [ 46.07971682   8.43270655 137.34446976]
- [ 45.32367502   8.29434903 135.09102322]
- [ 44.58003766   8.1582615  132.87454964]
- [ 43.84860138   8.02440678 130.69444233]
- [ 43.12916597   7.89274825 128.5501046 ]
- [ 42.42153452   7.76324987 126.44094958]
- [ 41.72551336   7.63587621 124.36640002]
- [ 41.04091201   7.51059241 122.32588813]
- [ 40.36754308   7.38736416 120.31885545]
- [ 39.7052223    7.26615775 118.34475268]
- [ 39.05376838   7.14694001 116.40303952]
- [ 38.41300304   7.02967831 114.49318456]
- [ 37.7827509    6.91434055 112.61466509]
- [ 37.16283948   6.80089516 110.76696697]
- [ 36.5530991    6.68931111 108.94958452]
- [ 35.95336289   6.57955784 107.16202033]
- [ 35.36346671   6.47160532 105.40378518]]
-#+end_example
+: 2000: [100. 100. 100.], 300.0
+: 2001: [ 33.  18. 165.], 216.0
+: 2002: [ 54.   6. 168.], 228.0
+: 2003: [ 55.  10. 162.], 227.0
+: 2010: [ 48.   9. 144.], 201.0
+: 2020: [ 41.   8. 122.], 171.0
+: 2030: [ 35.   6. 104.], 145.0
+
+
+* Table 1: Populations when the juvenile survival rate is \(r = 0.18\)
+| Year     | 2000 | 2001 | 2002 | 2003 | 2010 | 2020 | 2030 |
+|----------+------+------+------+------+------+------+------|
+| Juvenile |  100 |   33 |   54 |   55 |   48 |   41 |   35 |
+| Subadult |  100 |   18 |    6 |   10 |    9 |    8 |    6 |
+| Adult    |  100 |  165 |  168 |  162 |  144 |  122 |  104 |
+| Total    |  300 |  216 |  228 |  227 |  201 |  171 |  145 |
+
+
+#+begin_src python :results output :exports none
+from table import table
+import numpy 
+
+r = 0.30
+years = [2000, 2001, 2002, 2003, 2010, 2020, 2030]
+
+for year in years:
+    tableAtYear = numpy.round(table[round(r, 2)][year-2000])
+    total = sum(tableAtYear)
+    print(f"{year}: {tableAtYear}, {total}")
+#+end_src
+
+#+RESULTS:
+: 2000: [100. 100. 100.], 300.0
+: 2001: [ 33.  30. 165.], 228.0
+: 2002: [ 54.  10. 176.], 240.0
+: 2003: [ 58.  16. 173.], 247.0
+: 2010: [ 60.  18. 184.], 262.0
+: 2020: [ 66.  20. 201.], 287.0
+: 2030: [ 72.  21. 220.], 313.0
+
+* Table 2: Populations when the juvenile survival rate is \(r = 0.30\)
+| Year     | 2000 | 2001 | 2002 | 2003 | 2010 | 2020 | 2030 |
+|----------+------+------+------+------+------+------+------|
+| Juvenile |  100 |   33 |   54 |   58 |   60 |   66 |   72 |
+| Subadult |  100 |   30 |   10 |   16 |   18 |   20 |   21 |
+| Adult    |  100 |  165 |  176 |  173 |  184 |  201 |  220 |
+| Total    |  100 |  228 |  240 |  247 |  262 |  287 |  313 |
+
+
+* Table 3: Total populations at year 2030
+#+begin_src python :results output table :exports results
+from table import table, R
+import numpy
+
+printableTable = []
+
+print("[['Juvenile survival rate r', 'Total population at year 2030', 'Do the owls survive?'],")
+for r in R:
+    total = sum(numpy.round(table[round(r, 2)][30]))
+    print(f"[{round(r, 2)}, {total}, {'YES' if total > 240 else 'NO'}],")
+print("]")
+#+end_src
+
+#+RESULTS:
+| Juvenile survival rate r | Total population at year 2030 | Do the owls survive? |
+|                     0.18 |                         145.0 | NO                   |
+|                      0.2 |                         166.0 | NO                   |
+|                     0.22 |                         190.0 | NO                   |
+|                     0.24 |                         216.0 | NO                   |
+|                     0.26 |                         245.0 | YES                  |
+|                     0.28 |                         278.0 | YES                  |
+|                      0.3 |                         313.0 | YES                  |
