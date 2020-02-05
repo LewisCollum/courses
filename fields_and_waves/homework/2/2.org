@@ -67,5 +67,59 @@
 * 2.20
   [[./answer/2.20-1.png]]
   [[./answer/2.20-2.png]]
-* 2.25
+* 2.25  [[./answer/2.25-voltageStandingWavePattern.png]]
+  [[./answer/2.25-1.png]]
+  [[./answer/2.25-2.png]]
+  [[./answer/2.25-3.png]]
+* 2.33
+** (a)
+   [[./answer/2.33-1.png]]
+** (b)
+   [[./answer/2.33-2.png]]
+** (c)
+   [[./answer/2.33-3.png]]
 
+* NEW PAGE :ignore:
+  \newpage
+* Supplemental
+  #+begin_src python :results output latex :exports both
+import numpy as np
+
+microstrip = {
+    'eR': 9,
+    'height': 0.5, #mm
+    'impedance': 50
+}
+
+s = np.arange(0.5, 1.5, 0.0001)
+
+x = 0.56*((microstrip['eR'] - 0.9)/(microstrip['eR']+3))**0.05
+y = 1 + 0.02*np.log((s**4 + 3.7e-4 * s**2)/(s**4 + 0.43)) + 0.05 * np.log(1 + 1.7e-4 * s**3)
+
+microstrip['eEff'] = (microstrip['eR'] + 1)/2 + (microstrip['eR'] - 1)/2 * (1+10/s)**(-x*y)
+
+t = (30.67/s)**0.75
+
+Z0 = 60/np.sqrt(microstrip['eEff']) * np.log((6 + (2*np.pi - 6)*np.exp(-t))/s + np.sqrt(1 + 4/s**2))
+
+
+sIndex = np.where(np.isclose(Z0, 50.0, rtol = 0.0001))[0][0]
+microstrip['width'] = s[sIndex] * microstrip['height']
+
+print(f"\[x = {x:.4f}\]")
+print(f"\[y = {y[sIndex]:.4f}\]")
+print(f"\[t = {t[sIndex]:.4f}\]")
+print(f"\[\epsilon_{{eff}} = {microstrip['eEff'][sIndex]:.4f}\]")
+print(f"\[Z_0 = {Z0[sIndex]:.4f}\]")
+print(f"\[w = {microstrip['width']:.4f} \si{{\mm}}\]")
+  #+end_src
+
+  #+RESULTS:
+  #+begin_export latex
+  \[x = 0.5491\]
+  \[y = 0.9940\]
+  \[t = 12.5376\]
+  \[\epsilon_{eff} = 6.1085\]
+  \[Z_0 = 50.0047\]
+  \[w = 0.5265 \si{\mm}\]
+  #+end_export
