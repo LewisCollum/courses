@@ -1,0 +1,71 @@
+#+latex_class_options: [fleqn, twocolumn]
+#+latex_header: \usepackage{../homework}
+#+bind: org-latex-default-figure-position "H"
+#+bind: org-latex-image-default-width "0.8\\linewidth"
+
+#+title: EE381 HW 2
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* 2.2
+** (a)
+  [[./answer/2.2-a.png]]
+** (b)
+  [[./answer/2.2-b.png]]
+
+* 2.6
+  | \(a\)          | \(0.5\si{\centi\meter}\)           |
+  | \(b\)          | \(1\si{\centi\meter}\)             |
+  | \(\epsilon_r\) | \(4.5\)                            |
+  | \(\sigma\)     | \(10^{-3}\si{\siemens\per\meter}\) |
+  | \(f\)          | \(1\si{\GHz}\)                     |
+
+** (a)  
+   #+begin_export latex
+   \begin{align*}
+     G' &= \dfrac{2\pi\sigma}{\ln(b/a)} \\
+        &= \boxed{0.091\si{\siemens\per\meter}} \\
+   \end{align*}
+   #+end_export
+
+   #+begin_export latex
+   \begin{align*}
+     C' &= \dfrac{G' \epsilon}{\sigma} \\
+        &= \dfrac{G' \cdot 4.5\epsilon_0}{10^{-3}} \\
+        &= \boxed{361\si{\pF\per\meter}}
+   \end{align*}
+   #+end_export
+
+   #+begin_export latex
+   \begin{align*}
+     L' &= \dfrac{\epsilon\mu}{C'} \\
+        &= \dfrac{4.5\epsilon_0 \mu_0 }{C'} \\
+        &= \boxed{139\si{\nano\henry\per\meter}}
+   \end{align*}
+   #+end_export
+
+   #+begin_export latex
+   \begin{align*}
+     R_s &= \sqrt{\dfrac{\pi \cdot 1\si{\GHz} \cdot \mu_0}{5.8\times 10^7}} \\
+         &= 0.00825 \si{\ohm}
+   \end{align*}
+   #+end_export
+
+   #+begin_export latex
+   \begin{align*}
+     R' &= \dfrac{R_s}{2\pi} \left(\dfrac{1}{a} + \dfrac{1}{b}\right) \\
+        &= \boxed{0.394\si{\ohm\per\meter}}
+   \end{align*}
+   #+end_export
+
+** (b)
+   [[./answer/2.6-b.png]]
+
+* 2.13
+  [[./answer/2.13-1.png]]
+  [[./answer/2.13-2.png]]
+* 2.20
+  [[./answer/2.20-1.png]]
+  [[./answer/2.20-2.png]]
+* 2.25
+
