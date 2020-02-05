@@ -8,47 +8,6 @@
 #+author: Lewis Collum
 #+date: Updated: \today
 
-[[./r0.18.png]]
-[[./r0.30.png]]
-
-
-#+begin_src python :results output :async :tangle table.py :results silent
-import numpy
-
-table = {}
-
-R = numpy.arange(0.18, 0.31, 0.02)
-
-for r in R:
-    X = numpy.empty((31, 3))
-    X[0] = numpy.asarray([100, 100, 100])
-
-    for i in range(1, len(X)):
-        A = numpy.asarray([
-            [0, 0, 0.33],
-            [r, 0, 0],
-            [0, 0.71, 0.94]])
-        
-        X[i] = A.dot(X[i-1])
-    table[round(r, 2)] = X
-#+end_src
-
-#+begin_src python :async :results silent
-import numpy
-import matplotlib.pyplot as pyplot
-
-from table import table
-
-r = 0.30
-
-pyplot.title(f"Spotted Owl Populations: r = {r}")
-pyplot.xlabel('year')
-pyplot.ylabel('population')
-pyplot.plot(numpy.arange(2000, 2031), table[round(r, 2)])
-pyplot.legend(('juvenile', 'subadult', 'adult'))
-pyplot.show()
-#+end_src
-
 #+begin_src python :results output :exports none
 from table import table
 import numpy
@@ -135,3 +94,45 @@ print("]")
 |                     0.26 |                         245.0 | YES                  |
 |                     0.28 |                         278.0 | YES                  |
 |                      0.3 |                         313.0 | YES                  |
+
+* Plots
+[[./r0.18.png]]
+[[./r0.30.png]]
+
+* Code
+#+begin_src python :results output :async :tangle table.py :results silent
+import numpy
+
+table = {}
+
+R = numpy.arange(0.18, 0.31, 0.02)
+
+for r in R:
+    X = numpy.empty((31, 3))
+    X[0] = numpy.asarray([100, 100, 100])
+
+    for i in range(1, len(X)):
+        A = numpy.asarray([
+            [0, 0, 0.33],
+            [r, 0, 0],
+            [0, 0.71, 0.94]])
+        
+        X[i] = A.dot(X[i-1])
+    table[round(r, 2)] = X
+#+end_src
+
+#+begin_src python :async :results silent
+import numpy
+import matplotlib.pyplot as pyplot
+
+from table import table
+
+r = 0.30
+
+pyplot.title(f"Spotted Owl Populations: r = {r}")
+pyplot.xlabel('year')
+pyplot.ylabel('population')
+pyplot.plot(numpy.arange(2000, 2031), table[round(r, 2)])
+pyplot.legend(('juvenile', 'subadult', 'adult'))
+pyplot.show()
+#+end_src
