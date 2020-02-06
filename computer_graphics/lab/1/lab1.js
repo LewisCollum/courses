@@ -14,35 +14,40 @@ function init() {
     shaderProgram = initShaders(gl, "vertex-shader", "fragment-shader")
     gl.useProgram(shaderProgram)
 
-    
+    //TODO Encapsulate construction of radial shapes (in Factory or Builder)
     const rectangle = {}
-    rectangle.branch = Branch.makeFromOriginAndRadius({x: 0.66, y: 0.0}, 0.25)
-    rectangle.base = Radial.makeFromBranchWithCount(rectangle.branch, 4)
+    rectangle.base = Radial.makeFromCount(4)
+    rectangle.translator = new Translator(rectangle.base)
+    rectangle.scaler = Scaler.makeWithTranslator(rectangle.base, rectangle.translator)
     rectangle.drawer = new Drawer(rectangle.base)
 
+    rectangle.translator.translate(0.66, 0.0)
+    rectangle.scaler.scaleAll(0.25)
     rectangle.drawer.strategy = gl.LINE_LOOP
     rectangle.drawer.color = [1.0, 0.0, 0.0, 1.0]
     rectangle.drawer.draw()
 
     
     const septagon = {}
-    septagon.branch = Branch.makeFromOriginAndRadius({x: -0.66, y: 0.0}, 0.25)
-    septagon.base = Radial.makeFromBranchWithCount(septagon.branch, 7)
+    septagon.base = Radial.makeFromCount(7)
+    septagon.translator = new Translator(septagon.base)
+    septagon.scaler = Scaler.makeWithTranslator(septagon.base, septagon.translator)
     septagon.drawer = new Drawer(septagon.base)
 
+    septagon.translator.translate(-0.66, 0.0)
+    septagon.scaler.scaleAll(0.25)
     septagon.drawer.strategy = gl.LINE_LOOP
     septagon.drawer.color = [0.0, 1.0, 0.0, 1.0]
     septagon.drawer.draw()
 
     
     const ellipse = {}
-    ellipse.branch = Branch.makeFromOriginAndRadius({x: 0.0, y: 0.0}, 0.5)
-    ellipse.base = Radial.makeFromBranchWithCount(ellipse.branch, 50)
-    ellipse.drawer = new Drawer(ellipse.base)
+    ellipse.base = Radial.makeFromCount(50)
     ellipse.translator = new Translator(ellipse.base)
     ellipse.scaler = Scaler.makeWithTranslator(ellipse.base, ellipse.translator)
+    ellipse.drawer = new Drawer(ellipse.base)
 
-    ellipse.scaler.scaleX(0.5)
+    ellipse.scaler.scale(0.2, 0.4)
     ellipse.drawer.strategy = gl.TRIANGLE_FAN
     ellipse.drawer.color = [0.0, 0.0, 1.0, 1.0]
     ellipse.drawer.draw()
@@ -55,6 +60,8 @@ class Translator {
     }
 
     translate(x, y) {
+        this.translatable.origin.x += x
+        this.translatable.origin.y += y
         this.translatable.points.forEach(vector => {
             vector[0] += x
             vector[1] += y
@@ -73,29 +80,46 @@ class Scaler {
         this.translator = translator
     }
 
-    scale(x, y) {
-        this.translator.translate(-this.scalable.origin.x, -this.scalable.origin.y)
-        this.scalable.points.forEach(vector => {
-            vector[0] = x * vector[0]
-            vector[1] = y * vector[1]
-        })
-        this.translator.translate(this.scalable.origin.x, this.scalable.origin.y)    
+    onTranslatedToCenter(f) {
+        const {x: offsetX, y: offsetY} = this.scalable.origin
+
+        this.translator.translate(-offsetX, -offsetY)
+        f()
+        this.translator.translate(offsetX, offsetY)
     }
 
-    scaleX(x) {
-        this.translator.translate(-this.scalable.origin.x, -this.scalable.origin.y)
-        this.scalable.points.forEach(vector => {
-            vector[0] = x * vector[0]
+    scale(x, y) {
+        this.onTranslatedToCenter(() => {
+            this.scalable.points.forEach(vector => {
+                vector[0] = x * vector[0]
+                vector[1] = y * vector[1]
+            })
         })
-        this.translator.translate(this.scalable.origin.x, this.scalable.origin.y)    
+    }
+
+    scaleAll(magnitude) {
+        this.onTranslatedToCenter(() => {
+            this.scalable.points.forEach(vector => {
+                vector[0] = magnitude * vector[0]
+                vector[1] = magnitude * vector[1]
+            })
+        })
+    }
+    
+    scaleX(x) {
+        this.onTranslatedToCenter(() => {
+            this.scalable.points.forEach(vector => {
+                vector[0] = x * vector[0]
+            })
+        })
     }
 
     scaleY(y) {
-        this.translator.translate(-this.scalable.origin.x, -this.scalable.origin.y)
-        this.scalable.points.forEach(vector => {
-            vector[1] = y * vector[1]
+        this.onTranslatedToCenter(() => {
+            this.scalable.points.forEach(vector => {
+                vector[1] = y * vector[1]
+            })
         })
-        this.translator.translate(this.scalable.origin.x, this.scalable.origin.y)    
     }        
 }
 
@@ -120,41 +144,25 @@ class Drawer {
         const color = gl.getUniformLocation(shaderProgram, "color")
         gl.uniform4f(color, this.color[0], this.color[1], this.color[2], this.color[3])
 
-        const bufferLength = this.drawable.length
+        const bufferLength = this.drawable.points.length
         gl.drawArrays(this.strategy, 0, bufferLength)
     }
 }
 
-
-class Branch {
-    static makeFromOriginAndRadius(origin, radius) {
-        return new Branch(origin, radius)
-    }
-    
-    constructor(origin, radius) {
-        this.origin = origin
-        this.radius = radius
-    }
-}
-
-
 class Radial {
-    static makeFromBranchWithCount(branch, branchCount) {
-        return new Radial(branch, branchCount)
+    static makeFromCount(pointCount) {
+        return new Radial(pointCount)
     }
 
-    constructor(branch, branchCount) {
-        this.branch = branch
-        this.branchCount = branchCount
-        this.branchAngle = 2 * Math.PI / branchCount
+    constructor(pointCount) {
+        this.origin = {x: 0, y: 0}
+        this.pointCount = pointCount
+        this.vectorAngle = 2 * Math.PI / this.pointCount
         this.points = []
-        for (let i = 0.0; i < this.branchCount; ++i) {
-            let x = this.branch.radius * Math.cos(this.branchAngle * i) + this.branch.origin.x
-            let y = this.branch.radius * Math.sin(this.branchAngle * i) + this.branch.origin.y
+        for (let i = 0.0; i < this.pointCount; ++i) {
+            let x = Math.cos(this.vectorAngle * i)
+            let y = Math.sin(this.vectorAngle * i)
             this.points.push(vec4(x, y, 0.0, 1.0))
         }
     }
-
-    get origin() { return this.branch.origin }
-    get length() { return this.points.length }    
 }
