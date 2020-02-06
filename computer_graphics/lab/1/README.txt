@@ -6,7 +6,72 @@
                              ______________
 
 
-                               2020-01-21
+                               2020-02-06
 
 
+If you're curious, I used Emacs org-mode (a markup language that can
+export to latex, html, ascii, etc.) to generate this document. Org-mode
+is also used for "literate programming" and is comparable to (but much
+more powerful than) Jupyter Notebook.
 
+
+Foundation for Making Regular Polygons
+======================================
+
+Adaptation from OpenScad
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+  I adapted a method for making regular polygons from the language
+  OpenScad (which is used to create 3D CAD models). In OpenScad, circles
+  are defined with a radius and a number of fragments, basically. By
+  changing the number of fragments of a circle in OpenScad, the circle
+  can actually appear to be a triangle, square, pentagon, etc. My class
+  'Radial' is the adaptation of OpenScad's circle.
+
+
+Defining Each Point for a Regular Polygon
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  The 'Radial' class takes in the number of branches it needs to create
+  the shape. For a triangle (with the class type 'Radial'), the number
+  of branches is 3, since a triangle has 3 points. Points are defined by
+  rotating a vector by 2*pi / branchCount.
+
+
+Craftsmanship
+=============
+
+Decorators to Separate Class Responsibilities
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Instead of having behavior for drawing, scaling, translating in the
+  'Radial' class, I seperated each unique behavior into a Decorator
+  class. For example, a 'Drawer' "decorates" an object of the 'Radial'
+  class type to add (or remove) behavior to the object dynamically.
+
+
+All Together
+~~~~~~~~~~~~
+
+  1. define an empty object literal (e.g. const A = {})
+  2. define the base (A.base = <Radial Object>)
+  3. Add decorators (A.drawer = <Drawer Object>)
+
+
+Improvements
+============
+
+  1. Remove 'origin' from 'Radial' class and remove 'Branch' class. The
+     origin of a shape is irrelevant to the shape itself. The 'origin'
+     only matters in a broader scope, where the object is being placed
+     in a coordinate system.
+
+     Shapes can be constructed at the origin and then translated. The
+     'Translator' Decorator class can track where the shape currently
+     is.
+
+  2. Extract member functions from 'Drawer.draw()' since this function
+     violates the single responsibility principle.
+
+  3. Figure out the best way to put global variables 'canvas', 'gl', and
+     'shaderProgram' in a scope to avoid name conflicts in the future.
