@@ -1,1 +1,1 @@
-/home/triton/course/.homeworkTemplate.org
+../../.homeworkTemplate.org
