@@ -1,0 +1,36 @@
+#+latex_class_options: [fleqn, twocolumn]
+#+latex_header: \usepackage{../homework}
+
+#+title: EE381 HW3 
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* 2.47
+** (a) \(\Gamma = 0.5 \angle 0^{\circ}\)
+** (b) \(\Gamma = 0.62 \angle -29.74^{\circ}\)
+** (c) \(\Gamma = 1 \angle -53.13^{\circ}\)
+** (d) \(\Gamma = 1 \angle 180^{\circ}\)
+* 2.53
+** (a) \(\Gamma = 0.24 \angle 75^{\circ}\)
+** (b) \(SWR = 1.65\)
+** (c) \(z(0.35\lambda) = 0.61 - j0.05\)
+** (d) \(y(0.35\lambda) = 1.65 + j0.05\)
+** (e) \(d = 0.105\lambda\)
+** (f) \(d(max) = 0.105\lambda\)
+* 2.54
+** (a) \(\Gamma = 0.24 \angle 76^{\circ}\)
+** (b) \(SWR = 1.64\)
+** (c) \(z(0.35\lambda) = 0.61 - j0.02\)
+** (d) \(y(0.35\lambda) = 1.64 + j0.06\)
+** (e) \(d = 0.105\lambda\)
+** (f) \(d(max) = 0.105\lambda\)
+* 2.58
+** (a) \(Z_L = \boxed{j0.95 \cdot Z_0} = 95\si{\ohm}\)
+** (b)
+   #+attr_latex: :width 0.5\linewidth
+   [[./figure/2-58-b.png]]
+* 2.65
+  #+attr_latex: :width 0.5\linewidth
+  [[./figure/2-65.png]]
+* 2.68
+
