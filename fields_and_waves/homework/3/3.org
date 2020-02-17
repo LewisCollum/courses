@@ -1,5 +1,6 @@
 #+latex_class_options: [fleqn, twocolumn]
 #+latex_header: \usepackage{../homework}
+#+bind: org-latex-image-default-width "0.5\\linewidth"
 
 #+title: EE381 HW3 
 #+author: Lewis Collum
@@ -27,10 +28,77 @@
 * 2.58
 ** (a) \(Z_L = \boxed{j0.95 \cdot Z_0} = 95\si{\ohm}\)
 ** (b)
-   #+attr_latex: :width 0.5\linewidth
    [[./figure/2-58-b.png]]
 * 2.65
-  #+attr_latex: :width 0.5\linewidth
   [[./figure/2-65.png]]
 * 2.68
+  # Why does y(d) need a conductance of 1?
+  | \(Z_L\)    | \((75-j20)\si{\ohm}\)                 |
+  | \(Z_0\)    | \(50\si{\ohm}\)                       |
+  | \(z_L\)    | \((1.5-j0.4)\si{\ohm}\)               |
+  | \(y_L\)    | \((0.65 + j1.75)\si{\mho}\)           |
+  | \(d_1\)    | \(\boxed{0.104\lambda}\)              |
+  | \(y(d_1)\) | \((1 + j0.55)\si{\mho}\)              |
+  | \(l_1\)    | \(0.25 - 0.08 = \boxed{0.17\lambda}\) |
+  
+  # Checked with module 2.9:
+  # [[./figure/2.68.png]]
 
+  Work:
+  #+attr_latex: :width 0.9\linewidth
+  [[./figure/2.68-smith.png]]
+
+* 2.72
+** Find \(z_m\)
+   \noindent
+   \[z_{m1} = 0.4 - j0.2\]
+   \[z_{m2} = 0.4 + j0.2\]
+   #+begin_src python :exports none :results silent
+return 1/(1/(0.4-0.2j) + 1/(0.4+0.2j))
+   #+end_src
+
+   \[z_m = z_{m1} \parallel z_{m2} = 0.25 + j0\]
+
+   Work:
+   #+attr_latex: :width 0.9\linewidth
+   [[./figure/2.72-smith-m.png]]
+
+** Find \(Z_{in}\)
+   \noindent
+   \[z_{in} = 1.65 - j1.8\]
+   \[Z_{in} = (82.5 - j90)\si{\ohm}\]
+
+   Work:
+   #+attr_latex: :width 0.9\linewidth
+   [[./figure/2.72-smith-zin.png]]
+
+* 2.74
+  \noindent
+  \[z_L = 25/75 = 0.33\si{\ohm}\]
+  \[y_B = (1.0 - j1.15)\si{\mho}\]  
+  \[l = 0.3325\lambda - 0.25\lambda = \boxed{0.0825\lambda}\]
+  \[z_B = 1/y_B = (0.43 + j0.5)\si{\ohm}\]
+  \[Z = Z_B = z_B Z_0 = \boxed{(32.25 + j37.5)\si{\ohm}}\]
+  
+  Work:
+  #+attr_latex: :width 0.9\linewidth
+  [[./figure/2.74-smith.png]]
+
+* 2.75
+  \noindent
+  \[T = \dfrac{1\si{\meter}}{2c/3} = 5\si{\nano\second}\]
+  \[\Gamma_L = \dfrac{R_L - Z_0}{R_L + Z_0} = \dfrac{25 - 50}{25 + 50}
+  = -\dfrac{1}{3}\]
+  \[\Gamma_g = \dfrac{R_g - Z_0}{R_g + Z_0} = \dfrac{100 - 50}{100 + 50}
+  = \dfrac{1}{3}\]
+
+  \[V_1^+ = V_g \cdot \dfrac{Z_0}{Z_0 + R_g} = 60 \cdot
+  \dfrac{50}{50+100} = 20\si{\volt}\]
+  \[V_1^- = V_1^+ \cdot \Gamma_L = 20\cdot-\frac{1}{3} = -6.67\si{\volt}\]
+  \[V_2^+ = V_1^- \cdot \Gamma_g = 6.67\cdot\frac{1}{3} = 2.22\si{\volt}\]
+  \[V_2^- = -0.74\si{\volt}\]
+  \[V_3^+ = 0.25\si{\volt}\]
+  \[V_3^- = -0.083\si{\volt}\]
+  
+  #+attr_latex: :width 0.7\linewidth
+  [[./figure/2.75-bounce.png]]
