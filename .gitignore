@@ -15,7 +15,6 @@ __pycache__/
 **_minted*
 
 # Org-Mode generated files
-*.html
 *.tex
 
 # Scrap Files
