@@ -1,27 +1,30 @@
 #!/usr/bin/env bash
 
-courseName="$1"
-
-templateFile=~/course/.homeworkTemplate.org
-styleFile=~/course/latex_styles/homework.sty
-makeHomeworkFile=~/course/.makeHomework
-
 function main {
+    [ -z "$1" ] && error "Provide a course name" || courseName="$1"
+    templateFile=.homeworkTemplate.org
+    styleFile=latex_styles/homework.sty
+    makeHomeworkFile=.makeHomework
+    
     if [ ! -d "$courseName" ]; then
-        mkdir "$courseName"
-        mkdir "$courseName"/homework
-        
-        ln -s $makeHomeworkFile "$courseName"/homework/make
-        ln -s $templateFile "$courseName"/homework/template.org
-        ln -s $styleFile "$courseName"/homework/homework.sty
-        
+        prepareHomeworkDirectory
         requestAddToGit
     fi;
 }
-    
+
+function prepareHomeworkDirectory {
+    homework="$courseName"/homework
+    mkdir -p $homework
+    cd $homework
+    ln -s ../../$makeHomeworkFile make
+    ln -s ../../$templateFile template.org
+    ln -s ../../$styleFile homework.sty
+    cd ../..
+}
+
 function requestAddToGit {
     while true; do
-        read -p "Add to git? [Y/n]: " yn
+        read -p "Commit \"$courseName\" to git? [Y/n]: " yn
         case $yn in
             Y) addToGit; break;;
             n) exit;;
@@ -29,10 +32,15 @@ function requestAddToGit {
     done    
 }
 
-function addToGit {
+function commitToGit {
     git restore --staged `git diff --name-only --cached`    
     git add "$courseName"
     git commit -m "Added $courseName"
+}
+
+function error {
+    echo "ERROR: $1"
+    exit 1
 }
 
 main $@
