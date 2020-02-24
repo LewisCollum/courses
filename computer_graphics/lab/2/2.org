@@ -3,276 +3,623 @@
 
 #+title: Lab 2
 #+author: Lewis Collum
-#+date: Updated: \today"
+#+date: Updated: \today
 
 * html
   #+begin_src html :tangle lab2.html
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-            <title>2D Shapes</title>
-            <script type="text/javascript" src="../Common/webgl-utils.js"></script>
-            <script type="text/javascript" src="../Common/initShaders.js"></script>
-            <script type="text/javascript" src="../Common/MV.js"></script>
-            <script type="text/javascript" src="lab2.js"></script>
-            
-            <script type="x-shader/x-vertex" id="vertex-shader-square">
-                attribute vec4 myPosition;
-                void main() {
-                    gl_Position = myPosition;
-                    gl_PointSize = 1.0;
-                }
-                </script>
-            
-            <script type="x-shader/x-fragment" id="fragment-shader-square">
-                void main() {
-                    gl_FragColor = vec4( 0.0, 1.0, .0, 1.0 );
-                }
-            </script>
-    </head>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>2D Shapes</title>
+    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="matrix.js"></script>
+    <script type="text/javascript" src="form.js"></script>
+    <script type="text/javascript" src="lab2.js"></script>
     
-    <body onload="init()">
-        <canvas width="512" height="512" id="gl-canvas">
-        <button id="startStopButton" onclick="startStopAnim()"></button>
-        </canvas>
-    </body>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+      attribute vec4 position;
+      uniform mat4 interpolation;
+
+      void main() {
+        gl_Position = interpolation * position;
+        gl_PointSize = 1.0;
+      }
+    </script>
+    
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+      uniform vec4 color;
+      
+      void main() {
+        gl_FragColor = color;
+      }
+    </script>
+  </head>
+  
+  <body onload="init()" onkeydown="onKeydownEvent(event)">
+    <canvas width="512" height="512" id="gl-canvas" onclick="onClickEvent(event)"></canvas>
+    <button id="rotationToggleButton" onClick="onRotationToggled()">Toggle Rotation</button>
+    <button id="increaseDriftVelocity" onClick="onIncreaseDriftVelocity()">+ Velocity</button>
+    <button id="decreaseDriftVelocity" onClick="onDecreaseDriftVelocity()">- Velocity</button>
+  </body>
 </html>
   #+end_src
-* mainA
-  #+begin_src javascript :tangle lab2.js
-var gl;
-var shaderProgramSquare;
-
-function init() {
-    // Set up the canvas
-    var canvas=document.getElementById("gl-canvas");
-    gl=WebGLUtils.setupWebGL(canvas);
-    if (!gl) { alert( "WebGL is not available" ); }
-    
-    // Set up the viewport
-    gl.viewport( 0, 0, 512, 512 );   // x, y, width, height
-    
-    
-    // Set up the background color
-    gl.clearColor( 1.0, 0.0, 0.0, 1.0 );
-    
-    
-    shaderProgramSquare = initShaders( gl, "vertex-shader-square",
-                                      "fragment-shader-square" );
-    gl.useProgram( shaderProgramSquare );
-    
-    // Force the WebGL context to clear the color buffer
-    gl.clear( gl.COLOR_BUFFER_BIT );
-    
-    setupSquare();
-    
-    drawSquare();
-}
-
-function setupSquare() {
-    
-    // Enter array set up code here
-    var p0 = vec2( .2, .2 );
-    var p1 = vec2( -.2, .2 );
-    var p2 = vec2( -.2, -.2 );
-    var p3 = vec2( .2, -.2 );
-    var arrayOfPoints = [p0, p1, p2, p3];
-    
-    // Create a buffer on the graphics card,
-    // and send array to the buffer for use
-    // in the shaders
-    var bufferId = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(arrayOfPoints), gl.STATIC_DRAW );
-    
-    // Create a pointer that iterates over the
-    // array of points in the shader code
-    var myPositionAttribute = gl.getAttribLocation( shaderProgramSquare, "myPosition" );
-    gl.vertexAttribPointer( myPositionAttribute, 2, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( myPositionAttribute );    
-}
-
-function drawSquare() {
-        
-    gl.drawArrays( gl.TRIANGLE_FAN, 0, 4 );
-    
-}
-
-function startStopAnim() {
-
-}
-
-  #+end_src
-* main
+* My Lab2
   #+begin_src javascript :tangle lab2.js
 //Lewis Collum
 var canvas
 var gl
-var shaderProgram
+
+class EventDispatcher {
+    constructor() {this.handlers = []}
+    addHandler(handler) {this.handlers.push(handler)}
+    sendEvent(event) {this.handlers.forEach(handler => handler(event))}
+}
+
+const clickEventDispatcher = new EventDispatcher()
+function onClickEvent(event) {clickEventDispatcher.sendEvent(event)}
+
+const keydownEventDispatcher = new EventDispatcher()
+function onKeydownEvent(event) {keydownEventDispatcher.sendEvent(event)}
+
+const rotationToggleButton = new EventDispatcher()
+function onRotationToggled() {rotationToggleButton.sendEvent()}
+
+const increaseDriftVelocityButton = new EventDispatcher()
+function onIncreaseDriftVelocity() {increaseDriftVelocityButton.sendEvent()}
+
+const decreaseDriftVelocityButton = new EventDispatcher()
+function onDecreaseDriftVelocity() {decreaseDriftVelocityButton.sendEvent()}
+
+const frameEventDispatcher = new EventDispatcher()
+function onFrameEvent() {
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    frameEventDispatcher.sendEvent()
+    requestAnimFrame(onFrameEvent)
+}
+
 
 function init() {
     canvas = document.getElementById("gl-canvas")
     gl = WebGLUtils.setupWebGL(canvas)
 
-    gl.viewport(0, 0, 512, 512)
-    gl.clearColor(0.0, 0.0, 0.0, 1.0)
-    gl.clear(gl.COLOR_BUFFER_BIT)
-
-    shaderProgram = initShaders(gl, "vertex-shader", "fragment-shader")
+    const shaderProgram = initShaders(gl, "vertex-shader", "fragment-shader")
     gl.useProgram(shaderProgram)
-
-    //TODO Encapsulate construction of radial shapes (in Factory or Builder)
-    const rectangle = {}
-    rectangle.base = Radial.makeFromCount(4)
-    rectangle.translator = new Translator(rectangle.base)
-    rectangle.scaler = Scaler.makeWithTranslator(rectangle.base, rectangle.translator)
-    rectangle.drawer = new Drawer(rectangle.base)
-
-    rectangle.translator.translate(0.66, 0.0)
-    rectangle.scaler.scaleAll(0.25)
-    rectangle.drawer.strategy = gl.LINE_LOOP
-    rectangle.drawer.color = [1.0, 0.0, 0.0, 1.0]
-    rectangle.drawer.draw()
-
+    gl.viewport(0, 0, 512, 512)
+    gl.clearColor(1.0, 0.0, 0.0, 1.0)
+    gl.clear(gl.COLOR_BUFFER_BIT)
     
-    const septagon = {}
-    septagon.base = Radial.makeFromCount(7)
-    septagon.translator = new Translator(septagon.base)
-    septagon.scaler = Scaler.makeWithTranslator(septagon.base, septagon.translator)
-    septagon.drawer = new Drawer(septagon.base)
+    shape = {
+        points: Radial.makeFromPointCount(8),
+        position: form.Translate.each(0, 0, 0),
+        rotation: form.Rotate.noZ(0),
+        scale: form.Scale.all(0.1),
 
-    septagon.translator.translate(-0.66, 0.0)
-    septagon.scaler.scaleAll(0.25)
-    septagon.drawer.strategy = gl.LINE_LOOP
-    septagon.drawer.color = [0.0, 1.0, 0.0, 1.0]
-    septagon.drawer.draw()
+        drift: matrix.Identity(4),
+        driftVelocity: 0.004,
 
+        spin: matrix.Identity(4),
+        angularVelocity: 0.01,
+        isRotating: false,
+
+        update: function() {
+            shape.position = matrix.dot(shape.position, shape.drift)
+            shape.rotation = matrix.dot(shape.rotation, shape.spin)
+            
+            shape.transformations = [
+                shape.position,
+                shape.rotation,
+                shape.scale]
+            this.interpolation = matrix.interpolate(shape.transformations)
+        }
+    }
+
+    shape.keyToTransformation = {
+        [65]: function() {shape.drift = form.Translate.x(-shape.driftVelocity)}, //A
+        [68]: function() {shape.drift = form.Translate.x(shape.driftVelocity)}, //D,
+        [83]: function() {shape.drift = form.Translate.y(-shape.driftVelocity)}, //S
+        [87]: function() {shape.drift = form.Translate.y(shape.driftVelocity)}, //W
+        toggleRotation: function() {
+            if (!shape.isRotating) {
+                shape.spin = form.Rotate.noZ(shape.angularVelocity)
+                shape.isRotating = true
+            } else {
+                shape.spin = form.Rotate.noZ(0)
+                shape.isRotating = false
+            }
+        },
+        increaseDriftVelocity: function() {
+            shape.driftVelocity += 0.001
+        },
+        decreaseDriftVelocity: function() {
+            shape.driftVelocity -= 0.001
+        }        
+    }
+
+
+    drawer = new Drawer(shaderProgram)
+    drawer.strategy = gl.TRIANGLE_FAN
+    drawer.color = [1.0, 1.0, 0.0, 1.0]
+    drawer.addDrawable(shape)
     
-    const ellipse = {}
-    ellipse.base = Radial.makeFromCount(50)
-    ellipse.translator = new Translator(ellipse.base)
-    ellipse.scaler = Scaler.makeWithTranslator(ellipse.base, ellipse.translator)
-    ellipse.drawer = new Drawer(ellipse.base)
 
-    ellipse.scaler.scale(0.2, 0.4)
-    ellipse.drawer.strategy = gl.TRIANGLE_FAN
-    ellipse.drawer.color = [0.0, 0.0, 1.0, 1.0]
-    ellipse.drawer.draw()
-}
-
-
-class Translator {
-    constructor(translatable) {
-        this.translatable = translatable
-    }
-
-    translate(x, y) {
-        this.translatable.origin.x += x
-        this.translatable.origin.y += y
-        this.translatable.points.forEach(vector => {
-            vector[0] += x
-            vector[1] += y
-        })
-    }
-}
-
-
-class Scaler {
-    static makeWithTranslator(scalable, translator) {
-        return new Scaler(scalable, translator)
-    }
+    clickEventDispatcher.addHandler((event) => {
+        shape.position = form.Translate.each(2.0*event.clientX/512 - 1, -2.0*event.clientY/512 + 1, 0)
+    })
     
-    constructor(scalable, translator) {
-        this.scalable = scalable
-        this.translator = translator
-    }
+    keydownEventDispatcher.addHandler((event) => {
+        shape.keyToTransformation[event.keyCode]()
+    })
 
-    onTranslatedToCenter(f) {
-        const {x: offsetX, y: offsetY} = this.scalable.origin
+    rotationToggleButton.addHandler(() => {
+        shape.keyToTransformation.toggleRotation()
+    })
 
-        this.translator.translate(-offsetX, -offsetY)
-        f()
-        this.translator.translate(offsetX, offsetY)
-    }
+    increaseDriftVelocityButton.addHandler(() => {
+        shape.keyToTransformation.increaseDriftVelocity()
+    })
 
-    scale(x, y) {
-        this.onTranslatedToCenter(() => {
-            this.scalable.points.forEach(vector => {
-                vector[0] = x * vector[0]
-                vector[1] = y * vector[1]
-            })
-        })
-    }
-
-    scaleAll(magnitude) {
-        this.onTranslatedToCenter(() => {
-            this.scalable.points.forEach(vector => {
-                vector[0] = magnitude * vector[0]
-                vector[1] = magnitude * vector[1]
-            })
-        })
-    }
+    decreaseDriftVelocityButton.addHandler(() => {
+        shape.keyToTransformation.decreaseDriftVelocity()
+    })
     
-    scaleX(x) {
-        this.onTranslatedToCenter(() => {
-            this.scalable.points.forEach(vector => {
-                vector[0] = x * vector[0]
-            })
-        })
-    }
+    frameEventDispatcher.addHandler(() => {
+        shape.update()
+        drawer.drawAll()
+    })
 
-    scaleY(y) {
-        this.onTranslatedToCenter(() => {
-            this.scalable.points.forEach(vector => {
-                vector[1] = y * vector[1]
-            })
-        })
-    }        
+    onFrameEvent()
 }
 
 
 class Drawer {
-    constructor(drawable) {
-        this.drawable = drawable
+    constructor(shaderProgram) {
+        this.shaderProgram = shaderProgram
         this.color = [0.0, 0.0, 0.0, 1.0]
         this.strategy = gl.TRIANGLE_FAN
+        this.drawables = []
     }
 
-    draw() {
-        const flattenedDrawer = flatten(this.drawable.points)
+    addDrawable(drawable) {this.drawables.push(drawable)}
+    
+    drawAll() {
+        this.drawables.forEach((drawable) => this.drawInterpolated(drawable.points, drawable.interpolation))
+    }
+
+    drawInterpolated(points, interpolation) {
+        const interpolationPointer = gl.getUniformLocation(this.shaderProgram, "interpolation")
+        gl.uniformMatrix4fv(interpolationPointer, false, matrix.transpose(interpolation).flat())
+        this.draw(points)
+    }
+
+    draw(points) {
+        const flattenedDrawer = Float32Array.from(points.flat())
         const pointBuffer = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER, pointBuffer)
         gl.bufferData(gl.ARRAY_BUFFER, flattenedDrawer, gl.STATIC_DRAW)
 
-        const pointPosition = gl.getAttribLocation(shaderProgram, "position")
+        const pointPosition = gl.getAttribLocation(this.shaderProgram, "position")
         gl.vertexAttribPointer(pointPosition, 4, gl.FLOAT, false, 0, 0)
         gl.enableVertexAttribArray(pointPosition)
 
-        const color = gl.getUniformLocation(shaderProgram, "color")
+        const color = gl.getUniformLocation(this.shaderProgram, "color")
         gl.uniform4f(color, this.color[0], this.color[1], this.color[2], this.color[3])
 
-        const bufferLength = this.drawable.points.length
+        const bufferLength = points.length
         gl.drawArrays(this.strategy, 0, bufferLength)
     }
 }
 
 class Radial {
-    static makeFromCount(pointCount) {
-        return new Radial(pointCount)
-    }
-
-    constructor(pointCount) {
-        this.origin = {x: 0, y: 0}
-        this.pointCount = pointCount
-        this.vectorAngle = 2 * Math.PI / this.pointCount
-        this.points = []
-        for (let i = 0.0; i < this.pointCount; ++i) {
-            let x = Math.cos(this.vectorAngle * i)
-            let y = Math.sin(this.vectorAngle * i)
-            this.points.push(vec4(x, y, 0.0, 1.0))
+    static makeFromPointCount(pointCount) {
+        const vectorAngle = 2 * Math.PI / pointCount
+        var points = []
+        for (let i = 0; i < pointCount; ++i) {
+            let x = Math.cos(vectorAngle * i)
+            let y = Math.sin(vectorAngle * i)
+            points.push([x, y, 0, 1])
         }
+        return points
     }
 }
-
   #+end_src
+
+* form
+  #+begin_src javascript :tangle form.js
+const form = {};
+(function(context) {
+    context.Rotate = class {
+        static noZ(radians) {
+            return [[Math.cos(radians), -Math.sin(radians), 0, 0],
+                    [Math.sin(radians), Math.cos(radians), 0, 0],
+                    [0, 0, 1, 0],
+                    [0, 0, 0, 1]]
+        }
+    }
+
+
+    context.Translate = class {
+        static x(translation) {return this.each(translation, 0, 0)}
+        static y(translation) {return this.each(0, translation, 0)}
+        static z(translation) {return this.each(0, 0, translation)}
+        static all(translation) {return this.each(translation, translation, translation)}
+        
+        static each(x, y, z) {
+            return [[1, 0, 0, x],
+                    [0, 1, 0, y],
+                    [0, 0, 1, z],
+                    [0, 0, 0, 1]]
+        }
+
+    }
+
+
+    context.Scale = class {
+        static each(x, y, z) {
+            return [[x, 0, 0, 0],
+                    [0, y, 0, 0],
+                    [0, 0, z, 0],
+                    [0, 0, 0, 1]]
+        }    
+        
+        static all(scale) {
+            return [[scale, 0, 0, 0],
+                    [0, scale, 0, 0],
+                    [0, 0, scale, 0],
+                    [0, 0, 0, 1]]
+        }
+    }
+})(form)
+  #+end_src
+* matrix
+  #+begin_src javascript :tangle matrix.js
+const matrix = {};
+(function(context) {
+    context.make = function(rows, columns, fill=null) {
+        return Array(rows).fill().map(rows => Array(columns).fill().map(columns => fill))
+    }
+
+    context.Identity = function(size) {
+        identity = context.make(size, size, 0)
+        for (let i = 0; i < size; ++i) 
+            identity[i][i] = 1
+        return identity        
+    }
+    
+    context.transpose = function(matrix) {
+        return matrix[0].map((column, i) => matrix.map(row => row[i]));
+    }
+
+    context.column = function(matrix, column) {
+        return matrix.map(row => row[column])
+    }
+
+    context.dot = function(first, second) {
+        var dotted = context.make(first.length, second[0].length)
+        matrix.transpose(second).forEach((column, columnIndex) => {
+            first.forEach((row, rowIndex) => {
+                dotted[rowIndex][columnIndex] = matrix.dotVector(row, column)
+            })
+        })
+        return dotted
+    }
+    
+    context.dotVector = function(first, second) {
+        return first.map((value, index) => value * second[index]).reduce((sum, rest) => sum + rest)
+    }
+
+    context.interpolate = function(matrices) {
+        return matrices.reduce((interpolation, rest) => context.dot(interpolation, rest))
+    }
+
+    context.add = function(first, second) {
+        var result = first.slice()
+        for (let row = 0; row < first.length; ++row) {
+            for (let column = 0; column < first[0].length; ++column) {
+                result[row][column] += second[row][column]
+            }
+        }
+        return result
+    }
+})(matrix);
+  #+end_src
+
+* Matrix (by Davenchy)
+  #+begin_src javascript
+/*
+    Matrix Class
+    Created By Davenchy
+    twitter: @fadi_davenchy
+,*/
+
+const Matrix = (function() {
+  class Matrix {
+    constructor(r=3, c=3, i=0) {
+      // create matrix
+      if (Array.isArray(r)) this.matrix = r.map(c => c.slice(0));
+      else if (r instanceof Matrix) this.copyOf(r);
+      else this.matrix = Matrix.generateArray(r, c, i);
+
+      // check the matrix
+      const rows = this.matrix.length;
+      const columns = this.matrix[0].length;
+      const columnsLength = this.matrix.filter(c => c.length === columns).length;
+      if (columnsLength !== rows) throw new Error(`each column must have the same number of values: ${rows}`);
+    }
+
+    reset(i=0) {
+      this.matrix = Matrix.generateArray(this.rows, this.columns, i);
+      return this;
+    }
+
+    copyOf(m) {
+      this.matrix = m.matrix.map(c => c.slice(0));
+      return this;
+    }
+
+    clone() {
+      return new Matrix(this.matrix);
+    }
+
+    toString() {
+      return this.matrix.map(c => c.join('\t')).join('\n');
+    }
+
+    isEqualTo(m2) {
+      if (!m2 instanceof Matrix) throw new Error('need matrix to compare to');
+      const m1 = this;
+      if (m1.rows !== m2.rows || m1.columns !== m2.columns) return  false;
+      m1.loop(({ i, j, value }) => {
+        if (m2.getValue(i, j) !== value) return false;
+      });
+      return true;
+    }
+
+    get isSquare() {
+      return this.rows === this.columns;
+    }
+
+    get isInversable() {
+      return this.determinate !== 0;
+    }
+
+    get determinate() {
+      const m = this.clone();
+      if (!m.isSquare) throw new Error('matrix must be a square matrix');
+      const M = m.getValue.bind(m);
+      // handle (1x1) Matrix
+      if (m.rows === 1) return M(1, 1);
+      // handle (2x2) Matrix
+      if (m.rows === 2) return M(1, 1) * M(2, 2) - M(1, 2) * M(2, 1);
+      // handle (3x3) or more Matrices
+      if (m.rows >= 3) {
+        let sum = 0;
+        for (let i = 1; i <= m.rows; i++) {
+          const det = m.clone().reduce(1, i).determinate;
+          sum += Math.pow(-1, i - 1) * M(1, i) * det;
+        }
+        return sum;
+      }
+      return;
+    }
+
+    get rows() {
+      return this.matrix.length;
+    }
+
+    get columns() {
+      return this.matrix[0].length;
+    }
+
+    get type() {
+      return `(${this.rows} x ${this.columns})`
+    }
+
+    setColumn(n, c=[]) {
+      if (c.length !== this.rows) throw new Error(`column must has ${this.rows} value(s)`);
+      if (n > this.columns || n <= 0) throw new Error(`column number must be in range [1, ${this.columns}]`);
+      this.matrix.forEach((col, i) => {
+        col[n - 1] = c[i];
+      });
+      return this;
+    }
+
+    addColumn(c=[]) {
+      if (c.length !== this.rows) throw new Error(`column must has ${this.rows} value(s)`);
+      this.matrix.forEach((col, i) => {
+        col.push(c[i]);
+      });
+      return this;
+    }
+
+    getColumn(c=1) {
+      if (c > this.columns || c <= 0) throw new Error(`column number must be in range [1, ${this.columns}]`);
+      return this.matrix.map(r => r[c - 1]);
+    }
+
+    removeColumn(c) {
+      if (c > this.columns || c <= 0) throw new Error(`column number must be in range [1, ${this.columns}]`);
+      this.matrix.forEach(r => r.splice(c - 1, 1));
+      return this;
+    }
+
+    setRow(n, r=[]) {
+      if (r.length !== this.columns) throw new Error(`row must has ${this.columns} value(s)`);
+      if (n > this.rows || n <= 0) throw new Error(`row number must be in range [1, ${this.rows}]`);
+      this.matrix[n - 1] = r;
+      return this;
+    }
+
+    addRow(r=[]) {
+      if (r.length !== this.columns) throw new Error(`row must has ${this.columns} value(s)`);
+      this.matrix.push(r);
+      return this;
+    }
+
+    getRow(r=1) {
+      if (r > this.rows || r <= 0) throw new Error(`row number must be in range [1, ${this.rows}]`);
+      return this.matrix[r - 1].slice(0);
+    }
+
+    removeRow(r) {
+      if (r > this.rows || r <= 0) throw new Error(`row number must be in range [1, ${this.rows}]`);
+      this.matrix.splice(r - 1, 1);
+      return this;
+    }
+
+    setValue(r=1, c=1, v) {
+      this.matrix[r-1][c-1] = v;
+      return this;
+    }
+
+    getValue(r=1, c=1) {
+      if (r <= 0 || r > this.rows || c <= 0 || c > this.cols) return;
+      return this.matrix[r-1][c-1];
+    }
+
+    loop(cb) {
+      const self = this;
+      const { rows, columns } = this;
+      let counter = 0;
+      for(let i = 1; i <= rows; i++)
+        for(let j = 1; j <= columns; j++) {
+          const tools = {
+            self, i, j,
+            clone: self.clone(),
+            sign: Math.pow(-1, counter),
+            counter: counter++,
+            value: self.getValue(i, j),
+            setValue: v => self.setValue(i, j, v),
+            column: self.getColumn(j),
+            row: self.getRow(i),
+          }
+
+          try { tools.determinate = self.determinate; }
+          catch (_) { tools.determinate = null; }
+          tools.reduce = () => tools.clone.reduce(i, j);
+          tools.inverse = () => tools.clone.inverse();
+          tools.transpose = () => tools.clone.transpose();
+          tools.adjacency = () => tools.clone.adjacency();
+          tools.identity = () => tools.clone.identity();
+
+          cb(tools);
+        }
+      return this;
+    }
+
+    multiply(...matrices) {
+      const m1 = this;
+      matrices.forEach(m2 => {
+        if (m1.columns !== m2.rows) throw new Error('can not multiply the 2 matrices');
+        const temp = new Matrix(m1.rows, m2.columns);
+        temp.loop(({i, j, setValue}) => {
+          const product = Matrix.vectorDotProduct(m1.getRow(i), m2.getColumn(j));
+          setValue(product);
+        });
+        m1.copyOf(temp);
+      });
+      return this;
+    }
+
+    addNumber (n) {
+      const self = this;
+      const { rows, columns } = this;
+      this.loop(t => t.setValue(t.value + n));
+      return this;
+    }
+
+    subtractNumber (n) {
+      const self = this;
+      const { rows, columns } = this;
+      this.loop(t => t.setValue(t.value - n));
+      return this;
+    }
+
+    multiplyNumber (n) {
+      const self = this;
+      const { rows, columns } = this;
+      this.loop(t => t.setValue(t.value * n));
+      return this;
+    }
+
+    divideNumber (n) {
+      if (n === 0) throw new Error('can not divide by zero');
+      const self = this;
+      const { rows, columns } = this;
+      this.loop(t => t.setValue(t.value / n));
+      return this;
+    }
+
+    transpose() {
+      const mat = Array(this.columns).fill(0);
+      this.matrix = mat.map((r, i) => this.getColumn(i + 1));
+      return this;
+    }
+
+    inverse () {
+      const delta = Math.pow(this.determinate, -1);
+      this.adjacency().multiplyNumber(delta);
+      return this;
+    }
+
+    adjacency() {
+      if (!this.isInversable) throw new Error('matrix determinate value equal to zero');
+      if (!this.isSquare) throw new Error('must be a square matrix');
+
+      // 1x1 Matrix
+      if (this.rows === 1) this.setValue(1, 1, Math.pow(this.getValue(1, 1), -1));
+      // 2x2 Matrix
+      else if (this.rows === 2) {
+        const temp = this.getValue(1, 1);
+        this.setValue(1, 2, this.getValue(1, 2) * -1);
+        this.setValue(2, 1, this.getValue(2, 1) * -1);
+        this.setValue(1, 1, this.getValue(2, 2));
+        this.setValue(2, 2, temp);
+      }
+      // 3x3 or more Matrices
+      else if (this.rows >= 3) {
+        const temp = this.clone().reset();
+        this.loop(({i, j, reduce, sign}) => {
+          temp.setValue(i, j, reduce().determinate * sign)
+        }).copyOf(temp.transpose());
+      }
+
+      return this;
+    }
+
+    identity () {
+      const m = this;
+      if (!m.isSquare) throw new Error('must be a square matrix');
+      const n = m.rows;
+      const i = new Matrix(n, n);
+      for (let a = 1; a <= n; a++) {
+        i.setValue(a, a, 1);
+      }
+      return i;
+    }
+
+    reduce (r, c) {
+      this.removeRow(r).removeColumn(c);
+      return this;
+    }
+  }
+
+  Matrix.generateArray = (r = 3, c = 3, i = 0) => Array(r).fill().map(r => Array(c).fill().map(c => i));
+  Matrix.vectorDotProduct = (a, b) => {
+    if (a.length !== b.length) throw new Error(`length of 'a' not equal length of 'b'`)
+    return a.map((x, i) => x * b[i]).reduce((a, b) => a + b);
+  }
+
+  return Matrix;
+})();
+  #+end_src
+* Jots
+  - Transformations 
+    - input: transform parameters
+    - output: matrix
+
+  - Interpolation
+    - Has list of transformations
