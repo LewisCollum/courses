@@ -1,0 +1,160 @@
+#+latex_class_options: [fleqn]
+#+latex_header: \usepackage{../homework}
+#+bind: org-latex-image-default-width ".75\\linewidth"
+
+#+title: Ill-Conditioned Systems
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* Error and Condition Function :noexport:
+  #+name: solutionError
+  #+begin_src octave :eval no :tangle solutionError.m
+function error = solutionError(A)
+  n = length(A);
+  x = ones(n, 1);
+  b = A*x;
+  xhat = A\b;
+  diff = xhat - x;
+  error = norm(diff, inf);  
+end
+  #+end_src
+  
+  #+name: errorTable
+  #+begin_src octave :tangle errorTable.m
+function errorTable(i, errors, conditions)
+  printf("  n     error\t\t  cond\n");
+  for n = i
+    printf("%3i\t| %.3E\t| %.3E\n", n, errors(n), conditions(n));
+  end
+end
+  #+end_src
+
+  #+RESULTS: errorTable
+
+* Step 1 :noexport:
+** Errors and Conditions
+#+name: step1
+#+begin_src octave :results output drawer
+N = 1:15;
+for n = N
+  A = hilb(n);
+  errors(n) = solutionError(A);
+  conditions(n) = cond(A, inf);
+end
+
+errorTable(5:5:15, errors, conditions);
+#+end_src
+
+#+RESULTS: step1
+:results:
+  n     error		  cond
+  5	| 5.375E-12	| 9.437E+05
+ 10	| 4.312E-04	| 3.535E+13
+ 15	| 4.750E-03	| 8.029E+17
+:end:
+
+** Plots
+#+begin_src octave :noweb yes :results silent :async
+<<step1>>
+
+figure(1)
+semilogy(N, errors)
+xlabel('n')
+ylabel('Solution Error')
+grid on 
+xlim([1 15])
+saveas(gcf, 'figure/1_error.png')
+
+figure(2)
+semilogy(N, conditions)
+xlabel('n')
+ylabel('Condition Numbers')
+grid on
+xlim([1 15])
+saveas(gcf, 'figure/1_condition.png')
+#+end_src
+
+* Step 2 :noexport:
+  #+name: step2
+  #+begin_src octave :results output drawer
+rand('seed', 0621539);
+
+for n = 5:5:15
+  A = rand(n);
+  errorsA(n) = solutionError(A);
+  conditionsA(n) = cond(A, inf);
+
+  B = A + diag(sum(A,2) - diag(A));
+  errorsB(n) = solutionError(B);
+  conditionsB(n) = cond(B, inf);
+end
+
+errorTable(5:5:15, errorsA, conditionsA);
+printf("\n")
+errorTable(5:5:15, errorsB, conditionsB);
+  #+end_src
+
+  #+RESULTS: step2
+  :results:
+    n     error		  cond
+    5	| 1.488E-14	| 1.857E+03
+   10	| 2.442E-15	| 8.811E+01
+   15	| 5.773E-15	| 9.868E+02
+
+    n     error		  cond
+    5	| 4.441E-16	| 4.979E+00
+   10	| 4.441E-16	| 5.717E+00
+   15	| 6.661E-16	| 4.729E+00
+  :end:
+   
+* Step 3 :noexport:
+  #+name: step3
+  #+begin_src octave :results output drawer
+C = [9 6 3;
+     8 5 2;
+     7 4 1.01]
+
+errorC = solutionError(C);
+conditionC = cond(C, inf);
+
+printf("Error: %.3E\nCondition Number: %.3E", errorC, conditionC);
+  #+end_src
+
+  #+RESULTS:
+  :results:
+  C =
+
+     9.0000   6.0000   3.0000
+     8.0000   5.0000   2.0000
+     7.0000   4.0000   1.0100
+
+  Error: 3.094E-13
+  Condition Number: 1.430E+04
+  :end:
+
+* Submissions :ignore:
+  [[./figure/1_error.png]]
+  [[./figure/1_condition.png]]
+
+  #+begin_export latex
+  \newpage
+  #+end_export
+
+  #+begin_src octave :noweb yes :tangle colluml.m :export code
+% MA339 Project: Ill-Conditioned Systems
+% Lewis Collum
+
+<<solutionError>>
+
+<<errorTable>>
+
+% --- Step 1 ---
+<<step1>>
+
+% --- Step 2 ---
+<<step2>>
+
+% --- Step 3 ---
+<<step3>>
+  #+end_src
+  
