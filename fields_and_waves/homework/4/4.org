@@ -1,0 +1,235 @@
+#+latex_class_options: [twocolumn, fleqn]
+#+latex_header: \usepackage{../homework}
+#+bind: org-latex-image-default-width "0.9\\linewidth"
+
+#+title: EE381 HW 4
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* 3.5
+  All work done in Python. For vector notation, I use \([a, b, c]\)
+  instead of \(\hat{x}a + \hat{y}b + \hat{z}c\).
+
+  #+begin_src python :results silent :exports none :session s35
+import numpy as np
+A = {'vector': np.asarray([1, 2, -3])}
+A['norm'] = np.linalg.norm(A['vector'])
+A['unit'] = A['vector']/A['norm']
+
+B = {'vector': np.asarray([2, -4, 0])}
+B['norm'] = np.linalg.norm(B['vector'])
+B['unit'] = B['vector']/B['norm']
+
+C = {'vector': np.asarray([0, 2, -4])}
+C['norm'] = np.linalg.norm(C['vector'])
+C['unit'] = C['vector']/C['norm']
+  #+end_src
+
+** (a)
+   #+begin_src python :results output latex :exports results :session s35
+print(f"\(|A| = {round(A['norm'], 3)}\), \(\hat{{\mathbf{{a}}}} = {list(np.round(A['unit'], 3))}\)")
+   #+end_src
+
+   #+RESULTS:
+   #+begin_export latex
+   \(|A| = 3.742\), \(\hat{\mathbf{a}} = [0.267, 0.535, -0.802]\)
+   #+end_export
+
+** (b)
+   #+begin_src python :results output latex :exports results :session s35
+B['alongC'] = np.dot(C['unit'], B['vector'])
+print(f"\(comp_CB = {round(B['alongC'], 3)}\)")
+   #+end_src
+ 
+   #+RESULTS:
+   #+begin_export latex
+   \(comp_CB = -1.789\)
+   #+end_export
+
+** (c)
+   #+begin_src python :results output latex :exports results :session s35
+angleAC = np.cosh(np.dot(A['vector'], C['vector'])/(A['norm']*C['norm']))
+print(f"\(\\theta_{{AC}} = {round(np.degrees(angleAC), 1)}^{{\circ}}\)")
+   #+end_src
+
+   #+RESULTS:
+   #+begin_export latex
+   \(\theta_{AC} = 85.5^{\circ}\)
+   #+end_export
+   
+** (d)
+   #+begin_src python :results output latex :exports results :session s35
+crossAC = np.cross(A['vector'], C['vector'])
+print(f"\(\mathbf{{A}} \\times \mathbf{{C}} = {list(crossAC)}\)")
+   #+end_src
+
+   #+RESULTS:
+   #+begin_export latex
+   \(\mathbf{A} \times \mathbf{C} = [-2, 4, 2]\)
+   #+end_export
+   
+** (e)
+   #+begin_src python :results output latex :exports results :session s35
+resultTag = "\mathbf{A} \cdot (\mathbf{B} \\times \mathbf{C})"
+result = np.dot(A['vector'], np.cross(B['vector'], C['vector']))
+print(f"\({resultTag} = {result}\)")
+   #+end_src
+
+   #+RESULTS:
+   #+begin_export latex
+   \(\mathbf{A} \cdot (\mathbf{B} \times \mathbf{C}) = 20\)
+   #+end_export
+
+** (f)
+   #+begin_src python :results output latex :exports results :session s35
+resultTag = "\mathbf{A} \\times (\mathbf{B} \\times \mathbf{C})"
+result = np.cross(A['vector'], np.cross(B['vector'], C['vector']))
+print(f"\({resultTag} = {list(result)}\)")
+   #+end_src
+
+   #+RESULTS:
+   #+begin_export latex
+   \(\mathbf{A} \times (\mathbf{B} \times \mathbf{C}) = [32, -52, -24]\)
+   #+end_export
+
+** (g)
+   #+begin_src python :results output latex :exports results :session s35
+resultTag = "\hat{\mathbf{x}} \\times \mathbf{B}"
+result = np.cross([1, 0, 0], B['vector'])
+print(f"\({resultTag} = {list(result)}\)")
+   #+end_src
+
+   #+RESULTS:
+   #+begin_export latex
+   \(\hat{\mathbf{x}} \times \mathbf{B} = [0, 0, -4]\)
+   #+end_export
+
+** (h)
+   #+begin_src python :results output latex :exports results :session s35
+resultTag = "(\mathbf{A} \\times \hat{\mathbf{y}}) \cdot \hat{\mathbf{z}}"
+result = np.dot(np.cross(A['vector'], [0, 1, 0]), [0, 0, 1])
+print(f"\({resultTag} = {result}\)")
+   #+end_src
+
+   #+RESULTS:
+   #+begin_export latex
+   \((\mathbf{A} \times \hat{\mathbf{y}}) \cdot \hat{\mathbf{z}} = 1\)
+   #+end_export
+
+* 3.14
+* 3.20
+  #+begin_src python :results silent :session s320 :exports none
+import matplotlib.pyplot as pyplot
+import numpy
+
+def makeGrid():
+    fieldLength = 10
+    arrowSpacing = 2
+    
+    return numpy.meshgrid(
+        numpy.arange(-fieldLength, fieldLength+1, arrowSpacing),
+        numpy.arange(-fieldLength, fieldLength+1, arrowSpacing))
+
+def makePolarGrid():
+    fieldLength = 5
+    arrowSpacing = 1
+    radii = numpy.linspace(0.5,10,10)
+    thetas = numpy.linspace(0,2*numpy.pi,20)
+    
+    return numpy.meshgrid(thetas, radii)
+
+def plotField(x, y, xComponent, yComponent):
+    fig, ax = pyplot.subplots()
+    ax.set_aspect('equal')
+    ax.quiver(x, y, xComponent, yComponent)
+    ax.quiverkey(q, X=0.3, Y=1.1, U=10,label='Quiver key, length = 10', labelpos='E')
+
+def plotPolarField(theta, r, thetaComponent, rComponent):
+    fig = pyplot.figure()
+    ax = fig.add_subplot(111, polar=True)
+    ax.set_aspect('equal')
+    ax.quiver(
+        theta,
+        r,
+        thetaComponent * numpy.cos(theta) - rComponent * numpy.sin(theta),
+        rComponent * numpy.sin(theta) + thetaComponent * numpy.cos(theta))
+    ax.quiverkey(q, X=0.3, Y=1.1, U=10,label='Quiver key, length = 10', labelpos='E')
+  #+end_src
+
+** (a)
+   #+begin_src python :session s320 :results silent :exports none
+x, y = makeGrid()
+plotField(x, y, xComponent = -y, yComponent = 0)
+pyplot.savefig('./figure/3-20-a.png', bbox_inches='tight')
+   #+end_src
+
+   #+attr_latex: :width 0.6\linewidth
+   [[./figure/3-20-a.png]]
+ 
+** (b)
+   #+begin_src python :session s320 :results silent :exports none
+x, y = makeGrid()
+plotField(x, y, xComponent = 0, yComponent = x)
+pyplot.savefig('./figure/3-20-b.png', bbox_inches='tight')
+   #+end_src
+
+   #+attr_latex: :width 0.6\linewidth
+   [[./figure/3-20-b.png]]
+
+** (c)
+   #+begin_src python :session s320 :results silent :exports none
+x, y = makeGrid()
+plotField(x, y, xComponent = x, yComponent = y)
+pyplot.savefig('./figure/3-20-c.png', bbox_inches='tight')
+   #+end_src
+
+   #+attr_latex: :width 0.6\linewidth
+   [[./figure/3-20-c.png]]
+
+** (d)
+   #+begin_src python :session s320 :results silent :exports none
+x, y = makeGrid()
+plotField(x, y, xComponent = x, yComponent = 2*y)
+pyplot.savefig('./figure/3-20-d.png', bbox_inches='tight')
+   #+end_src
+
+   #+attr_latex: :width 0.6\linewidth
+   [[./figure/3-20-d.png]]
+
+** (e) :noexport:
+   #+begin_src python :session s320 :results silent :exports none
+# theta, r = makePolarGrid()
+
+# dr = 1
+# dt = 1q
+
+# f = pyplot.figure()
+# ax = f.add_subplot(111, polar=True)
+# ax.quiver(theta, r, dr * cos(theta) - dt * sin (theta), dr * sin(theta) + dt * cos(theta))
+
+# pyplot.savefig('./figure/3-20-e.png', bbox_inches='tight')
+
+# theta, r = makePolarGrid() #numpy.meshgrid(thetas, radii)
+# plotPolarField(theta, r, r, 0)
+# pyplot.show()
+
+x, y = makeGrid()
+r = numpy.sqrt(x**2 + y**2)
+theta = numpy.arctan2(y, x)
+f = r + theta
+u = r * numpy.cos(theta)
+v = r * numpy.sin(theta)
+
+plotField(x, y, u, v)
+pyplot.show()
+   #+end_src
+
+   #+attr_latex: :width 0.6\linewidth
+   [[./figure/3-20-e.png]]
+
+* 3.25
+* 3.26
+* 3.40
+* 3.44
+* 3.48
+* 3.50
