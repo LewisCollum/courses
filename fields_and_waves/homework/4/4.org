@@ -1,6 +1,7 @@
 #+latex_class_options: [twocolumn, fleqn]
 #+latex_header: \usepackage{../homework}
-#+bind: org-latex-image-default-width "0.9\\linewidth"
+#+bind: org-latex-image-default-width "0.6\\linewidth"
+#+property: header-args :eval no-export
 
 #+title: EE381 HW 4
 #+author: Lewis Collum
@@ -48,13 +49,13 @@ print(f"\(comp_CB = {round(B['alongC'], 3)}\)")
 
 ** (c)
    #+begin_src python :results output latex :exports results :session s35
-angleAC = np.cosh(np.dot(A['vector'], C['vector'])/(A['norm']*C['norm']))
+angleAC = np.arccos(np.dot(A['vector'], C['vector'])/(A['norm']*C['norm']))
 print(f"\(\\theta_{{AC}} = {round(np.degrees(angleAC), 1)}^{{\circ}}\)")
    #+end_src
 
    #+RESULTS:
    #+begin_export latex
-   \(\theta_{AC} = 85.5^{\circ}\)
+   \(\theta_{AC} = 17.0^{\circ}\)
    #+end_export
    
 ** (d)
@@ -117,6 +118,7 @@ print(f"\({resultTag} = {result}\)")
    #+end_export
 
 * 3.14
+  What is this question even asking?
 * 3.20
   #+begin_src python :results silent :session s320 :exports none
 import matplotlib.pyplot as pyplot
@@ -124,7 +126,7 @@ import numpy
 
 def makeGrid():
     fieldLength = 10
-    arrowSpacing = 2
+    arrowSpacing = 1
     
     return numpy.meshgrid(
         numpy.arange(-fieldLength, fieldLength+1, arrowSpacing),
@@ -151,7 +153,7 @@ def plotPolarField(theta, r, thetaComponent, rComponent):
     ax.quiver(
         theta,
         r,
-        thetaComponent * numpy.cos(theta) - rComponent * numpy.sin(theta),
+        rComponent * numpy.cos(theta) - thetaComponent * numpy.sin(theta),
         rComponent * numpy.sin(theta) + thetaComponent * numpy.cos(theta))
     ax.quiverkey(q, X=0.3, Y=1.1, U=10,label='Quiver key, length = 10', labelpos='E')
   #+end_src
@@ -196,39 +198,76 @@ pyplot.savefig('./figure/3-20-d.png', bbox_inches='tight')
    #+attr_latex: :width 0.6\linewidth
    [[./figure/3-20-d.png]]
 
-** (e) :noexport:
+** (e)
    #+begin_src python :session s320 :results silent :exports none
-# theta, r = makePolarGrid()
+theta, r = makePolarGrid()
 
-# dr = 1
-# dt = 1q
-
-# f = pyplot.figure()
-# ax = f.add_subplot(111, polar=True)
-# ax.quiver(theta, r, dr * cos(theta) - dt * sin (theta), dr * sin(theta) + dt * cos(theta))
-
-# pyplot.savefig('./figure/3-20-e.png', bbox_inches='tight')
-
-# theta, r = makePolarGrid() #numpy.meshgrid(thetas, radii)
-# plotPolarField(theta, r, r, 0)
-# pyplot.show()
-
-x, y = makeGrid()
-r = numpy.sqrt(x**2 + y**2)
-theta = numpy.arctan2(y, x)
-f = r + theta
-u = r * numpy.cos(theta)
-v = r * numpy.sin(theta)
-
-plotField(x, y, u, v)
-pyplot.show()
+plotPolarField(theta, r, r, 0)
+pyplot.xlabel('theta')
+pyplot.ylabel('r')
+pyplot.savefig('./figure/3-20-e.png', bbox_inches='tight')
    #+end_src
 
    #+attr_latex: :width 0.6\linewidth
    [[./figure/3-20-e.png]]
 
+** (f)
+   #+begin_src python :session s320 :results silent :exports none
+theta, r = makePolarGrid()
+
+plotPolarField(theta, r, 0, numpy.sin(theta))
+pyplot.xlabel('theta')
+pyplot.ylabel('r')
+pyplot.savefig('./figure/3-20-f.png', bbox_inches='tight')
+   #+end_src
+
+   #+attr_latex: :width 0.6\linewidth
+   [[./figure/3-20-f.png]]
+
 * 3.25
+** (c)
+   #+begin_src python :results output latex :exports both
+import scipy.integrate as integrate
+import numpy
+
+rRange = (2, 5)
+zRange = (-2, 2)
+A = integrate.dblquad(
+    lambda r, z: 1,
+    *rRange,
+    *zRange)
+print(f"\(A = \\boxed{{ {A[0]} }}\)")
+   #+end_src
+
+   #+RESULTS:
+   #+begin_export latex
+   \(A = \boxed{ 12.0 }\)
+   #+end_export
+
+   
+   [[./figure/3-25-c_sketch.png]]
 * 3.26
+  #+begin_src python :results output latex :exports both
+import scipy.integrate as integrate
+import numpy
+
+rRange = (2, 5)
+phiRange = (numpy.pi/2, numpy.pi)
+zRange = (0, 2)
+volume = integrate.tplquad(
+    lambda z, phi, r: r,
+    *rRange,
+    *phiRange,
+    *zRange)[0]
+print(f"\(V = \\boxed{{ {volume/numpy.pi}\pi }}\)")
+  #+end_src
+
+  #+RESULTS:
+  #+begin_export latex
+  \(V = \boxed{ 10.5\pi }\)
+  #+end_export
+
+
 * 3.40
 * 3.44
 * 3.48
