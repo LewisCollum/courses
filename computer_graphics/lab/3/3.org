@@ -1,0 +1,51 @@
+#+latex_class_options: [fleqn]
+#+latex_header: \usepackage{../homework}
+
+#+title: Lab 3
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* HTML
+  #+begin_src html :tangle lab2.html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>2D Shapes</title>
+    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="matrix.js"></script>
+    <script type="text/javascript" src="form.js"></script>
+    <script type="text/javascript" src="lab2.js"></script>
+    
+    <script id="vertex-shader" type="x-shader/x-vertex">
+      attribute vec4 position;
+      uniform mat4 interpolation;
+
+      void main() {
+        gl_Position = interpolation * position;
+        gl_PointSize = 1.0;
+      }
+    </script>
+    
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+      uniform vec4 color;
+      
+      void main() {
+        gl_FragColor = color;
+      }
+    </script>
+  </head>
+  
+  <body onload="init()" onkeydown="onKeydownEvent(event)">
+    <canvas width="512" height="512" id="gl-canvas" onclick="onClickEvent(event)"></canvas>
+    <button id="rotationToggleButton" onClick="onRotationToggled()">Toggle Rotation</button>
+    <button id="increaseDriftVelocity" onClick="onIncreaseDriftVelocity()">+ Velocity</button>
+    <button id="decreaseDriftVelocity" onClick="onDecreaseDriftVelocity()">- Velocity</button>
+  </body>
+</html>
+  #+end_src
+
+* JS
