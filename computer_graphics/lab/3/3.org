@@ -6,7 +6,7 @@
 #+date: Updated: \today
 
 * HTML
-  #+begin_src html :tangle lab2.html
+  #+begin_src html :tangle lab3.html
 <!DOCTYPE html>
 <html>
   <head>
@@ -17,7 +17,7 @@
     <script type="text/javascript" src="../Common/MV.js"></script>
     <script type="text/javascript" src="matrix.js"></script>
     <script type="text/javascript" src="form.js"></script>
-    <script type="text/javascript" src="lab2.js"></script>
+    <script type="text/javascript" src="lab3.js"></script>
     
     <script id="vertex-shader" type="x-shader/x-vertex">
       attribute vec4 position;
@@ -41,7 +41,7 @@
   
   <body onload="init()" onkeydown="onKeydownEvent(event)">
     <canvas width="512" height="512" id="gl-canvas" onclick="onClickEvent(event)"></canvas>
-    <button id="rotationToggleButton" onClick="onRotationToggled()">Toggle Rotation</button>
+    <button id="rotationToggleButton">Toggle Rotation</button>
     <button id="increaseDriftVelocity" onClick="onIncreaseDriftVelocity()">+ Velocity</button>
     <button id="decreaseDriftVelocity" onClick="onDecreaseDriftVelocity()">- Velocity</button>
   </body>
@@ -49,3 +49,276 @@
   #+end_src
 
 * JS
+  #+begin_src javascript :tangle lab3.js
+//Lewis Collum
+var canvas
+var gl
+
+class EventDispatcher {
+    constructor() {this.handlers = []}
+    addHandler(handler) {this.handlers.push(handler)}
+    sendEvent(event) {this.handlers.forEach(handler => handler(event))}
+}
+
+const clickEventDispatcher = new EventDispatcher()
+function onClickEvent(event) {clickEventDispatcher.sendEvent(event)}
+
+const keydownEventDispatcher = new EventDispatcher()
+function onKeydownEvent(event) {keydownEventDispatcher.sendEvent(event)}
+
+const decreaseDriftVelocityButton = new EventDispatcher()
+function onDecreaseDriftVelocity() {decreaseDriftVelocityButton.sendEvent()}
+
+const frameEventDispatcher = new EventDispatcher()
+function onFrameEvent() {
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    frameEventDispatcher.sendEvent()
+    requestAnimFrame(onFrameEvent)
+}
+
+
+function init() {
+    canvas = document.getElementById("gl-canvas")
+    gl = WebGLUtils.setupWebGL(canvas)
+
+    const shaderProgram = initShaders(gl, "vertex-shader", "fragment-shader")
+    gl.useProgram(shaderProgram)
+    gl.viewport(0, 0, 512, 512)
+    gl.clearColor(1.0, 0.0, 0.0, 1.0)
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    
+    shape = {
+        points: Radial.makeFromPointCount(8),
+        position: form.Translate.each(0, 0, 0),
+        rotation: form.Rotate.noZ(0),
+        scale: form.Scale.all(0.1),
+
+        drift: matrix.Identity(4),
+        driftVelocity: 0.004,
+
+        spin: matrix.Identity(4),
+        angularVelocity: 0.01,
+        isRotating: false,
+
+        update: function() {
+            shape.position = matrix.dot(shape.position, shape.drift)
+            shape.rotation = matrix.dot(shape.rotation, shape.spin)
+            
+            shape.transformations = [
+                shape.position,
+                shape.rotation,
+                shape.scale]
+            this.interpolation = matrix.interpolate(shape.transformations)
+        }
+    }
+
+    shape.keyToTransformation = {
+        [65]: function() {shape.drift = form.Translate.x(-shape.driftVelocity)}, //A
+        [68]: function() {shape.drift = form.Translate.x(shape.driftVelocity)}, //D,
+        [83]: function() {shape.drift = form.Translate.y(-shape.driftVelocity)}, //S
+        [87]: function() {shape.drift = form.Translate.y(shape.driftVelocity)}, //W
+        toggleRotation: function() {
+            if (!shape.isRotating) {
+                shape.spin = form.Rotate.noZ(shape.angularVelocity)
+                shape.isRotating = true
+            } else {
+                shape.spin = form.Rotate.noZ(0)
+                shape.isRotating = false
+            }
+        },
+        increaseDriftVelocity: function() {
+            shape.driftVelocity += 0.001
+        },
+        decreaseDriftVelocity: function() {
+            shape.driftVelocity -= 0.001
+        }        
+    }
+
+
+    drawer = new Drawer(shaderProgram)
+    drawer.strategy = gl.TRIANGLE_FAN
+    drawer.color = [1.0, 1.0, 0.0, 1.0]
+    drawer.addDrawable(shape)
+    
+
+    clickEventDispatcher.addHandler((event) => {
+        shape.position = form.Translate.each(2.0*event.clientX/512 - 1, -2.0*event.clientY/512 + 1, 0)
+    })
+    
+    keydownEventDispatcher.addHandler((event) => {
+        shape.keyToTransformation[event.keyCode]()
+    })
+
+    document.getElementById("rotationToggleButton").addEventListener(
+       "click",
+        shape.keyToTransformation.toggleRotation)
+    
+    document.getElementById("increaseDriftVelocity").addEventListener(
+        "click",
+        shape.keyToTransformation.increaseDriftVelocity)
+
+    document.getElementById("decreaseDriftVelocity").addEventListener(
+        "click",
+        shape.keyToTransformation.decreaseDriftVelocity)
+
+    document.getElementById(
+    frameEventDispatcher.addHandler(() => {
+        shape.update()
+        drawer.drawAll()
+    })
+
+    onFrameEvent()
+}
+
+
+class Drawer {
+    constructor(shaderProgram) {
+        this.shaderProgram = shaderProgram
+        this.color = [0.0, 0.0, 0.0, 1.0]
+        this.strategy = gl.TRIANGLE_FAN
+        this.drawables = []
+    }
+
+    addDrawable(drawable) {this.drawables.push(drawable)}
+    
+    drawAll() {
+        this.drawables.forEach((drawable) => this.drawInterpolated(drawable.points, drawable.interpolation))
+    }
+
+    drawInterpolated(points, interpolation) {
+        const interpolationPointer = gl.getUniformLocation(this.shaderProgram, "interpolation")
+        gl.uniformMatrix4fv(interpolationPointer, false, matrix.transpose(interpolation).flat())
+        this.draw(points)
+    }
+
+    draw(points) {
+        const flattenedDrawer = Float32Array.from(points.flat())
+        const pointBuffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, pointBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, flattenedDrawer, gl.STATIC_DRAW)
+
+        const pointPosition = gl.getAttribLocation(this.shaderProgram, "position")
+        gl.vertexAttribPointer(pointPosition, 4, gl.FLOAT, false, 0, 0)
+        gl.enableVertexAttribArray(pointPosition)
+
+        const color = gl.getUniformLocation(this.shaderProgram, "color")
+        gl.uniform4f(color, this.color[0], this.color[1], this.color[2], this.color[3])
+
+        const bufferLength = points.length
+        gl.drawArrays(this.strategy, 0, bufferLength)
+    }
+}
+
+class Radial {
+    static makeFromPointCount(pointCount) {
+        const vectorAngle = 2 * Math.PI / pointCount
+        var points = []
+        for (let i = 0; i < pointCount; ++i) {
+            let x = Math.cos(vectorAngle * i)
+            let y = Math.sin(vectorAngle * i)
+            points.push([x, y, 0, 1])
+        }
+        return points
+    }
+}
+  #+end_src
+* My Library
+** Form
+   #+begin_src javascript :tangle form.js
+const form = {};
+(function(context) {
+    context.Rotate = class {
+        static noZ(radians) {
+            return [[Math.cos(radians), -Math.sin(radians), 0, 0],
+                    [Math.sin(radians), Math.cos(radians), 0, 0],
+                    [0, 0, 1, 0],
+                    [0, 0, 0, 1]]
+        }
+    }
+
+
+    context.Translate = class {
+        static x(translation) {return this.each(translation, 0, 0)}
+        static y(translation) {return this.each(0, translation, 0)}
+        static z(translation) {return this.each(0, 0, translation)}
+        static all(translation) {return this.each(translation, translation, translation)}
+        
+        static each(x, y, z) {
+            return [[1, 0, 0, x],
+                    [0, 1, 0, y],
+                    [0, 0, 1, z],
+                    [0, 0, 0, 1]]
+        }
+
+    }
+
+
+    context.Scale = class {
+        static each(x, y, z) {
+            return [[x, 0, 0, 0],
+                    [0, y, 0, 0],
+                    [0, 0, z, 0],
+                    [0, 0, 0, 1]]
+        }    
+        
+        static all(scale) {
+            return [[scale, 0, 0, 0],
+                    [0, scale, 0, 0],
+                    [0, 0, scale, 0],
+                    [0, 0, 0, 1]]
+        }
+    }
+})(form)
+   #+end_src
+** Matrix
+   #+begin_src javascript :tangle matrix.js
+const matrix = {};
+(function(context) {
+    context.make = function(rows, columns, fill=null) {
+        return Array(rows).fill().map(rows => Array(columns).fill().map(columns => fill))
+    }
+
+    context.Identity = function(size) {
+        identity = context.make(size, size, 0)
+        for (let i = 0; i < size; ++i) 
+            identity[i][i] = 1
+        return identity        
+    }
+    
+    context.transpose = function(matrix) {
+        return matrix[0].map((column, i) => matrix.map(row => row[i]));
+    }
+
+    context.column = function(matrix, column) {
+        return matrix.map(row => row[column])
+    }
+
+    context.dot = function(first, second) {
+        var dotted = context.make(first.length, second[0].length)
+        matrix.transpose(second).forEach((column, columnIndex) => {
+            first.forEach((row, rowIndex) => {
+                dotted[rowIndex][columnIndex] = matrix.dotVector(row, column)
+            })
+        })
+        return dotted
+    }
+    
+    context.dotVector = function(first, second) {
+        return first.map((value, index) => value * second[index]).reduce((sum, rest) => sum + rest)
+    }
+
+    context.interpolate = function(matrices) {
+        return matrices.reduce((interpolation, rest) => context.dot(interpolation, rest))
+    }
+
+    context.add = function(first, second) {
+        var result = first.slice()
+        for (let row = 0; row < first.length; ++row) {
+            for (let column = 0; column < first[0].length; ++column) {
+                result[row][column] += second[row][column]
+            }
+        }
+        return result
+    }
+})(matrix);
+   #+end_src

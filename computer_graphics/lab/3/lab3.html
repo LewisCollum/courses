@@ -1,22 +1,39 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>2D Shapes</title>
+    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="matrix.js"></script>
+    <script type="text/javascript" src="form.js"></script>
+    <script type="text/javascript" src="lab3.js"></script>
+    
+    <script id="vertex-shader" type="x-shader/x-vertex">
+      attribute vec4 position;
+      uniform mat4 interpolation;
 
-<script id="vertex-shader" type="x-shader/x-vertex">
-//Vertex Shader Code Here
-</script>
-
-<script id="fragment-shader" type="x-shader/x-fragment">
-//Fragment Shader Code Here
-</script>
-
-<script type="text/javascript" src="../Common/webgl-utils.js"></script>
-<script type="text/javascript" src="../Common/initShaders.js"></script>
-<script type="text/javascript" src="../Common/MV.js"></script>
-<script type="text/javascript" src="lab3.js"></script>
-</head>
-
-<body onload = "initGL()">
-    <img hidden src="./myimage.jpg" id="myImage"/>
-</body>
+      void main() {
+        gl_Position = interpolation * position;
+        gl_PointSize = 1.0;
+      }
+    </script>
+    
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+      uniform vec4 color;
+      
+      void main() {
+        gl_FragColor = color;
+      }
+    </script>
+  </head>
+  
+  <body onload="init()" onkeydown="onKeydownEvent(event)">
+    <canvas width="512" height="512" id="gl-canvas" onclick="onClickEvent(event)"></canvas>
+    <button id="rotationToggleButton">Toggle Rotation</button>
+    <button id="increaseDriftVelocity" onClick="onIncreaseDriftVelocity()">+ Velocity</button>
+    <button id="decreaseDriftVelocity" onClick="onDecreaseDriftVelocity()">- Velocity</button>
+  </body>
 </html>
