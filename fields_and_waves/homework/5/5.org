@@ -1,0 +1,7 @@
+#+latex_class_options: [fleqn]
+#+latex_header: \usepackage{../homework}
+
+#+title: 
+#+author: Lewis Collum
+#+date: Updated: \today"
+
