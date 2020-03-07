@@ -8,7 +8,9 @@
     <script type="text/javascript" src="../Common/MV.js"></script>
     <script type="text/javascript" src="matrix.js"></script>
     <script type="text/javascript" src="form.js"></script>
+    <script type="text/javascript" src="radial.js"></script>
     <script type="text/javascript" src="lab3.js"></script>
+    <script type="text/javascript" src="drawer.js"></script>
     
     <script id="vertex-shader" type="x-shader/x-vertex">
       attribute vec4 position;
@@ -30,10 +32,10 @@
     </script>
   </head>
   
-  <body onload="init()" onkeydown="onKeydownEvent(event)">
-    <canvas width="512" height="512" id="gl-canvas" onclick="onClickEvent(event)"></canvas>
+  <body onload="init()">
+    <canvas width="512" height="512" id="gl-canvas"></canvas>
     <button id="rotationToggleButton">Toggle Rotation</button>
-    <button id="increaseDriftVelocity" onClick="onIncreaseDriftVelocity()">+ Velocity</button>
-    <button id="decreaseDriftVelocity" onClick="onDecreaseDriftVelocity()">- Velocity</button>
+    <button id="increaseDriftVelocity">+ Velocity</button>
+    <button id="decreaseDriftVelocity">- Velocity</button>
   </body>
 </html>
