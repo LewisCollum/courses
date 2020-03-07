@@ -85,7 +85,7 @@ function init() {
 
     
     shape = {
-        points: radial.make3d(10, 10),
+        points: radial.make3d(30, 10),
         position: form.Translate.each(0, 0, 0),
         rotation: form.Rotate.noZ(0),
         scale: form.Scale.all(0.8),
