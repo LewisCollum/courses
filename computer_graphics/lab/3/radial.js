@@ -10,7 +10,8 @@ const radial = {};
         }
         return points
     }
-    
+
+    //TODO extract functions
     context.make3d = function(yawCount, pitchCount) {
         const stackCount = pitchCount+1
         const yawAngleStep = 2*Math.PI/yawCount
@@ -32,7 +33,7 @@ const radial = {};
             }
         }
         points.push([0, 0, 1, 1])
-        console.log(points)
+
         var triangulated = []
         
         //bottom
@@ -70,18 +71,6 @@ const radial = {};
             let c = yawIndex == yawCount-1 ? points[last-1] : points[last-1-yawIndex-1]
             triangulated.push(a, b, c)
         }
-        console.log(triangulated)
         return triangulated
-    }
-
-    context.triangulate = function(points) {
-        triangulated = []
-
-        
-        points.forEach((point) => {
-            //console.log(point)
-            triangulated.push(point)
-        })
-        return points
     }
 })(radial);

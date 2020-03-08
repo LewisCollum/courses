@@ -48,6 +48,27 @@ const form = {};
 
 
     context.Scale = class {
+        static x(value) {
+            return [[value, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [0, 0, 1, 0],
+                    [0, 0, 0, 1]]
+        }
+
+        static y(value) {
+            return [[1, 0, 0, 0],
+                    [0, value, 0, 0],
+                    [0, 0, 1, 0],
+                    [0, 0, 0, 1]]
+        }
+
+        static y(value) {
+            return [[1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [0, 0, value, 0],
+                    [0, 0, 0, 1]]
+        }
+        
         static each(x, y, z) {
             return [[x, 0, 0, 0],
                     [0, y, 0, 0],

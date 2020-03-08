@@ -14,20 +14,23 @@
     
     <script id="vertex-shader" type="x-shader/x-vertex">
       attribute vec4 position;
+      attribute vec4 color;
+      varying vec4 fragmentColor;
       uniform mat4 interpolation;
 
       void main() {
         gl_Position = interpolation * position;
         gl_PointSize = 1.0;
+        fragmentColor = color;
       }
     </script>
     
     <script id="fragment-shader" type="x-shader/x-fragment">
       precision mediump float;
-      uniform vec4 color;
+      varying vec4 fragmentColor;
       
       void main() {
-        gl_FragColor = color;
+        gl_FragColor = fragmentColor;
       }
     </script>
   </head>

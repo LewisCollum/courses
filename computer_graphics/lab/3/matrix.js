@@ -19,6 +19,15 @@ const matrix = {};
         return matrix.map(row => row[column])
     }
 
+    context.snap = function(matrix, threshold) {        
+        matrix.forEach((row, rowIndex) => {
+            row.forEach((column, columnIndex) => {
+                if (column <= threshold) matrix[rowIndex][columnIndex] = 0
+            })
+        })
+        return matrix
+    }
+
     context.dot = function(first, second) {
         var dotted = context.make(first.length, second[0].length)
         matrix.transpose(second).forEach((column, columnIndex) => {
@@ -33,7 +42,7 @@ const matrix = {};
         return first.map((value, index) => value * second[index]).reduce((sum, rest) => sum + rest)
     }
 
-    context.interpolate = function(matrices) {
+    context.dotMatrices = function(matrices) {
         return matrices.reduce((interpolation, rest) => context.dot(interpolation, rest))
     }
 

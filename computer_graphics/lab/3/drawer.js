@@ -30,8 +30,10 @@ const drawer = {};
         context.gl.vertexAttribPointer(pointPosition, 4, context.gl.FLOAT, false, 0, 0)
         context.gl.enableVertexAttribArray(pointPosition)
 
-        const color = context.gl.getUniformLocation(context.shaderProgram, "color")
-        context.gl.uniform4f(color, context.color[0], context.color[1], context.color[2], context.color[3])
+        const color = context.gl.getAttribLocation(context.shaderProgram, "color")
+        //context.gl.uniform4f(color, context.color[0], context.color[1], context.color[2], context.color[3])
+        context.gl.vertexAttribPointer(color, 4, gl.FLOAT, false, 0, 0)
+        context.gl.enableVertexAttribArray(color)
 
         const bufferLength = points.length
         context.gl.drawArrays(context.strategy, 0, bufferLength)
