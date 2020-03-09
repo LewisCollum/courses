@@ -1,7 +1,14 @@
-#+latex_class_options: [fleqn]
+#+latex_class_options: [twocolumn,fleqn]
 #+latex_header: \usepackage{../homework}
+#+bind: org-latex-image-default-width "0.7\\linewidth"
 
-#+title: 
+#+title: EE381 HW 5
 #+author: Lewis Collum
-#+date: Updated: \today"
+#+date: Updated: \today
 
+* 1
+** (a)  
+   [[./figure/1-a.png]]
+
+** (b)  
+   [[./figure/1-b.png]]
