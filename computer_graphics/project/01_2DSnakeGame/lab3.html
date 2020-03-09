@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>2D Shapes</title>
+    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="matrix.js"></script>
+    <script type="text/javascript" src="form.js"></script>
+    <script type="text/javascript" src="radial.js"></script>
+    <script type="text/javascript" src="lab3.js"></script>
+    <script type="text/javascript" src="drawer.js"></script>
+    
+    <script id="vertex-shader" type="x-shader/x-vertex">
+      attribute vec4 position;
+      attribute vec4 color;
+      varying vec4 fragmentColor;
+      uniform mat4 interpolation;
+
+      void main() {
+        gl_Position = interpolation * position;
+        gl_PointSize = 1.0;
+        fragmentColor = color;
+      }
+    </script>
+    
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+      varying vec4 fragmentColor;
+      
+      void main() {
+        gl_FragColor = fragmentColor;
+      }
+    </script>
+  </head>
+  
+  <body onload="init()">
+    <canvas width="512" height="512" id="gl-canvas"></canvas>
+    <button id="rotationToggleButton">Toggle Rotation</button>
+    <button id="increaseDriftVelocity">+ Velocity</button>
+    <button id="decreaseDriftVelocity">- Velocity</button>
+  </body>
+</html>
