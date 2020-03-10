@@ -3,23 +3,24 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
     <title>2D Shapes</title>
-    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
-    <script type="text/javascript" src="../Common/initShaders.js"></script>
-    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="./Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="./Common/initShaders.js"></script>
+    <script type="text/javascript" src="./Common/MV.js"></script>
     <script type="text/javascript" src="matrix.js"></script>
     <script type="text/javascript" src="form.js"></script>
     <script type="text/javascript" src="radial.js"></script>
     <script type="text/javascript" src="lab3.js"></script>
     <script type="text/javascript" src="drawer.js"></script>
+    <script type="text/javascript" src="frameEventDispatcher.js"></script>
     
     <script id="vertex-shader" type="x-shader/x-vertex">
       attribute vec4 position;
       attribute vec4 color;
       varying vec4 fragmentColor;
-      uniform mat4 interpolation;
+      uniform mat4 transformation;
 
       void main() {
-        gl_Position = interpolation * position;
+        gl_Position = transformation * position;
         gl_PointSize = 1.0;
         fragmentColor = color;
       }
@@ -33,12 +34,16 @@
         gl_FragColor = fragmentColor;
       }
     </script>
+
+    <link rel="stylesheet" href="styles.css">
   </head>
   
   <body onload="init()">
-    <canvas width="512" height="512" id="gl-canvas"></canvas>
-    <button id="rotationToggleButton">Toggle Rotation</button>
-    <button id="increaseDriftVelocity">+ Velocity</button>
-    <button id="decreaseDriftVelocity">- Velocity</button>
+    <div class="container">
+      <canvas width="512" height="512" id="gl-canvas"></canvas>
+      <div id="overlay">
+        <div>SCORE: <span id="score"></span></div>
+      </div>
+    </div>
   </body>
 </html>

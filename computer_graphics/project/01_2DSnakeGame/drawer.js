@@ -6,17 +6,21 @@ const drawer = {};
         context.color = [0.0, 0.0, 0.0, 1.0]
         context.strategy = context.gl.TRIANGLE_FAN
         context.drawables = []
+        
+        frameEventDispatcher.addRenderingListener(() => {
+            this.drawAll()
+        })
     }
 
     context.addDrawable = function(drawable) {context.drawables.push(drawable)}
     
     context.drawAll = function() {
-        context.drawables.forEach((drawable) => context.drawInterpolated(drawable.points, drawable.interpolation))
+        context.drawables.forEach((drawable) => context.drawTransformed(drawable.points, drawable.transformation))
     }
 
-    context.drawInterpolated = function(points, interpolation) {
-        const interpolationPointer = context.gl.getUniformLocation(context.shaderProgram, "interpolation")
-        context.gl.uniformMatrix4fv(interpolationPointer, false, matrix.transpose(interpolation).flat())
+    context.drawTransformed = function(points, transformation) {
+        const transformationPointer = context.gl.getUniformLocation(context.shaderProgram, "transformation")
+        context.gl.uniformMatrix4fv(transformationPointer, false, matrix.transpose(transformation).flat())
         context.draw(points)
     }
 

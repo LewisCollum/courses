@@ -16,7 +16,7 @@
     mimics the snake moving in a grid. This makes checking boundary
     conditions easier.
 
-* Needs    
+* Needs
   - Bounds checking system for squares
     - Total canvas size / grid spacing = grid index
   - Key Event Dispatcher (key up and key down) stores object key maps
@@ -28,23 +28,24 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
     <title>2D Shapes</title>
-    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
-    <script type="text/javascript" src="../Common/initShaders.js"></script>
-    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="./Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="./Common/initShaders.js"></script>
+    <script type="text/javascript" src="./Common/MV.js"></script>
     <script type="text/javascript" src="matrix.js"></script>
     <script type="text/javascript" src="form.js"></script>
     <script type="text/javascript" src="radial.js"></script>
     <script type="text/javascript" src="lab3.js"></script>
     <script type="text/javascript" src="drawer.js"></script>
+    <script type="text/javascript" src="frameEventDispatcher.js"></script>
     
     <script id="vertex-shader" type="x-shader/x-vertex">
       attribute vec4 position;
       attribute vec4 color;
       varying vec4 fragmentColor;
-      uniform mat4 interpolation;
+      uniform mat4 transformation;
 
       void main() {
-        gl_Position = interpolation * position;
+        gl_Position = transformation * position;
         gl_PointSize = 1.0;
         fragmentColor = color;
       }
@@ -58,33 +59,59 @@
         gl_FragColor = fragmentColor;
       }
     </script>
+
+    <link rel="stylesheet" href="styles.css">
   </head>
   
   <body onload="init()">
-    <canvas width="512" height="512" id="gl-canvas"></canvas>
-    <button id="rotationToggleButton">Toggle Rotation</button>
-    <button id="increaseDriftVelocity">+ Velocity</button>
-    <button id="decreaseDriftVelocity">- Velocity</button>
+    <div class="container">
+      <canvas width="512" height="512" id="gl-canvas"></canvas>
+      <div id="overlay">
+        <div>SCORE: <span id="score"></span></div>
+      </div>
+    </div>
   </body>
 </html>
   #+end_src
 
+* CSS
+  #+begin_src css :tangle styles.css
+.container {
+    position: relative;
+}
+#overlay {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    font-family: "Roboto";
+    font-size: 20px;
+    color: black;
+}
+  #+end_src
 * JS
   #+begin_src javascript :tangle lab3.js
 //Lewis Collum
 var canvas
 var gl
 
-class EventDispatcher {
-    constructor() {this.handlers = []}
-    addEventListener(listeningFunction) {this.handlers.push(listeningFunction)}
-    dispatchEvent(event) {this.handlers.forEach(handler => handler(event))}
+var safeIgnoreKeyDownHandler = {
+    get: function(target, name) {
+        if (target.hasOwnProperty(name)) {
+            console.log(name)
+            return target[name]
+        }
+        return () => {}
+    }
 }
 
-const frameEventDispatcher = new EventDispatcher()
-function onFrameEvent() {
-    gl.clear(gl.COLOR_BUFFER_BIT)
-    frameEventDispatcher.dispatchEvent()
+var currentMillis = 0
+const updatePeriod = 100
+function onFrameEvent(millis) {
+    if (millis > currentMillis + updatePeriod) {
+        currentMillis = millis
+        gl.clear(gl.COLOR_BUFFER_BIT)
+        frameEventDispatcher.dispatchEvent()
+    }
     requestAnimFrame(onFrameEvent)
 }
 
@@ -95,144 +122,66 @@ function init() {
     const shaderProgram = initShaders(gl, "vertex-shader", "fragment-shader")
     gl.useProgram(shaderProgram)
     gl.viewport(0, 0, 512, 512)
-    gl.clearColor(0.0, 0.0, 0.0, 1.0)
+    gl.clearColor(0.4, 1.0, 0.4, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT)
-    gl.enable(gl.DEPTH_TEST)
 
     drawer.setupWithGlAndShaders(gl, shaderProgram)
-    drawer.strategy = gl.TRIANGLES
-    
-    shape = {
-        points: radial.make3d(40, 40),
-        position: matrix.Identity(4),
-        rotation: matrix.Identity(4),
-        scale: form.Scale.all(0.8),
+    drawer.strategy = gl.TRIANGLE_FAN
 
-        drift: matrix.Identity(4),
-        driftVelocity: 0.004,
-
-        spin: matrix.Identity(4),
-        angularVelocity: 0.05,
-
-        growth: matrix.Identity(4),
-        growthVelocity: 1.01,
-
-        isRotating: false,
-
-        update: function() {
-            this.position = matrix.dot(this.position, this.drift)
-            this.rotation = matrix.dot(this.rotation, this.spin) //rotate around LOCAL axes
-            this.scale = matrix.dot(this.scale, this.growth)
-            
-            this.transformations = [
-                this.position,
-                this.rotation,
-                this.scale]
-            this.interpolation = matrix.dotMatrices(this.transformations)
-        }
-    }
-
-    shape.keyLog = new Set()
-        
-    shape.keyUpHandler = {
-        get: function(target, name) {
-            if (target.hasOwnProperty(name) && shape.keyLog.has(name)) {
-                shape.keyLog.delete(name)
-                console.log(shape.keyLog)
-                return target[name]
-            }
-            return () => {}
-        }
-    }
-    
-    shape.keyUpMap = new Proxy({
-        ['A']: function() {shape.drift = matrix.dot(form.Translate.x(shape.driftVelocity), shape.drift)},
-        ['D']: function() {shape.drift = matrix.dot(form.Translate.x(-shape.driftVelocity), shape.drift)},
-        ['S']: function() {shape.drift = matrix.dot(form.Translate.y(shape.driftVelocity), shape.drift)},
-        ['W']: function() {shape.drift = matrix.dot(form.Translate.y(-shape.driftVelocity), shape.drift)},
-        ['O']: function() {shape.growth = matrix.dot(form.Scale.x(shape.growthVelocity), shape.growth)},
-        ['P']: function() {shape.growth = matrix.dot(form.Scale.x(2-shape.growthVelocity), shape.growth)},
-        ['K']: function() {shape.growth = matrix.dot(form.Scale.y(shape.growthVelocity), shape.growth)},
-        ['L']: function() {shape.growth = matrix.dot(form.Scale.y(2-shape.growthVelocity), shape.growth)},
-        ['X']: function() {shape.spin = matrix.dot(form.Rotate.x(-shape.angularVelocity), shape.spin)},
-        ['Y']: function() {shape.spin = matrix.dot(form.Rotate.y(-shape.angularVelocity), shape.spin)},
-        ['Z']: function() {shape.spin = matrix.dot(form.Rotate.z(-shape.angularVelocity), shape.spin)}
-    }, shape.keyUpHandler)
-
-
-    shape.keyDownHandler = {
-        get: function(target, name) {
-            if (target.hasOwnProperty(name) && !shape.keyLog.has(name)) {
-                shape.keyLog.add(name)
-                console.log(shape.keyLog)
-                return target[name]
-            }
-            return () => {}
-        }
-    }
-    
-    shape.keyDownMap = new Proxy({
-        ['A']: function() {shape.drift = matrix.dot(form.Translate.x(-shape.driftVelocity), shape.drift)},
-        ['D']: function() {shape.drift = matrix.dot(form.Translate.x(shape.driftVelocity), shape.drift)},
-        ['S']: function() {shape.drift = matrix.dot(form.Translate.y(-shape.driftVelocity), shape.drift)},
-        ['W']: function() {shape.drift = matrix.dot(form.Translate.y(shape.driftVelocity), shape.drift)},
-        ['O']: function() {shape.growth = matrix.dot(form.Scale.x(2 - shape.growthVelocity), shape.growth)},
-        ['P']: function() {shape.growth = matrix.dot(form.Scale.x(shape.growthVelocity), shape.growth)},
-        ['K']: function() {shape.growth = matrix.dot(form.Scale.y(2 - shape.growthVelocity), shape.growth)},
-        ['L']: function() {shape.growth = matrix.dot(form.Scale.y(shape.growthVelocity), shape.growth)},
-        ['X']: function() {shape.spin = matrix.dot(form.Rotate.x(shape.angularVelocity), shape.spin)},
-        ['Y']: function() {shape.spin = matrix.dot(form.Rotate.y(shape.angularVelocity), shape.spin)},
-        ['Z']: function() {shape.spin = matrix.dot(form.Rotate.z(shape.angularVelocity), shape.spin)}
-    }, shape.keyDownHandler)
-    
-    shape.toggleRotation = function() {
-        if (!shape.isRotating) {
-            shape.spin = form.Rotate.z(shape.angularVelocity)
-            shape.isRotating = true
-        } else {
-            shape.spin = form.Rotate.z(0)
-            shape.isRotating = false
-        }
-    }
-
-    shape.increaseDriftVelocity = function() {shape.driftVelocity += 0.001}
-    shape.decreaseDriftVelocity = function() {shape.driftVelocity -= 0.001}
-
-    canvas.addEventListener("click", () => {
-        shape.position = form.Translate.each(2.0*event.clientX/512 - 1, -2.0*event.clientY/512 + 1, 0)
-    })
-
-    document.getElementById("rotationToggleButton").addEventListener(
-       "click",
-        shape.toggleRotation)
-    
-    document.getElementById("increaseDriftVelocity").addEventListener(
-        "click",
-        shape.increaseDriftVelocity)
-
-    document.getElementById("decreaseDriftVelocity").addEventListener(
-        "click",
-        shape.decreaseDriftVelocity)
-
-    document.addEventListener("keydown", (event) => {
-        let key = String.fromCharCode(event.keyCode)
-        shape.keyDownMap[key]()
-    })
-
-    document.addEventListener("keyup", (event) => {
-        let key = String.fromCharCode(event.keyCode)
-        shape.keyUpMap[key]()
-    })
-
-
+    const score = document.getElementById("score")
+    const scoreText = document.createTextNode("")
+    score.appendChild(scoreText)
     frameEventDispatcher.addEventListener(() => {
-        shape.update()
-        drawer.drawAll()
+        scoreText.nodeValue = 0
     })
+    
+    snake = new Snake()
+    snake.setDriftKeyMap(KeyMapWASD)
+    drawer.addDrawable(snake)
 
-    drawer.addDrawable(shape)
     onFrameEvent()
 }
+
+
+class Snake {
+    constructor() {
+        this.points = matrix.dotMatrices([
+            radial.make2d(4),
+            form.Rotate.z(Math.PI/4),
+            form.Scale.all(Math.sqrt(2)*0.04)])
+        this.transformation = matrix.Identity(4)
+        this.drift = matrix.Identity(4)
+        this.driftVelocity = 0.08
+        
+        frameEventDispatcher.addEventListener(() => {
+            this.update()
+        })
+    }
+
+    setDriftKeyMap(KeyMap) {
+        this.driftKeyMap = new KeyMap(this).proxy
+        document.addEventListener("keydown", (event) => {
+            let key = String.fromCharCode(event.keyCode)
+            this.driftKeyMap[key]()
+        })
+    }
+    
+    update() {
+        this.transformation = matrix.dot(this.transformation, this.drift)
+    }    
+}
+
+class KeyMapWASD {
+    constructor(driftable) {
+        this.proxy = new Proxy({
+            ['A']: function() {driftable.drift = form.Translate.x(-driftable.driftVelocity)},
+            ['D']: function() {driftable.drift = form.Translate.x(driftable.driftVelocity)},
+            ['S']: function() {driftable.drift = form.Translate.y(-driftable.driftVelocity)},
+            ['W']: function() {driftable.drift = form.Translate.y(driftable.driftVelocity)},
+        }, safeIgnoreKeyDownHandler)
+    }
+}
+        
   #+end_src
 * My Library
 ** Form
@@ -474,17 +423,21 @@ const drawer = {};
         context.color = [0.0, 0.0, 0.0, 1.0]
         context.strategy = context.gl.TRIANGLE_FAN
         context.drawables = []
+        
+        frameEventDispatcher.addRenderingListener(() => {
+            this.drawAll()
+        })
     }
 
     context.addDrawable = function(drawable) {context.drawables.push(drawable)}
     
     context.drawAll = function() {
-        context.drawables.forEach((drawable) => context.drawInterpolated(drawable.points, drawable.interpolation))
+        context.drawables.forEach((drawable) => context.drawTransformed(drawable.points, drawable.transformatiopn))
     }
 
-    context.drawInterpolated = function(points, interpolation) {
-        const interpolationPointer = context.gl.getUniformLocation(context.shaderProgram, "interpolation")
-        context.gl.uniformMatrix4fv(interpolationPointer, false, matrix.transpose(interpolation).flat())
+    context.drawTransformed = function(points, transformation) {
+        const transformationPointer = context.gl.getUniformLocation(context.shaderProgram, "transformation")
+        context.gl.uniformMatrix4fv(transformationPointer, false, matrix.transpose(transformation).flat())
         context.draw(points)
     }
 
@@ -507,4 +460,26 @@ const drawer = {};
         context.gl.drawArrays(context.strategy, 0, bufferLength)
     }
 })(drawer);
+   #+end_src
+
+** FrameEventHandler
+   #+begin_src javascript :tangle frameEventDispatcher.js
+frameEventDispatcher = {};
+(function(context) {
+    context.handlers = [] 
+    context.renderingHandlers = []
+
+    context.addEventListener = function(listeningFunction) {
+        this.handlers.push(listeningFunction)
+    }
+    
+    context.addRenderingListener = function(listeningFunction) {
+        this.renderingHandlers.push(listeningFunction)
+    }
+    
+    context.dispatchEvent = function(event) {
+        this.handlers.forEach(handler => handler(event))
+        this.renderingHandlers.forEach(handler => handler(event))
+    }
+})(frameEventDispatcher);
    #+end_src
