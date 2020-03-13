@@ -1,0 +1,29 @@
+#+latex_class_options: [fleqn]
+#+latex_header: \usepackage{../homework}
+
+#+title: STAT383 HW 4
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* 8
+  #+begin_src python :results output
+import numpy
+import scipy.stats as stats
+
+hardness = numpy.asarray([135, 149, 132, 142, 124,
+                          130, 122, 128, 120, 128,
+                          127, 123, 136, 141, 130,
+                          139, 134, 135, 130, 141,
+                          149, 137, 137, 140, 148])
+mean = 84.8667
+sd = 21.0791
+tCritical = stats.t(29).ppf(0.05)
+print(stats.t(df=29, loc=mean, scale=sd).interval(0.95))
+print(tCritical)
+  #+end_src
+
+  #+RESULTS:
+  : (41.75509985052054, 127.97830014947945)
+  : -1.6991270265334977
+
+* 9
