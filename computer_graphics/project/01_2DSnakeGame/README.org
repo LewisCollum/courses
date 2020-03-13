@@ -1,0 +1,4 @@
+#+title: Snake Game
+#+author: Lewis Collum & Justin Marcy
+
+[[./figure/gameScreenshot.png]]
