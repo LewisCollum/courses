@@ -1,7 +1,7 @@
 #+latex_class_options: [fleqn]
 #+latex_header: \usepackage{../homework}
 
-#+title: Lab 3
+#+title: Project 1: Snake Game
 #+author: Lewis Collum
 #+date: Updated: \today
 
@@ -22,7 +22,7 @@
   - Key Event Dispatcher (key up and key down) stores object key maps
     and calls the maps when event occurs.
 * HTML
-  #+begin_src html :tangle lab3.html
+  #+begin_src html :tangle main.html
 <!DOCTYPE html>
 <html>
   <head>
@@ -34,33 +34,32 @@
     <script type="text/javascript" src="matrix.js"></script>
     <script type="text/javascript" src="form.js"></script>
     <script type="text/javascript" src="radial.js"></script>
-    <script type="text/javascript" src="lab3.js"></script>
+    <script type="text/javascript" src="main.js"></script>
     <script type="text/javascript" src="drawer.js"></script>
     <script type="text/javascript" src="frameEventDispatcher.js"></script>
     
     <script id="vertex-shader" type="x-shader/x-vertex">
       attribute vec4 position;
-      attribute vec4 color;
-      varying vec4 fragmentColor;
       uniform mat4 transformation;
 
       void main() {
         gl_Position = transformation * position;
         gl_PointSize = 1.0;
-        fragmentColor = color;
       }
     </script>
     
     <script id="fragment-shader" type="x-shader/x-fragment">
       precision mediump float;
-      varying vec4 fragmentColor;
+      uniform vec4 color;
       
       void main() {
-        gl_FragColor = fragmentColor;
+        gl_FragColor = color;
       }
     </script>
 
     <link rel="stylesheet" href="styles.css">
+
+    <h1>SNAKE</h1>
   </head>
   
   <body onload="init()">
@@ -70,6 +69,8 @@
         <div>SCORE: <span id="score"></span></div>
       </div>
     </div>
+    <p>W, A, S, D to move. Don't run into yourself and don't go over the edge.</p>
+    <h3>Lewis Collum & Justin Marcy</h3>
   </body>
 </html>
   #+end_src
@@ -77,43 +78,32 @@
 * CSS
   #+begin_src css :tangle styles.css
 .container {
+    text-align:center;
     position: relative;
 }
+
 #overlay {
-    position: absolute;
-    left: 10px;
-    top: 10px;
+    position: relative;
+    left: 0px;
+    top: -40px;
     font-family: "Roboto";
     font-size: 20px;
     color: black;
 }
+
+body {
+    text-align:center;
+    background-color: darkslategray;
+    font-family: "Roboto";
+    color: white;
+}
+
   #+end_src
 * JS
-  #+begin_src javascript :tangle lab3.js
+  #+begin_src javascript :tangle main.js
 //Lewis Collum
 var canvas
 var gl
-
-var safeIgnoreKeyDownHandler = {
-    get: function(target, name) {
-        if (target.hasOwnProperty(name)) {
-            console.log(name)
-            return target[name]
-        }
-        return () => {}
-    }
-}
-
-var currentMillis = 0
-const updatePeriod = 100
-function onFrameEvent(millis) {
-    if (millis > currentMillis + updatePeriod) {
-        currentMillis = millis
-        gl.clear(gl.COLOR_BUFFER_BIT)
-        frameEventDispatcher.dispatchEvent()
-    }
-    requestAnimFrame(onFrameEvent)
-}
 
 function init() {
     canvas = document.getElementById("gl-canvas")
@@ -131,57 +121,168 @@ function init() {
     const score = document.getElementById("score")
     const scoreText = document.createTextNode("")
     score.appendChild(scoreText)
+
+    var grid = new Grid(15)
+    var apple = new Apple(grid)
+    var snake = new Snake(grid)
+
     frameEventDispatcher.addEventListener(() => {
-        scoreText.nodeValue = 0
+        scoreText.nodeValue = snake.body.length
+
+        if (squareIntersection(snake.body[0].coordinates, apple.coordinates)) {
+            apple.eat()
+            snake.feed()
+            updatePeriod -= 2
+        } 
+        else if (snake.isOverEdge() || snake.isOverlapping()) {
+            window.alert(`Score: ${scoreText.nodeValue}`)
+            window.location.reload(false)
+        } 
     })
     
-    snake = new Snake()
-    snake.setDriftKeyMap(KeyMapWASD)
-    drawer.addDrawable(snake)
-
     onFrameEvent()
 }
 
+var currentMillis = 0
+var updatePeriod = 100
+function onFrameEvent(millis) {
+    if (millis > currentMillis + updatePeriod) {
+        currentMillis = millis
+        gl.clear(gl.COLOR_BUFFER_BIT)
+        frameEventDispatcher.dispatchEvent()
+    }
+    requestAnimFrame(onFrameEvent)
+}
 
 class Snake {
-    constructor() {
-        this.points = matrix.dotMatrices([
-            radial.make2d(4),
-            form.Rotate.z(Math.PI/4),
-            form.Scale.all(Math.sqrt(2)*0.04)])
-        this.transformation = matrix.Identity(4)
+    constructor(grid) {
+        this.grid = grid
+        this.points = makeSquareOfSize(this.grid.spacing)
+
         this.drift = matrix.Identity(4)
-        this.driftVelocity = 0.08
+        this.driftVelocity = this.grid.spacing
+
+        this.body = [{
+            points: this.points,
+            transformation: matrix.Identity(4),
+            color: [0.6, 0.3, 0.0, 1],
+            coordinates: [Math.floor(this.grid.count/2), Math.floor(this.grid.count/2)]
+        }]
+        drawer.addDrawable(this.body[0])  
+
+        frameEventDispatcher.addEventListener(() => this.update())
         
-        frameEventDispatcher.addEventListener(() => {
-            this.update()
-        })
+        this.setMovementKeyMap()
     }
 
-    setDriftKeyMap(KeyMap) {
-        this.driftKeyMap = new KeyMap(this).proxy
-        document.addEventListener("keydown", (event) => {
-            let key = String.fromCharCode(event.keyCode)
-            this.driftKeyMap[key]()
+    update() {        
+        this.body[this.body.length-1].transformation = matrix.dot(this.body[0].transformation, this.drift)
+        this.body.unshift(this.body.pop())
+
+        this.body[0].coordinates[0] = Math.floor((this.body[0].transformation[0][3]+1)*this.grid.count/2)
+        this.body[0].coordinates[1] = Math.floor((this.body[0].transformation[1][3]+1)*this.grid.count/2)
+    }    
+    
+    moveUp() {this.drift = form.Translate.y(this.driftVelocity)}
+    moveDown() {this.drift = form.Translate.y(-this.driftVelocity)}
+    moveRight() {this.drift = form.Translate.x(this.driftVelocity)}
+    moveLeft() {this.drift = form.Translate.x(-this.driftVelocity)}
+    stop() {this.drift = matrix.Identity(4)}
+
+    isOverlapping() {
+        var overlapping = false
+        this.body.forEach((segment, index) => {
+            if (index != 0 && squareIntersection(this.body[0].coordinates, segment.coordinates)) 
+                overlapping = true
         })
+        return overlapping
+    }
+
+    isOverEdge() {
+        return this.body[0].coordinates[0] >= this.grid.count ||
+            this.body[0].coordinates[0] < 0 ||
+            this.body[0].coordinates[1] >= this.grid.count ||
+            this.body[0].coordinates[1] < 0
+    }
+
+    feed() {
+        this.body.push({
+            points: this.points,
+            transformation: this.body[this.body.length-1].transformation,
+            color: [0.6, 0.3, 0.0, 1],
+            coordinates: [null, null]
+        })
+
+        drawer.addDrawable(this.body[this.body.length-1])            
     }
     
-    update() {
-        this.transformation = matrix.dot(this.transformation, this.drift)
-    }    
-}
-
-class KeyMapWASD {
-    constructor(driftable) {
-        this.proxy = new Proxy({
-            ['A']: function() {driftable.drift = form.Translate.x(-driftable.driftVelocity)},
-            ['D']: function() {driftable.drift = form.Translate.x(driftable.driftVelocity)},
-            ['S']: function() {driftable.drift = form.Translate.y(-driftable.driftVelocity)},
-            ['W']: function() {driftable.drift = form.Translate.y(driftable.driftVelocity)},
+    setMovementKeyMap() {
+        this.movementKeyMap = new Proxy({
+            ['A']: () => this.moveLeft(),
+            ['D']: () => this.moveRight(),
+            ['S']: () => this.moveDown(),
+            ['W']: () => this.moveUp()
         }, safeIgnoreKeyDownHandler)
+        
+        document.addEventListener("keydown", (event) => {
+            let key = String.fromCharCode(event.keyCode)
+            this.movementKeyMap[key]()
+        })
     }
 }
+
+function makeSquareOfSize(size) {
+    return matrix.dotMatrices([
+        radial.make2d(4),
+        form.Rotate.z(Math.PI/4),
+        form.Scale.all(Math.sqrt(2)*size/2)])
+}
+
+var safeIgnoreKeyDownHandler = {
+    get: function(target, name) {
+        if (target.hasOwnProperty(name)) {
+            return target[name]
+        }
+        return () => {}
+    }
+}
+
+class Grid {
+    constructor(count) {
+        this.count = count
+        this.spacing = 2/count
+    }
+
+    randomCoordinates() {
+        return [Math.floor(Math.random()*this.count), Math.floor(Math.random()*this.count)]        
+    }
+
+    gridToFrameCoordinates(coordinates) {
+        return [coordinates[0]*this.spacing-1, coordinates[1]*this.spacing-1]        
+    }
+}
+
+class Apple {
+    constructor(grid) {
+        this.grid = grid
+        this.points = makeSquareOfSize(this.grid.spacing)
+        this.color = [1.0, 0.0, 0.0, 1.0]
         
+        this.eat()
+        drawer.addDrawable(this)
+    }
+    
+    eat() {
+        this.coordinates = this.grid.randomCoordinates()
+        const translation = this.grid.gridToFrameCoordinates(this.coordinates)
+        this.transformation = form.Translate.each(translation[0]+this.grid.spacing/2, translation[1]+this.grid.spacing/2, 0)
+    }
+}
+
+function squareIntersection(coordinatesA, coordinatesB) {
+    return coordinatesA[0] == coordinatesB[0] && coordinatesA[1] == coordinatesB[1]
+}
+
   #+end_src
 * My Library
 ** Form
@@ -290,6 +391,10 @@ const matrix = {};
     
     context.transpose = function(matrix) {
         return matrix[0].map((column, i) => matrix.map(row => row[i]));
+    }
+
+    context.negate = function(matrix) {
+        return matrix.map(vector => vector.map(element => -element))
     }
 
     context.column = function(matrix, column) {
@@ -420,7 +525,6 @@ const drawer = {};
     context.setupWithGlAndShaders = function(gl, shaderProgram) {
         context.gl = gl
         context.shaderProgram = shaderProgram
-        context.color = [0.0, 0.0, 0.0, 1.0]
         context.strategy = context.gl.TRIANGLE_FAN
         context.drawables = []
         
@@ -432,17 +536,14 @@ const drawer = {};
     context.addDrawable = function(drawable) {context.drawables.push(drawable)}
     
     context.drawAll = function() {
-        context.drawables.forEach((drawable) => context.drawTransformed(drawable.points, drawable.transformatiopn))
+        context.drawables.forEach((drawable) => context.draw(drawable))
     }
 
-    context.drawTransformed = function(points, transformation) {
+    context.draw = function(drawable) {
         const transformationPointer = context.gl.getUniformLocation(context.shaderProgram, "transformation")
-        context.gl.uniformMatrix4fv(transformationPointer, false, matrix.transpose(transformation).flat())
-        context.draw(points)
-    }
-
-    context.draw = function(points) {
-        const flattenedDrawer = Float32Array.from(points.flat())
+        context.gl.uniformMatrix4fv(transformationPointer, false, matrix.transpose(drawable.transformation).flat())
+        
+        const flattenedDrawer = Float32Array.from(drawable.points.flat())
         const pointBuffer = context.gl.createBuffer()
         context.gl.bindBuffer(context.gl.ARRAY_BUFFER, pointBuffer)
         context.gl.bufferData(context.gl.ARRAY_BUFFER, flattenedDrawer, context.gl.STATIC_DRAW)
@@ -451,14 +552,13 @@ const drawer = {};
         context.gl.vertexAttribPointer(pointPosition, 4, context.gl.FLOAT, false, 0, 0)
         context.gl.enableVertexAttribArray(pointPosition)
 
-        const color = context.gl.getAttribLocation(context.shaderProgram, "color")
-        //context.gl.uniform4f(color, context.color[0], context.color[1], context.color[2], context.color[3])
-        context.gl.vertexAttribPointer(color, 4, gl.FLOAT, false, 0, 0)
-        context.gl.enableVertexAttribArray(color)
+        const color = context.gl.getUniformLocation(context.shaderProgram, "color")
+        context.gl.uniform4f(color, drawable.color[0], drawable.color[1], drawable.color[2], drawable.color[3])
 
-        const bufferLength = points.length
+        const bufferLength = drawable.points.length
         context.gl.drawArrays(context.strategy, 0, bufferLength)
     }
+    
 })(drawer);
    #+end_src
 

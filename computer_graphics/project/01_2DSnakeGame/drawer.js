@@ -3,7 +3,6 @@ const drawer = {};
     context.setupWithGlAndShaders = function(gl, shaderProgram) {
         context.gl = gl
         context.shaderProgram = shaderProgram
-        context.color = [0.0, 0.0, 0.0, 1.0]
         context.strategy = context.gl.TRIANGLE_FAN
         context.drawables = []
         
@@ -15,17 +14,14 @@ const drawer = {};
     context.addDrawable = function(drawable) {context.drawables.push(drawable)}
     
     context.drawAll = function() {
-        context.drawables.forEach((drawable) => context.drawTransformed(drawable.points, drawable.transformation))
+        context.drawables.forEach((drawable) => context.draw(drawable))
     }
 
-    context.drawTransformed = function(points, transformation) {
+    context.draw = function(drawable) {
         const transformationPointer = context.gl.getUniformLocation(context.shaderProgram, "transformation")
-        context.gl.uniformMatrix4fv(transformationPointer, false, matrix.transpose(transformation).flat())
-        context.draw(points)
-    }
-
-    context.draw = function(points) {
-        const flattenedDrawer = Float32Array.from(points.flat())
+        context.gl.uniformMatrix4fv(transformationPointer, false, matrix.transpose(drawable.transformation).flat())
+        
+        const flattenedDrawer = Float32Array.from(drawable.points.flat())
         const pointBuffer = context.gl.createBuffer()
         context.gl.bindBuffer(context.gl.ARRAY_BUFFER, pointBuffer)
         context.gl.bufferData(context.gl.ARRAY_BUFFER, flattenedDrawer, context.gl.STATIC_DRAW)
@@ -34,12 +30,11 @@ const drawer = {};
         context.gl.vertexAttribPointer(pointPosition, 4, context.gl.FLOAT, false, 0, 0)
         context.gl.enableVertexAttribArray(pointPosition)
 
-        const color = context.gl.getAttribLocation(context.shaderProgram, "color")
-        //context.gl.uniform4f(color, context.color[0], context.color[1], context.color[2], context.color[3])
-        context.gl.vertexAttribPointer(color, 4, gl.FLOAT, false, 0, 0)
-        context.gl.enableVertexAttribArray(color)
+        const color = context.gl.getUniformLocation(context.shaderProgram, "color")
+        context.gl.uniform4f(color, drawable.color[0], drawable.color[1], drawable.color[2], drawable.color[3])
 
-        const bufferLength = points.length
+        const bufferLength = drawable.points.length
         context.gl.drawArrays(context.strategy, 0, bufferLength)
     }
+    
 })(drawer);

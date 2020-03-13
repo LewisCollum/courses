@@ -15,6 +15,10 @@ const matrix = {};
         return matrix[0].map((column, i) => matrix.map(row => row[i]));
     }
 
+    context.negate = function(matrix) {
+        return matrix.map(vector => vector.map(element => -element))
+    }
+
     context.column = function(matrix, column) {
         return matrix.map(row => row[column])
     }
