@@ -6,7 +6,9 @@
 #+date: Updated: \today
 
 * 8
-  #+begin_src python :results output
+  \[H_0: \mu_0 = 130\]
+  \[H_A: \mu_0 \ne 130\]
+  #+begin_src python :results output latex :exports both 
 import numpy
 import scipy.stats as stats
 
@@ -15,15 +17,44 @@ hardness = numpy.asarray([135, 149, 132, 142, 124,
                           127, 123, 136, 141, 130,
                           139, 134, 135, 130, 141,
                           149, 137, 137, 140, 148])
-mean = 84.8667
-sd = 21.0791
-tCritical = stats.t(29).ppf(0.05)
-print(stats.t(df=29, loc=mean, scale=sd).interval(0.95))
-print(tCritical)
+
+minimalHardness = 130
+n = len(hardness)
+confidence = 0.95
+interval = stats.t(df=n, loc=hardness.mean(), scale=stats.sem(hardness)).interval(confidence)
+print(f"{confidence*100}\% C.I. for \mu: {list(numpy.round(interval, 2))}")
   #+end_src
 
   #+RESULTS:
-  : (41.75509985052054, 127.97830014947945)
-  : -1.6991270265334977
+  #+begin_export latex
+  95.0\% C.I. for \mu: [130.89, 137.67]
+  #+end_export
+
+  Since \(H_0\) is not inside this interval, we reject \(H_0\). Thus,
+  the annealing process does not result in the proper Brinell hardness
+  on average.
 
 * 9
+  \[H_0: \mu = 100\]
+  \[H_A: \mu \ne 100\]
+  #+begin_src python :results output latex :exports both 
+import numpy
+import scipy.stats as stats
+
+mean = 100
+std = 15
+n = 20
+confidence = 0.95
+
+interval = stats.t(df=n, loc=mean, scale=std/numpy.sqrt(n)).interval(confidence)
+print(f"{confidence*100}\% C.I. for \mu: {list(numpy.round(interval, 2))}")
+  #+end_src
+
+  #+RESULTS:
+  #+begin_export latex
+  95.0\% C.I. for \mu: [93.0, 107.0]
+  #+end_export
+
+  Since \(H_0\) is inside this interval, we fail to reject
+  \(H_0\). There is not enough evidence to suggest that students with
+  behavioral issues have a different cognition from their peers.
