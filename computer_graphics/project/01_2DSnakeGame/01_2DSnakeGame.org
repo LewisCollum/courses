@@ -35,6 +35,9 @@
     <script type="text/javascript" src="form.js"></script>
     <script type="text/javascript" src="radial.js"></script>
     <script type="text/javascript" src="main.js"></script>
+    <script type="text/javascript" src="Snake.js"></script>
+    <script type="text/javascript" src="Apple.js"></script>
+    <script type="text/javascript" src="Grid.js"></script>
     <script type="text/javascript" src="drawer.js"></script>
     <script type="text/javascript" src="frameEventDispatcher.js"></script>
     
@@ -100,14 +103,12 @@ body {
 
   #+end_src
 * JS
+** main
   #+begin_src javascript :tangle main.js
 //Lewis Collum
-var canvas
-var gl
-
 function init() {
-    canvas = document.getElementById("gl-canvas")
-    gl = WebGLUtils.setupWebGL(canvas)
+    const canvas = document.getElementById("gl-canvas")
+    const gl = WebGLUtils.setupWebGL(canvas)
 
     const shaderProgram = initShaders(gl, "vertex-shader", "fragment-shader")
     gl.useProgram(shaderProgram)
@@ -118,46 +119,43 @@ function init() {
     drawer.setupWithGlAndShaders(gl, shaderProgram)
     drawer.strategy = gl.TRIANGLE_FAN
 
-    const score = document.getElementById("score")
-    const scoreText = document.createTextNode("")
-    score.appendChild(scoreText)
+    const grid = new Grid(15)
+    const apple = new Apple(grid)
+    const snake = new Snake(grid)
 
-    var grid = new Grid(15)
-    var apple = new Apple(grid)
-    var snake = new Snake(grid)
+    const scoreElement = document.getElementById("score")
+    const scoreTextNode = document.createTextNode("")
+    scoreElement.appendChild(scoreTextNode)
+    scoreTextNode.nodeValue = snake.length
+
+    frameEventDispatcher.updateMillis = 100
 
     frameEventDispatcher.addEventListener(() => {
-        scoreText.nodeValue = snake.body.length
+        gl.clear(gl.COLOR_BUFFER_BIT)
 
-        if (squareIntersection(snake.body[0].coordinates, apple.coordinates)) {
-            apple.eat()
+        if (Grid.areCoordinatesEqual(snake.headCoordinates, apple.coordinates)) {
             snake.feed()
-            updatePeriod -= 2
+            apple.eat()
+            
+            scoreTextNode.nodeValue = snake.length
+            
+            frameEventDispatcher.increaseUpdateMillis(-2)
         } 
-        else if (snake.isOverEdge() || snake.isOverlapping()) {
-            window.alert(`Score: ${scoreText.nodeValue}`)
+        else if (snake.isDead) {
+            window.alert(`Score: ${scoreTextNode.nodeValue}`)
             window.location.reload(false)
         } 
     })
     
-    onFrameEvent()
+    frameEventDispatcher.onFrameEvent()
 }
-
-var currentMillis = 0
-var updatePeriod = 100
-function onFrameEvent(millis) {
-    if (millis > currentMillis + updatePeriod) {
-        currentMillis = millis
-        gl.clear(gl.COLOR_BUFFER_BIT)
-        frameEventDispatcher.dispatchEvent()
-    }
-    requestAnimFrame(onFrameEvent)
-}
-
+  #+end_src
+** Snake
+   #+begin_src javascript :tangle Snake.js
 class Snake {
     constructor(grid) {
         this.grid = grid
-        this.points = makeSquareOfSize(this.grid.spacing)
+        this.points = grid.makeCell()
 
         this.drift = matrix.Identity(4)
         this.driftVelocity = this.grid.spacing
@@ -189,20 +187,27 @@ class Snake {
     moveLeft() {this.drift = form.Translate.x(-this.driftVelocity)}
     stop() {this.drift = matrix.Identity(4)}
 
-    isOverlapping() {
+    get headCoordinates() {
+        return this.body[0].coordinates
+    }
+
+    get isOverlapping() {
         var overlapping = false
         this.body.forEach((segment, index) => {
-            if (index != 0 && squareIntersection(this.body[0].coordinates, segment.coordinates)) 
+            if (index != 0 && Grid.areCoordinatesEqual(this.body[0].coordinates, segment.coordinates)) 
                 overlapping = true
         })
         return overlapping
     }
 
-    isOverEdge() {
-        return this.body[0].coordinates[0] >= this.grid.count ||
-            this.body[0].coordinates[0] < 0 ||
-            this.body[0].coordinates[1] >= this.grid.count ||
-            this.body[0].coordinates[1] < 0
+    get isOverEdge() { return this.grid.isOutOfBounds(this.body[0].coordinates) }
+
+    get isDead() {
+        return this.isOverEdge || this.isOverlapping
+    }
+
+    get length() {
+        return this.body.length
     }
 
     feed() {
@@ -222,7 +227,11 @@ class Snake {
             ['D']: () => this.moveRight(),
             ['S']: () => this.moveDown(),
             ['W']: () => this.moveUp()
-        }, safeIgnoreKeyDownHandler)
+        }, {
+            get: function(target, name) {
+                return target.hasOwnProperty(name) ? target[name] : () => {} 
+            }
+        })
         
         document.addEventListener("keydown", (event) => {
             let key = String.fromCharCode(event.keyCode)
@@ -230,23 +239,29 @@ class Snake {
         })
     }
 }
+   #+end_src
 
-function makeSquareOfSize(size) {
-    return matrix.dotMatrices([
-        radial.make2d(4),
-        form.Rotate.z(Math.PI/4),
-        form.Scale.all(Math.sqrt(2)*size/2)])
-}
-
-var safeIgnoreKeyDownHandler = {
-    get: function(target, name) {
-        if (target.hasOwnProperty(name)) {
-            return target[name]
-        }
-        return () => {}
+** Apple
+   #+begin_src javascript :tangle Apple.js
+class Apple {
+    constructor(grid) {
+        this.grid = grid
+        this.points = this.grid.makeCell()
+        this.color = [1.0, 0.0, 0.0, 1.0]
+        
+        this.eat()
+        drawer.addDrawable(this)
+    }
+    
+    eat() {
+        this.coordinates = this.grid.randomCoordinates()
+        const translation = this.grid.gridToFrameCoordinates(this.coordinates)
+        this.transformation = form.Translate.each(translation[0]+this.grid.spacing/2, translation[1]+this.grid.spacing/2, 0)
     }
 }
-
+   #+end_src
+** Grid
+   #+begin_src javascript :tangle Grid.js
 class Grid {
     constructor(count) {
         this.count = count
@@ -260,30 +275,24 @@ class Grid {
     gridToFrameCoordinates(coordinates) {
         return [coordinates[0]*this.spacing-1, coordinates[1]*this.spacing-1]        
     }
-}
 
-class Apple {
-    constructor(grid) {
-        this.grid = grid
-        this.points = makeSquareOfSize(this.grid.spacing)
-        this.color = [1.0, 0.0, 0.0, 1.0]
-        
-        this.eat()
-        drawer.addDrawable(this)
+    makeCell() {
+        return matrix.dotMatrices([
+            radial.make2d(4),
+            form.Rotate.z(Math.PI/4),
+            form.Scale.all(Math.sqrt(2)*this.spacing/2)])        
     }
     
-    eat() {
-        this.coordinates = this.grid.randomCoordinates()
-        const translation = this.grid.gridToFrameCoordinates(this.coordinates)
-        this.transformation = form.Translate.each(translation[0]+this.grid.spacing/2, translation[1]+this.grid.spacing/2, 0)
+    isOutOfBounds(coordinates) {
+        return coordinates[0] >= this.count || coordinates[0] < 0 ||
+            coordinates[1] >= this.count || coordinates[1] < 0
+    }
+
+    static areCoordinatesEqual(a, b) {
+        return a[0] == b[0] && a[1] == b[1]
     }
 }
-
-function squareIntersection(coordinatesA, coordinatesB) {
-    return coordinatesA[0] == coordinatesB[0] && coordinatesA[1] == coordinatesB[1]
-}
-
-  #+end_src
+   #+end_src
 * My Library
 ** Form
     #+begin_src javascript :tangle form.js
@@ -562,7 +571,7 @@ const drawer = {};
 })(drawer);
    #+end_src
 
-** FrameEventHandler
+** FrameEventDispatcher
    #+begin_src javascript :tangle frameEventDispatcher.js
 frameEventDispatcher = {};
 (function(context) {
@@ -581,5 +590,20 @@ frameEventDispatcher = {};
         this.handlers.forEach(handler => handler(event))
         this.renderingHandlers.forEach(handler => handler(event))
     }
+
+    context.currentMillis = 0
+    context.updateMillis = 0
+    context.increaseUpdateMillis = function(millis) {
+        context.updateMillis += millis
+    }
+    
+    context.onFrameEvent = function(millis) {
+        if (millis > context.currentMillis + context.updateMillis) {
+            context.currentMillis = millis
+            frameEventDispatcher.dispatchEvent()
+        }
+        requestAnimFrame(context.onFrameEvent)
+    }
 })(frameEventDispatcher);
    #+end_src
+   

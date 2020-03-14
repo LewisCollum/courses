@@ -15,4 +15,18 @@ frameEventDispatcher = {};
         this.handlers.forEach(handler => handler(event))
         this.renderingHandlers.forEach(handler => handler(event))
     }
+
+    context.currentMillis = 0
+    context.updateMillis = 0
+    context.increaseUpdateMillis = function(millis) {
+        context.updateMillis += millis
+    }
+    
+    context.onFrameEvent = function(millis) {
+        if (millis > context.currentMillis + context.updateMillis) {
+            context.currentMillis = millis
+            frameEventDispatcher.dispatchEvent()
+        }
+        requestAnimFrame(context.onFrameEvent)
+    }
 })(frameEventDispatcher);

@@ -1,4 +1,57 @@
 #+title: Snake Game
 #+author: Lewis Collum & Justin Marcy
 
+** Screenshot :ignore:noexport:
 [[./figure/gameScreenshot.png]]
+
+** Game Controls
+| Key        | Action                |
+|------------+-----------------------|
+| W, A, S, D | Up, Left, Down, Right |
+
+** Implementation
+*** Snake
+    The snake is a list of squares. If you *feed* the snake (with an
+    apple), a square is pushed to the list of squares. When the snake
+    *moves*, a square is popped off the end of the list and pushed to
+    the front in the updated position; this ensures we do not have to
+    move every square in the list.
+*** Apple
+    When an apple is *eaten*, it simply moves to another random grid
+    location. This mimics the apple being eaten (disappearing) and a
+    new apple appearing elsewhere.
+*** Grid
+    Everything is sized and moves on a grid. The snakes width is the
+    size of the grid spacing, and it moves the distance of one grid
+    cell per frame. The apple's location is a random grid cell's
+    coordinates (e.g. [4, 5]), which is then converted from grid space
+    coordinates to the frame space (between -1 and 1).
+*** Frame Rate
+    Frame rate is controlled by checking if a desired milliseconds
+    has passed since the last frame, and if it has, then a new frame
+    will be dispatched (via our frame dispatcher).
+
+    Also, as part of the game logic, every time the snake eats an apple, the
+    frame rate increases.
+*** Scoring    
+    Your score is the length of the snake. Once the snake dies, you
+    have won as many points as the length of the snake.
+
+*** Game Logic Overview
+    The game logic resides in =main.js=. Conditionally, if the snake
+    goes off the edge of the canvas, or overlaps itself, then it dies
+    and the game is over. Here is the entire game logic: 
+    #+begin_src javascript 
+if (Grid.areCoordinatesEqual(snake.headCoordinates, apple.coordinates)) {
+    snake.feed()
+    apple.eat()
+    
+    scoreTextNode.nodeValue = snake.length
+    
+    frameEventDispatcher.increaseUpdateMillis(-2)
+} 
+else if (snake.isDead) {
+    window.alert(`Score: ${scoreTextNode.nodeValue}`)
+    window.location.reload(false)
+}
+    #+end_src
