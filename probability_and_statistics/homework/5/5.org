@@ -1,0 +1,60 @@
+#+latex_class_options: [fleqn]
+#+latex_header: \usepackage{../homework}
+#+bind: org-latex-minted-options (("bgcolor" "codeBackground"))
+
+#+title: HW 5
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* 7 
+  *Independent Two-Sample T Test*
+  \[H_0: \mu_{w} \le \mu_{w/o}\]
+  \[H_A: \mu_{w} > \mu_{w/o}\]
+
+** Python
+  #+begin_src python :exports both :results output latex
+import scipy.stats as stats
+
+withSurfactant = (39.3, 23.5, 37.7, 24.8, 33.9, 29.1)
+withoutSurfactant = (32.1, 19.8, 32.9, 25.0, 35.4, 28.0)
+
+tScore, pTwoTailed = stats.ttest_ind(withSurfactant, withoutSurfactant)
+
+pOneTailed = pTwoTailed/2
+print(f"\[\\textnormal{{p-value}} = {round(pOneTailed, 3)}\]")
+  #+end_src
+  #+RESULTS:
+  #+begin_export latex
+  \[\textnormal{p-value} = 0.25\]
+  #+end_export
+
+** Conclusion
+  Since the p-value is much greater than \alpha, we fail to reject the
+  Null Hypothesis.
+
+* 8
+  *Independent Two-Sample T Test*
+  \[H_0: \mu_{A} \le \mu_{B}\]
+  \[H_A: \mu_{A} > \mu_{B}\]
+
+** Python
+  #+begin_src python :exports both :results output latex
+import scipy.stats as stats
+
+medicine = {
+    'A': (143, 148, 155, 125, 133, 138, 155, 144, 140, 143),
+    'B': (135, 135, 140, 142, 121, 122, 120, 133, 131, 137)
+}
+
+_, p = stats.ttest_ind(medicine['A'], medicine['B'])
+
+print(f"\[\\textnormal{{p-value}} = {round(p/2, 3)}\]")
+  #+end_src
+  #+RESULTS:
+  #+begin_export latex
+  \[\textnormal{p-value} = 0.006\]
+  #+end_export
+
+** Conclusion
+  Since the p-value is less than \alpha, we reject the Null Hypothesis.
+  
