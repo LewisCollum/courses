@@ -1,0 +1,192 @@
+#+latex_class_options: [fleqn, twocolumn]
+#+latex_header: \usepackage{../homework}
+#+property: header-args :exports both
+#+bind: org-latex-minted-options (("bgcolor" "codeBackground")("fontsize" "\\scriptsize"))
+#+options: num:t tags:nil
+
+#+title: Project 2
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* 1
+  We want to see if the mean whiteness of high hydrogen peroxide
+  samples, is greater than the mean whiteness of low hydrogen peroxide
+  samples.  
+  \[H_A: \mu_H > \mu_L\]
+  \[H_0: \mu_H \le \mu_L\]
+  
+** Python
+  #+begin_src python :results output latex
+import pandas
+import scipy.stats as stats
+
+data = pandas.read_csv('data/1.csv')
+
+def whitenessFromPeroxideLevel(level):
+    rowIndices = data['Hydrogen Peroxide'] == level
+    rows = data[rowIndices]
+    return rows['Whiteness'].tolist()
+
+whiteness = {
+    'lowPeroxide': whitenessFromPeroxideLevel('low'),
+    'highPeroxide': whitenessFromPeroxideLevel('high')
+}
+
+_, p = stats.ttest_ind(
+    whiteness['highPeroxide'],
+    whiteness['lowPeroxide'])
+
+print(f"\[\\textnormal{{p-value}} = {round(p/2, 3)}\]")
+  #+end_src
+  #+RESULTS:
+  #+begin_export latex
+  \[\textnormal{p-value} = 0.027\]
+  #+end_export
+
+** Conclusion
+  Since the one-tailed p-value is less than \alpha (\(0.05\)), *we
+  reject the null hypothesis.* We can conclude that higher level
+  results in whiter garments.
+
+* 2
+  \noindent
+  \[H_A: \mu_{20} < \mu_{10}\]
+  \[H_0: \mu_{20} \ge \mu_{10}\]
+  
+** Python
+   This function is used in the following questions.
+   #+begin_src python :tangle p2.py :exports code
+def sliceByUniquesInColumn(dataframe, sliceColumn, onEachSlice):
+    slices = {}
+    for unique in dataframe[sliceColumn].unique():
+        matchingRowIndices = dataframe[sliceColumn] == unique
+        slices[unique] = onEachSlice(dataframe[matchingRowIndices])
+    return slices
+   #+end_src
+
+  #+begin_src python :results output latex
+import pandas
+import scipy.stats as stats
+from p2 import sliceByUniquesInColumn
+
+percentByPressure = sliceByUniquesInColumn(
+    dataframe = pandas.read_csv('data/2.csv'),
+    sliceColumn = 'Roller Pressure',
+    onEachSlice = lambda slice: list(slice['Percent Pickup']))
+
+_, p = stats.ttest_ind(
+    percentByPressure[10],
+    percentByPressure[20])
+
+print(f"\[\\textnormal{{p-value}} = {round(p/2, 5)}\]")
+  #+end_src
+  #+RESULTS:
+  #+begin_export latex
+  \[\textnormal{p-value} = 0.00303\]
+  #+end_export
+
+** Conclusion
+  Since the one-tailed p-value is less than \alpha (\(0.05\)), *we
+  reject the null hypothesis.* We can conclude that more dense fabric
+  is less absorbent.
+
+* 3
+  \noindent
+  \[H_A: \mu_{\text{new}} > \mu_{\text{standard}}\]
+  \[H_0: \mu_{\text{new}} \le \mu_{\text{standard}}\]
+  
+** Python
+  #+begin_src python :results output latex
+import pandas
+import scipy.stats as stats
+from p2 import sliceByUniquesInColumn
+
+percentByPressure = sliceByUniquesInColumn(
+    dataframe = pandas.read_csv('data/3.csv'),
+    sliceColumn = 'Procedure',
+    onEachSlice = lambda slice: list(slice['Breaking Strength']))
+
+_, p = stats.ttest_ind(
+    percentByPressure['new'],
+    percentByPressure['standard'])
+
+print(f"\[\\textnormal{{p-value}} = {round(p/2, 5)}\]")
+  #+end_src
+  #+RESULTS:
+  #+begin_export latex
+  \[\textnormal{p-value} = 0.00326\]
+  #+end_export
+
+** Conclusion
+  Since the one-tailed p-value is less than \alpha (\(0.05\)), *we
+  reject the null hypothesis.* We can conclude the new procedure has a
+  larger breaking strength on average than the standard procedure.
+
+* 4
+  \noindent
+  \[H_A: \mu_{1} \ne \mu_{2}\]
+  \[H_0: \mu_{1} = \mu_{2}\]
+
+** Python
+  #+begin_src python :results output latex
+import pandas
+import scipy.stats as stats
+from p2 import sliceByUniquesInColumn
+
+percentByPressure = sliceByUniquesInColumn(
+    dataframe = pandas.read_csv('data/4.csv'),
+    sliceColumn = 'Joystick',
+    onEachSlice = lambda slice: list(slice['Mean Error']))
+
+_, p = stats.ttest_ind(
+    percentByPressure[1],
+    percentByPressure[2])
+
+print(f"\[\\textnormal{{p-value}} = {round(p, 5)}\]")
+  #+end_src
+  #+RESULTS:
+  #+begin_export latex
+  \[\textnormal{p-value} = 0.3042\]
+  #+end_export
+
+** Conclusion
+  Since the two-tailed p-value is greater than \alpha (\(0.05\)), *we
+  fail to reject the null hypothesis.* 
+
+* 5
+  \noindent
+  \[H_A: \mu_{\text{after}} < \mu_{\text{before}}\]
+  \[H_0: \mu_{\text{after}} \ge \mu_{\text{before}}\]
+
+** Python
+  #+begin_src python :results output latex
+import pandas
+import scipy.stats as stats
+from p2 import sliceByUniquesInColumn
+
+percentByPressure = sliceByUniquesInColumn(
+    dataframe = pandas.read_csv('data/5.csv'),
+    sliceColumn = 'Green Management Procedures',
+    onEachSlice = lambda slice: list(slice['Damaged Inventory (%)']))
+
+_, p = stats.ttest_ind(
+    percentByPressure['Before'],
+    percentByPressure['After'])
+
+print(f"\[\\textnormal{{p-value}} = {round(p/2, 5):f}\]")
+  #+end_src
+  #+RESULTS:
+  #+begin_export latex
+  \[\textnormal{p-value} = 0.000030\]
+  #+end_export
+
+** Conclusion
+  Since the one-tailed p-value is less than \alpha (\(0.05\)), *we
+  reject the null hypothesis.* We conclude green management techniques
+  have significantly improved practices.
+
+* 6
+* 7
+* 8
+* 9
+* 10
