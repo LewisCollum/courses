@@ -1,0 +1,38 @@
+#+latex_class_options: [fleqn, twocolumn]
+#+latex_header: \usepackage{../homework}
+#+property: header-args :exports both :cache yes 
+#+bind: org-latex-minted-options (("bgcolor" "codeBackground")("fontsize" "\\scriptsize"))
+#+options: num:t tags:nil
+#+bind: org-latex-image-default-width "\\linewidth"
+
+#+title: EE381 HW 7
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* 1 - Biot-Savart Law
+** A - Compared to Coloumb's Law
+*** Similarities:
+    - Proportional to \(1/R^2\)
+    - Work on the principle of superposition
+*** Differences:
+    - Coulomb's
+      - Point charge produces electric field
+      - Direction of \(E\) is radial to point charge
+    - Biot-Savart's
+      - Current element produces magnetic field
+      - Direction of \(B\) is perpependicular to \(\hat{r}\)
+
+** B - Magnetic Field Intensity (H) from a line at a point
+   [[./figure/1-b.png]]
+
+* 2 - Solenoid 
+  [[./figure/2.png]]
+* 3 - Tokamak
+** A - without E
+   [[./figure/3-a.png]]
+** B - with E
+   [[./figure/3-b.png]]
+   \newpage
+* 4 - Sliding Bar
+  [[./figure/4.png]]
+* 5 - 
