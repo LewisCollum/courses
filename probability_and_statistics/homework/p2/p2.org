@@ -1,6 +1,6 @@
 #+latex_class_options: [fleqn, twocolumn]
 #+latex_header: \usepackage{../homework}
-#+property: header-args :exports both
+#+property: header-args :exports both :cache yes 
 #+bind: org-latex-minted-options (("bgcolor" "codeBackground")("fontsize" "\\scriptsize"))
 #+options: num:t tags:nil
 
@@ -38,14 +38,14 @@ _, p = stats.ttest_ind(
 
 print(f"\[\\textnormal{{p-value}} = {round(p/2, 3)}\]")
   #+end_src
-  #+RESULTS:
+  #+RESULTS[0c102c56c50cb619f73c2d0e10c073daba7d70c2]:
   #+begin_export latex
   \[\textnormal{p-value} = 0.027\]
   #+end_export
 
 ** Conclusion
   Since the one-tailed p-value is less than \alpha (\(0.05\)), *we
-  reject the null hypothesis.* We can conclude that higher level
+  reject the null hypothesis.* We are 95% confident that higher level
   results in whiter garments.
 
 * 2
@@ -80,15 +80,15 @@ _, p = stats.ttest_ind(
 
 print(f"\[\\textnormal{{p-value}} = {round(p/2, 5)}\]")
   #+end_src
-  #+RESULTS:
+  #+RESULTS[83f63ae447d50ebd465729f3f9fa627245a021b3]:
   #+begin_export latex
   \[\textnormal{p-value} = 0.00303\]
   #+end_export
 
 ** Conclusion
   Since the one-tailed p-value is less than \alpha (\(0.05\)), *we
-  reject the null hypothesis.* We can conclude that more dense fabric
-  is less absorbent.
+  reject the null hypothesis.* We are 95% confident that more dense
+  fabric is less absorbent.
 
 * 3
   \noindent
@@ -112,15 +112,16 @@ _, p = stats.ttest_ind(
 
 print(f"\[\\textnormal{{p-value}} = {round(p/2, 5)}\]")
   #+end_src
-  #+RESULTS:
+  #+RESULTS[541d09ce573d2f439e8aadb34a64348a8f663044]:
   #+begin_export latex
   \[\textnormal{p-value} = 0.00326\]
   #+end_export
 
 ** Conclusion
   Since the one-tailed p-value is less than \alpha (\(0.05\)), *we
-  reject the null hypothesis.* We can conclude the new procedure has a
-  larger breaking strength on average than the standard procedure.
+  reject the null hypothesis.* We are 95% confident that the new
+  procedure has a larger breaking strength on average than the
+  standard procedure.
 
 * 4
   \noindent
@@ -144,7 +145,7 @@ _, p = stats.ttest_ind(
 
 print(f"\[\\textnormal{{p-value}} = {round(p, 5)}\]")
   #+end_src
-  #+RESULTS:
+  #+RESULTS[59536b99f5afb8179901aa62bc9cbc0f83b8330b]:
   #+begin_export latex
   \[\textnormal{p-value} = 0.3042\]
   #+end_export
@@ -175,18 +176,155 @@ _, p = stats.ttest_ind(
 
 print(f"\[\\textnormal{{p-value}} = {round(p/2, 5):f}\]")
   #+end_src
-  #+RESULTS:
+  #+RESULTS[502bdb29f543ac627be5f1d2bfab15f610dc78ec]:
   #+begin_export latex
   \[\textnormal{p-value} = 0.000030\]
   #+end_export
 
 ** Conclusion
   Since the one-tailed p-value is less than \alpha (\(0.05\)), *we
-  reject the null hypothesis.* We conclude green management techniques
-  have significantly improved practices.
+  reject the null hypothesis.* We are 95% confident that green
+  management techniques have significantly improved practices.
 
 * 6
+  \noindent
+  \[H_A: \mu < 0.5\%\]
+  \[H_0: \mu \ge 0.5\%\]
+
+** Python
+  #+begin_src python :results output latex
+import pandas
+import scipy.stats as stats
+
+csv = pandas.read_csv('data/6.csv')
+percentChangeInWeight = list(csv['Weight Gain (%)'])
+
+_, p = stats.ttest_1samp(
+    percentChangeInWeight,
+    0.5)
+
+print(f"\[\\textnormal{{p-value}} = {round(p/2, 5):f}\]")
+  #+end_src
+  #+RESULTS[63fbd74a5b5435b0dea26f9baa82d3056b5931a7]:
+  #+begin_export latex
+  \[\textnormal{p-value} = 0.000010\]
+  #+end_export
+
+** Conclusion
+  Since the one-tailed p-value is less than \alpha (\(0.05\)), *we
+  reject the null hypothesis.* We are 95% confident that this material
+  experiences less than 0.5% average weight gain for this type of
+  diffusion.
+
 * 7
+  \noindent
+  \[H_A: \mu > 3.50\]
+  \[H_0: \mu \le 3.50\]
+
+** Python
+  #+begin_src python :results output latex
+import pandas
+import scipy.stats as stats
+
+csv = pandas.read_csv('data/7.csv')
+densities = list(csv['Densities'])
+
+_, p = stats.ttest_1samp(densities, 3.5)
+
+print(f"\[\\textnormal{{p-value}} = {round(p/2, 5):f}\]")
+  #+end_src
+  #+RESULTS[ed05b700b92d6db7f9a8418335bf03f23fd3e786]:
+  #+begin_export latex
+  \[\textnormal{p-value} = 0.028790\]
+  #+end_export
+
+** Conclusion
+  Since the one-tailed p-value is less than \alpha (\(0.05\)), *we
+  reject the null hypothesis.* We are 95% confident that the average
+  density is larger than 3.50.
+
 * 8
+  \[H_A: p < 0.10\]
+  \[H_0: p = 0.10\]
+  \[\alpha = 0.05\]
+
+** Python
+  #+begin_src python :results output latex
+import pandas
+import scipy.stats as stats
+
+p = stats.binom.cdf(
+    k = 23,
+    n = 324,
+    p = 0.1)
+
+print(f"\[\\textnormal{{p-value}} = {round(p, 3)}\]")
+  #+end_src
+  #+RESULTS[1ea11390d48a97210684e343dbea37175cfa7583]:
+  #+begin_export latex
+  \[\textnormal{p-value} = 0.045\]
+  #+end_export
+
+** Conclusion
+  Since the one-tailed p-value is less than \alpha (\(0.05\)), *we
+  reject the null hypothesis.* The evidence suggests that the positive
+  result being incorrect is less than 10%.
+
 * 9
+  \[H_A: p < 0.05\]
+  \[H_0: p = 0.05\]
+  \[\alpha = 0.05\]
+
+** Python
+  #+begin_src python :results output latex
+import pandas
+import scipy.stats as stats
+
+defectiveAcceptance = 0.05
+sampleSize = 200
+defective = 8
+
+p = stats.binom.cdf(
+    k = defective,
+    n = sampleSize,
+    p = defectiveAcceptance)
+
+print(f"\[\\textnormal{{p-value}} = {round(p, 3)}\]")
+  #+end_src
+  #+RESULTS[4ec15f31774ac9552db0d51e0b37991a231c63e2]:
+  #+begin_export latex
+  \[\textnormal{p-value} = 0.327\]
+  #+end_export
+
+** Conclusion
+  Since the one-tailed p-value is greater than \alpha (\(0.05\)), *we
+  fail to reject the null hypothesis.* There is no evidence to show
+  that fewer than 5% are defective.
+  
 * 10
+  \[H_A: p_H > p_L\]
+  \[H_0: p_H = p_L\]
+  \[\alpha = 0.05\]
+
+** Python
+  #+begin_src python :results output latex
+import pandas
+import statsmodels.stats.proportion as proportion
+
+_, p = proportion.proportions_ztest(
+    count = [13, 20],
+    nobs = [62, 70])
+
+print(f"\[\\textnormal{{p-value}} = {round(p, 3)}\]")
+  #+end_src
+  #+RESULTS[b076433efc72316b16fc31f528cb1ab4e67fd52d]:
+  #+begin_export latex
+  \[\textnormal{p-value} = 0.314\]
+  #+end_export
+
+** Conclusion
+  Since the one-tailed p-value is greater than \alpha (\(0.05\)), *we
+  fail to reject the null hypothesis.* There is no evidence to show
+  that larger percentage of insulators will break down at higher
+  temperatures.
+  
