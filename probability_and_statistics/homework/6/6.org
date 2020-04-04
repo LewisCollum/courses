@@ -1,0 +1,134 @@
+#+latex_class_options: [fleqn, twocolumn]
+#+latex_header: \usepackage{../homework}
+#+property: header-args :results output latex :exports both :eval no-export
+#+bind: org-latex-minted-options (("bgcolor" "codeBackground") ("fontsize" "\\scriptsize"))
+#+bind: org-latex-image-default-width "\\linewidth"
+#+options: num:t tags:nil
+
+#+title: STAT383 HW 6
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* 5 - Paper Tensile Strength
+** Hypotheses
+   \noindent
+   \[H_0: \mu_{5} = \mu_{10} = \mu_{15} = \mu_{20}\]
+   \[H_A: \mu_i \ne \mu_j \text{ for some } i \ne j\]
+
+** Data
+  #+begin_src python :results silent :session q5 :exports code
+import pandas
+import plotnine as p9
+import matplotlib.pyplot as pyplot
+
+data = pandas.read_excel('q5.xlsx')
+data.rename({
+    'Hardwood Concentration (%)': 'concentration',
+    'Tensile Strength (PSI)': 'psi'}, axis='columns', inplace=True)
+
+data['concentration'] = data['concentration'].astype('category')
+
+g = (p9.ggplot(data)
+     + p9.aes(y='psi', x='concentration')
+     + p9.geom_boxplot(p9.aes(fill='concentration'))
+     + p9.theme_classic()
+     + p9.theme(legend_position='none')
+     + p9.ggtitle(("Paper Bag Tensile Strengths"
+                   "at Different Hardwood Concentrations"))
+     + p9.ylab("Tensile Strength (PSI)")
+     + p9.xlab("Hardwood Concentration (%)"))
+
+g.draw()
+pyplot.savefig('q5_boxplot.png')
+  #+end_src
+  [[./q5_boxplot.png]]
+
+** ANOVA
+  #+begin_src python :session q5
+from scipy import stats
+
+f, p = stats.f_oneway(data['psi'], data['concentration'])
+print(f'\[\\text{{p-value}} = {round(p, 5)}\]')
+  #+end_src
+  #+RESULTS:
+  #+begin_export latex
+  \[\text{p-value} = 0.0077\]
+  #+end_export
+
+** Tukey HSD
+  #+begin_src python :session q5 :results output pp
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+print(pairwise_tukeyhsd(data['psi'], data['concentration']))
+  #+end_src
+  #+RESULTS:
+  #+begin_example
+  Multiple Comparison of Means - Tukey HSD, FWER=0.05 
+  ====================================================
+  group1 group2 meandiff p-adj   lower   upper  reject
+  ----------------------------------------------------
+       5     10      3.5 0.3193 -2.0552  9.0552  False
+       5     15      8.5 0.0019  2.9448 14.0552   True
+       5     20  10.3333  0.001  4.7781 15.8885   True
+      10     15      5.0 0.0873 -0.5552 10.5552  False
+      10     20   6.8333 0.0126  1.2781 12.3885   True
+      15     20   1.8333 0.7726 -3.7219  7.3885  False
+  ----------------------------------------------------
+  #+end_example
+
+** Conclusion
+*** From ANOVA: 
+    Since the p-value is less than 0.05, we reject the null
+    hypothesis. The data suggests that the hardwood concentration has
+    some effect on the tensile strength of the bag.
+   
+*** From Tukey HSD:    
+**** Upper :ignore:
+    The difference in tensile strength between bags with hardwood
+    concentrations of 15% and 20% is not significant. However, the
+    difference of those between 10% and 20% is significant.
+    
+    \vspace{12pt}
+
+**** Lower :ignore:
+    Analogously, the difference in tensile strength between bags with
+    hardwood concentrations of 5% and 10% is not significant. However,
+    the difference of those between 5% and 15% is significant.
+    
+    \vspace{12pt}
+
+**** Total :ignore:
+    At the edge-cases, bags with a hardwood concentration between 5%
+    and 20% have significantly different tensile strengths.
+
+
+* 9 - Paint Weathering
+** Hypotheses
+   \noindent
+   \[H_0: \mu_{5} = \mu_{10} = \mu_{15} = \mu_{20}\]
+   \[H_A: \mu_i \ne \mu_j \text{ for some } i \ne j\]
+
+** ANOVA
+  #+begin_src python :session q5
+import pandas
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+
+data = pandas.read_excel('q9.xlsx')
+print(f'\[\\text{{p-value}} = {round(p, 5)}\]')
+  #+end_src
+  #+RESULTS:
+  #+begin_export latex
+  \[\text{p-value} = 0.0077\]
+  #+end_export
+
+
+
+* Misc :noexport:
+#+begin_src python
+from scipy import stats
+print(stats.f.sf(2.3, 7, 30))
+#+end_src
+
+#+RESULTS:
+: 0.053001137175812896
+
