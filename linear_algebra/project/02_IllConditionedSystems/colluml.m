@@ -1,5 +1,6 @@
 % MA339 Project: Ill-Conditioned Systems
 % Lewis Collum
+1;
 
 function error = solutionError(A)
   n = length(A);
