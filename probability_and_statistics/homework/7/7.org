@@ -1,0 +1,181 @@
+#+latex_class_options: [twocolumn, fleqn]
+#+latex_header: \usepackage{../homework}
+#+bind: org-latex-minted-options (("bgcolor" "codeBackground") ("fontsize" "\\scriptsize"))
+#+bind: org-latex-image-default-width "\\linewidth"
+#+options: num:t tags:nil
+
+#+title: STAT 383 HW 7
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* 2 - Burner Rates
+  #+begin_src python :results silent :exports code :session p2
+from matplotlib import pyplot
+from scipy import stats
+import pandas
+
+data = pandas.read_excel('data/BurnerRates.xls')
+data = data.rename(columns = {
+    'Burner Area Liberation Rate': 'x',
+    'Nitrous Oxide Emission Rate': 'y'})
+
+regression = stats.linregress(data.x, data.y)
+regressionLine = regression.intercept + regression.slope * data.x
+  #+end_src
+
+** (a)
+   #+begin_src python :results output latex :exports both :session p2 :eval no-export
+print(f'Regression = '
+      f'\({regression.intercept:.2f} + {regression.slope:.2f}x\)')
+
+pyplot.plot(data.x, data.y, 'bo', label='data')
+pyplot.plot(data.x, regressionLine, 'r-', label='regression')
+pyplot.legend()
+pyplot.xlabel('Burner Area Liberation Rate')
+pyplot.ylabel('Nitrous Oxide Emission Rate')
+pyplot.savefig('figure/2.png', bbox_inches='tight')
+pyplot.show()
+   #+end_src
+   #+RESULTS:
+   #+begin_export latex
+   Regression = \(-49.62 + 1.76x\)
+   #+end_export
+
+   If the burner area liberation rate increases by 1, then the nitrous
+   oxide emission rate increases by 1.76. The intercept is not
+   directly interpretable here since the data does not consider burner
+   area liberation rates below 100.
+
+   [[./figure/2.png]]
+
+** (b)
+   \(rate_E\): Nitrous Oxide Emission Rate \\
+   \(rate_L\): Burner Area Liberation Rate
+   \[rate_E = \beta_0 + \beta_1 \cdot rate_L + \epsilon\]
+   \[H_0: \beta_1 = 0\]
+   \[H_A: \beta_1 \ne 0\]
+
+   Two-tail T test:
+   #+begin_src python :results output latex :exports both :session p2 :eval no-export
+print(f'\[p = {regression.pvalue:.2E}\]')
+   #+end_src
+   #+RESULTS:
+   #+begin_export latex
+   \[p = 2.13E-36\]
+   #+end_export
+
+   Since the p-value from the t-test is much less than \alpha (0.05),
+   we reject the null hypothesis, which indicates there is significant
+   linear relationship between the burner area liberation rate and the
+   nitrous oxide emission rate.
+
+** (c)
+   #+begin_src python :results output latex :exports both :session p2
+print(f'\[R^2 = {regression.rvalue**2:.4f}\]')
+   #+end_src
+   #+RESULTS:
+   #+begin_export latex
+   \[R^2 = 0.9997\]
+   #+end_export
+   
+   99.97% of the variance in nitrous oxide emission rate is explained
+   by burner area liberation rate.
+
+** (d) Residuals
+   #+begin_src python :results silent :session p2 :eval no-export
+import seaborn
+seaborn.residplot(data.x, data.y)
+pyplot.savefig('figure/2-resid.png')
+pyplot.show()
+   #+end_src
+   [[./figure/2-resid.png]]
+   
+   There do not appear to be any outliers, and the error variance
+   appears constant.
+   
+* 7 - Copper Resistivity
+  #+begin_src python :session p7 :results output
+from matplotlib import pyplot
+from scipy import stats
+import pandas
+
+data = pandas.read_excel('data/CopperResistivity.xlsx')
+data = data.rename(columns = {
+    'Temperature': 'x',
+    'Resistivity': 'y'})
+
+regression = stats.linregress(data.x, data.y)
+regressionLine = regression.intercept + regression.slope * data.x
+  #+end_src
+
+** (a)
+   #+begin_src python :results output latex :exports both :session p7 :eval no-export
+print(f'Regression = '
+      f'\({regression.intercept:.2f} + {regression.slope:.2f}x\)')
+
+pyplot.plot(data.x, data.y, 'bo', label='data')
+pyplot.plot(data.x, regressionLine, 'r-', label='regression')
+pyplot.legend()
+pyplot.xlabel('Temperature')
+pyplot.ylabel('Resistivity')
+pyplot.savefig('figure/7.png', bbox_inches='tight')
+pyplot.show()
+   #+end_src
+   #+RESULTS:
+   #+begin_export latex
+   Regression = \(-3.61 + 0.07x\)
+   #+end_export
+
+   If the temperature increases by 1 Kelvin, then the copper resistivity
+   increases by \(0.07 \si{n \Omega m}\). The intercept is not
+   directly interpretable here since the data does not consider
+   temperature at 0 Kelvin.
+
+   [[./figure/7.png]]
+
+** (b)
+   \(T\): Temperature \\
+   \(R\): Resistivity
+   \[R = \beta_0 + \beta_1 \cdot T + \epsilon\]
+   \[H_0: \beta_1 = 0\]
+   \[H_A: \beta_1 \ne 0\]
+
+   Two-tail T test:
+   #+begin_src python :results output latex :exports both :session p7 :eval no-export
+print(f'\[p = {regression.pvalue:.2E}\]')
+   #+end_src
+   #+RESULTS:
+   #+begin_export latex
+   \[p = 1.50E-25\]
+   #+end_export
+
+   Since the p-value from the t-test is much less than \alpha (0.05),
+   we reject the null hypothesis, which indicates there is significant
+   linear relationship between the temperature and the resistivity of
+   copper.
+
+** (c)
+   #+begin_src python :results output latex :exports both :session p7
+print(f'\[R^2 = {regression.rvalue**2:.4f}\]')
+   #+end_src
+   #+RESULTS:
+   #+begin_export latex
+   \[R^2 = 0.9996\]
+   #+end_export
+   
+   99.96% of the variance in resistivity of copper is explained by temperature.
+
+** (d) Residuals   
+   #+begin_src python :results silent :session p7 :eval no-export
+import seaborn
+seaborn.residplot(data.x, data.y)
+pyplot.savefig('figure/7-resid.png')
+pyplot.show()
+   #+end_src
+   [[./figure/7-resid.png]]
+   
+   There do not appear to be any outliers, and the error variance
+   appears constant. It may also be possible that there is some
+   non-linearity at the lower ranges of temperature, and an outlier at
+   the last temperature sample.
+   
