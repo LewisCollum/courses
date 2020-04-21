@@ -55,20 +55,20 @@ import numpy
 
 x = numpy.linspace(2, 6, 20) #wavelenth
 
-#index for quartz
-n2 = numpy.sqrt(1 +
+#impedance for quartz
+eta2 = 1/numpy.sqrt(1 +
                0.6961663*x**2 / (x**2 - 0.0684043**2) +
                0.4079426*x**2 / (x**2 - 0.1162414**2) +
                0.8974794*x**2 / (x**2 - 9.896161**2))
 
-#index for air
-n1 = 1 
+#impedance for air
+eta1 = 1
 
-reflectionCoefficient = (n2 - n1)/(n1 + n2)
+reflectionCoefficient = (eta2 - eta1)/(eta1 + eta2)
 transmissionCoefficient = 1 + reflectionCoefficient
 
 reflectivity = reflectionCoefficient**2
-transmissivity = transmissionCoefficient**2 * (n1/n2)
+transmissivity = transmissionCoefficient**2 * (eta1/eta2)
 
 pyplot.plot(x, reflectivity)
 pyplot.title('Reflectivity')
@@ -90,7 +90,7 @@ from matplotlib import pyplot
 import numpy
 from numpy import cos, arcsin, sin
 
-def ganIntrinsicImpedance(wavelength):
+def ganIndex(wavelength):
     return numpy.sqrt(
         0.6961663*wavelength**2 / (wavelength**2 - 0.0684043**2)
         + 0.4079426*wavelength**2 / (wavelength**2 - 0.1162414**2)
@@ -103,22 +103,23 @@ def degreeArangeToRadians(start, stop, spacing):
     radianRangeAsColumnVector = radianRange.reshape(-1, 1).T
     return radianRangeAsColumnVector
 
-def snellsTransmissionAngle(n1, n2, a1):
-    return arcsin(sin(a1)*(n1/n2))
+def snellsTransmissionAngle(eta1, eta2, a1):
+    return arcsin(sin(a1)*(eta2/eta1))
 
-def perpendicularReflection(n1, n2, a1, a2):
-    return ((n2*cos(a1) - n1*cos(a2))
-            / (n2*cos(a1) + n1*cos(a2)))**2
+def perpendicularReflection(eta1, eta2, a1, a2):
+    return ((eta2*cos(a1) - eta1*cos(a2))
+            / (eta2*cos(a1) + eta1*cos(a2)))**2
 
-def parallelReflection(n1, n2, a1, a2):
-    return ((n2*cos(a2) - n1*cos(a1))
-            / (n2*cos(a2) + n1*cos(a1)))**2
+def parallelReflection(eta1, eta2, a1, a2):
+    return ((eta2*cos(a2) - eta1*cos(a1))
+            / (eta2*cos(a2) + eta1*cos(a1)))**2
 
 
 
 wavelength = numpy.linspace(2, 6, 20)
-n2 = ganIntrinsicImpedance(wavelength)
-n1 = 1 #Air
+n2 = ganIndex(wavelength)
+eta1 = 1 #Air
+eta2 = 1/n2 #by the relationship eta2/eta1 = n1/n2
 
 incidenceAngles = degreeArangeToRadians(
     start = 0,
@@ -126,19 +127,19 @@ incidenceAngles = degreeArangeToRadians(
     spacing = 10)
 
 transmissionAngles = snellsTransmissionAngle(
-    n1 = n1,
-    n2 = n2,
+    eta1 = eta1,
+    eta2 = eta2,
     a1 = incidenceAngles)
 
 transverseElectricReflectivity = perpendicularReflection(
-    n1 = n1,
-    n2 = n2,
+    eta1 = eta1,
+    eta2 = eta2,
     a1 = incidenceAngles,
     a2 = transmissionAngles)
 
 transverseMagneticReflectivity = parallelReflection(
-    n1 = n1,
-    n2 = n2,
+    eta1 = eta1,
+    eta2 = eta2,
     a1 = incidenceAngles,
     a2 = transmissionAngles)
 
