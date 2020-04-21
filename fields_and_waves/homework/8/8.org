@@ -1,0 +1,174 @@
+#+latex_class_options: [twocolumn, fleqn]
+#+latex_header: \usepackage{../homework}
+#+bind: org-latex-image-default-width "\\linewidth"
+#+property: header-args :exports both :eval no-export
+#+bind: org-latex-minted-options (("bgcolor" "codeBackground")("fontsize" "\\scriptsize"))
+#+options: num:t tags:nil
+
+#+title: HW 8
+#+author: Lewis Collum
+#+date: Updated: \today
+
+# 2:30-3:30 MWF office hours
+# \gamma: loss of wave through material
+
+* 1 - Magneto-Hydrodynamic Generation 
+  *Waterloo Bridge Experiment*
+  #+attr_latex: :width 0.6\linewidth
+   [[./figure/1-waterlooBridge.png]]
+
+   Faraday's configuration was meant to measure current generated from
+   velocity of Thames cutting through earth's magnetic field. This was
+   an attempt to illustrate electomagnetic induction. In 1938, funded
+   by Westinghouse, Bela Karlovitz was the first to patent a
+   Magneto-Hydrodynamic (MHD) generator. His MHD generator used hot
+   moving gas (as opposed to a river).
+
+** Sources :noexport:
+   https://en.wikipedia.org/wiki/Magnetohydrodynamic_generator#Faraday_generator
+   https://en.wikipedia.org/wiki/B%C3%A9la_Karlovitz
+   https://www.slideshare.net/hemanthduru/magneto-hydro-dynamic-mhd-power-generation
+   https://cdm16694.contentdm.oclc.org/digital/collection/p16694coll20/id/327/
+   
+* 2 - Multipole Expansion of Magentic Vector Potential
+  \(r_o\): distance to observervation point.
+
+  \(r_s\): distance to source point (on the contour).
+
+  \(d_{os}\): distance between \(r_o\) and \(r_s\).
+
+  \(\cos(\phi)\): angle between \(r_o\) and \(r_s\).
+
+** Magentic Vector Potential Setup
+   \[A_{\phi} = \dfrac{\mu I}{4\pi} \oint_C \dfrac{1}{d_{os}} \,dr_o \tag*{\it eq. 5.65
+   in 7th ed.}\]
+
+** Finding \(d_{os}\)  
+   \noindent
+   #+begin_export latex
+   \begin{align*}
+     d_{os} &= |\vec{r_o} - \vec{r_s}| \\
+            &= \sqrt{(\vec{r_o} - \vec{r_s}) \cdot (\vec{r_o} -
+              \vec{r_s})} \\
+            &= \sqrt{|\vec{r_o}|^2 + |\vec{r_s}|^2 - 2r_or_s\cos(\phi)} \\
+            &= \boxed{\sqrt{r_o^2 + r_s^2 - 2 r_o r_s \cos(\phi)}}
+   \end{align*}
+   #+end_export
+
+** Legendre Expansion of \(1/d_{os}\)
+   We need \(1/d_{os}\) in the form of
+   \[\dfrac{1}{\sqrt{1-2xt+t^2}} = \sum_{n=0}^{\infty} P_n(x)t^n
+   \tag*{Legendre generator}\]
+
+   where \(P_n\) is a polynomial of degree \(n\).
+
+   So, 
+   #+begin_export latex
+   \begin{align*}
+     \dfrac{1}{d_{os}} &= (r_o^2 + r_s^2 - 2 r_o r_s \cos(\phi))^{-1} \\
+                       &= \left(
+                         r_o^2 \left(
+                         \frac{r_o^2}{r_o^2}
+                         + \frac{r_s^2}{r_o^2}
+                         - 2 \frac{r_o r_s}{r_o^2} \cos(\phi)
+                         \right)
+                         \right)^{-1} \tag*{extract \(r_o^2\)} \\
+                       &= \dfrac{1}{r_o}
+                         \left(1
+                         + \left(\dfrac{r_s}{r_o}\right)^{2}
+                         - 2\left(\dfrac{r_s}{r_o}\right) \cos(\phi)
+                         \right)^{-1} \\
+   \end{align*}
+   #+end_export
+  
+   Let \(x = \cos{(\phi)}\) and \(t = \dfrac{r_s}{r_o}\).
+   Then,
+
+   #+begin_export latex
+   \begin{align*}
+     \dfrac{1}{d_{os}} &= \dfrac{1}{r_o} \dfrac{1}{\sqrt{1 + t^{2} - 2at}} \\
+                       &= \dfrac{1}{r_o} \sum_{n=0}^{\infty} P_n(x)t^n \\
+                       &= \boxed{\dfrac{1}{r_o} \sum_{n=0}^{\infty} P_n(
+                         \cos{(\phi)})\left(\dfrac{r_s}{r_o}\right)^n} \tag*{replaced \(x\) and \(t\)}
+   \end{align*}
+   #+end_export   
+
+** Combining \(r_o\) from the Legendre function
+   Our contour integration is with respect to \(r_s\) and \(\phi\),
+   but not \(r_o\). Let's extract \(r_o\) which would be constant in
+   our contour integration.
+
+   #+begin_export latex
+   \begin{align*}
+     \dfrac{1}{d_{os}} &= \dfrac{1}{r_o} \sum_{n=0}^{\infty}
+                         P_n(\cos{(\phi)})
+                         (r_s)^n
+                         \left(\dfrac{1}{r_o^n}\right) \\
+                       &= \boxed{\sum_{n=0}^{\infty} \dfrac{1}{r_o^{n+1}}
+                         P_n(\cos{(\phi)})
+                         (r_s)^n}
+                         \tag*{since \(r_o \cdot r_o^n = r_o^{n+1}\)}
+   \end{align*}
+   #+end_export   
+   
+** Multipole Expansion of Magentic Vector Potential
+   A Legendre polynomial lookup table, to substitute \(P_n(x)\), can be found here:
+   https://en.wikipedia.org/wiki/Legendre_polynomials#Legendre_polynomials_in_multipole_expansions.
+
+   #+begin_export latex
+   \begin{align*}
+     A_{\phi} &= \dfrac{\mu I}{4\pi} \sum_{n=0}^{\infty}
+                \dfrac{1}{r_o^{n+1}}
+                \oint_C P_n(\cos{(\phi)}) \cdot r_s^n \cdot \,dr_s \\
+              &= \dfrac{\mu I}{4\pi} \left[ \frac{1}{r_o} \oint_C \,dr_s + \right.\\
+                &\qquad \left. \frac{1}{r_o^2} \oint_C r_s \cos{(\phi)} \,dr_s + \right.\\
+                &\qquad \left. \frac{1}{r_o^3} \oint_C r_s^2 \left(\frac{1}{2} (3\cos{(\phi)} -1)\right) \,dr_s + ... \right] \\
+   \end{align*}
+   #+end_export
+   
+   - \(1/r_o\) term: Magnetic Monopole
+   - \(1/r_o^2\) term: Magnetic Dipole
+   - \(1/r_o^3\) term: Magnetic Quadrapole
+  
+   We observe that the monopole term contour integration is zero
+   around a closed contour. I.e.  \[\oint_C \,dr_s\ = 0.\] This makes
+   sense since monopoles do not evidently exist in nature. The
+   dominating term, then, is the magnetic dipole term.
+
+   #+begin_export latex
+   \begin{align*}
+     A_{\phi} &= \dfrac{\mu I}{4\pi} \frac{1}{r_o^2} \oint_C r_s
+                \cos{(\phi)} \,dr_s \tag*{\(\cos{(\phi)} = \hat{r_o} \cdot \hat{r_s}\)}\\
+              &= \dfrac{\mu I}{4\pi} \frac{1}{r_o^2} \oint_C r_s
+                (\hat{r_o} \cdot \hat{r_s}) \,dr_s \tag*{\(r_s \cdot \hat{r_s} = \vec{r_s}\)} \\
+              &= \dfrac{\mu I}{4\pi} \frac{1}{r_o^2} \oint_C \hat{r_o}
+                \cdot \vec{r_s} \,dr_s \\
+              &= \dfrac{\mu I}{4\pi} \frac{1}{r_o^2} \int_S d\vec{a}
+                \times \vec{r_o} \tag*{Stokes Thereom} \\
+              &= \dfrac{\mu I}{4\pi} \frac{m \times \hat{r_o}}{r_o^2}
+                \tag*{\(m = I\int_S\,d\vec{a}\) \scriptsize (magnetic
+                dipole moment of loop)} \\
+              &= \boxed{\dfrac{\mu I m}{4\pi r_o^2} \sin{(\theta)}}
+   \end{align*}
+   #+end_export
+   
+** sources :noexport:
+   - http://web.hep.uiuc.edu/home/serrede/P435/Lecture_Notes/P435_Lect_17.pdf
+   - https://en.wikipedia.org/wiki/Legendre_polynomials#Legendre_polynomials_in_multipole_expansions
+   - https://en.wikipedia.org/wiki/Legendre_polynomials#Rodrigues'_formula_and_other_explicit_formulas
+* 3
+  # spherical coordinates
+  # S = E cross H
+  
+* 4 - Longitudinal Polarization
+  Sound waves and water waves are longitudinal, and their vibration
+  can potentially occur in all directions perpendicular to the
+  direction of travel. Polarization can only occur if vibrations occur
+  in one plane only.
+
+* 5 - Polarization with Electric Field of a Wave
+  [[./figure/5.png]]
+
+* 6 
+* 7
+* 8

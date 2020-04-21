@@ -1,0 +1,185 @@
+#+latex_class_options: [twocolumn, fleqn]
+#+latex_header: \usepackage{../homework}
+#+bind: org-latex-image-default-width "\\linewidth"
+#+property: header-args :exports both :eval no-export
+#+bind: org-latex-minted-options (("bgcolor" "codeBackground")("fontsize" "\\scriptsize"))
+#+options: num:t tags:nil
+
+
+#+title: HW 9
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* 1 
+  [[./figure/1.png]]
+* 2
+  [[./figure/2-a.png]]
+  [[./figure/2-b.png]]
+* 3
+  #+begin_src python :results output latex :exports both
+from numpy import *
+nAir = 1
+nGan = 3.7
+criticalAngle = arcsin(nAir/nGan)
+print(f'\[\\theta_c ='
+      f'{rad2deg(criticalAngle):.3f}^{{\circ}}\]')
+
+solidAngleCone = 2*pi*(1-cos(criticalAngle)) #4*pi
+solidAngleHemisphere = 2*pi
+
+coneCount = 2
+solidAngleRatio = coneCount * solidAngleCone/solidAngleHemisphere
+print(f'\[\\text{{solid Angle Ratio}} = {solidAngleRatio:.3f}\]')
+
+import pint
+unit = pint.UnitRegistry()
+
+wavelength = 560
+h = 6.63E-34
+c = 3E8
+E = solidAngleRatio * h*c/wavelength
+print(f'\[\\text{{fraction of optical energy}} = \\text{{{E:.2E} J}}\]')
+  #+end_src
+
+  #+RESULTS:
+  #+begin_export latex
+  \[\theta_c =15.680^{\circ}\]
+  \[\text{solid Angle Ratio} = 0.074\]
+  \[\text{fraction of optical energy} = \text{2.64E-29 J}\]
+  #+end_export
+
+* 4
+  #+begin_src python :async :results silent
+from matplotlib import pyplot
+import numpy
+
+x = numpy.linspace(2, 6, 20) #wavelenth
+
+#index for quartz
+n2 = numpy.sqrt(1 +
+               0.6961663*x**2 / (x**2 - 0.0684043**2) +
+               0.4079426*x**2 / (x**2 - 0.1162414**2) +
+               0.8974794*x**2 / (x**2 - 9.896161**2))
+
+#index for air
+n1 = 1 
+
+reflectionCoefficient = (n2 - n1)/(n1 + n2)
+transmissionCoefficient = 1 + reflectionCoefficient
+
+reflectivity = reflectionCoefficient**2
+transmissivity = transmissionCoefficient**2 * (n1/n2)
+
+pyplot.plot(x, reflectivity)
+pyplot.title('Reflectivity')
+pyplot.savefig('figure/4-re.png')
+pyplot.show()
+
+pyplot.plot(x, transmissivity)
+pyplot.title('Transmissivity')
+pyplot.savefig('figure/4-tr.png')
+pyplot.show()
+  #+end_src
+  
+  [[./figure/4-re.png]]
+  [[./figure/4-tr.png]]
+
+* 5 
+  #+begin_src python :results output
+from matplotlib import pyplot
+import numpy
+from numpy import cos, arcsin, sin
+
+def ganIntrinsicImpedance(wavelength):
+    return numpy.sqrt(
+        0.6961663*wavelength**2 / (wavelength**2 - 0.0684043**2)
+        + 0.4079426*wavelength**2 / (wavelength**2 - 0.1162414**2)
+        + 0.8974794*wavelength**2 / (wavelength**2 - 9.896161**2)
+        + 1).reshape(-1, 1)
+
+def degreeArangeToRadians(start, stop, spacing):
+    degreeRange = numpy.arange(start, stop+spacing, spacing)
+    radianRange = numpy.deg2rad(degreeRange)
+    radianRangeAsColumnVector = radianRange.reshape(-1, 1).T
+    return radianRangeAsColumnVector
+
+def snellsTransmissionAngle(n1, n2, a1):
+    return arcsin(sin(a1)*(n1/n2))
+
+def perpendicularReflection(n1, n2, a1, a2):
+    return ((n2*cos(a1) - n1*cos(a2))
+            / (n2*cos(a1) + n1*cos(a2)))**2
+
+def parallelReflection(n1, n2, a1, a2):
+    return ((n2*cos(a2) - n1*cos(a1))
+            / (n2*cos(a2) + n1*cos(a1)))**2
+
+
+
+wavelength = numpy.linspace(2, 6, 20)
+n2 = ganIntrinsicImpedance(wavelength)
+n1 = 1 #Air
+
+incidenceAngles = degreeArangeToRadians(
+    start = 0,
+    stop = 60,
+    spacing = 10)
+
+transmissionAngles = snellsTransmissionAngle(
+    n1 = n1,
+    n2 = n2,
+    a1 = incidenceAngles)
+
+transverseElectricReflectivity = perpendicularReflection(
+    n1 = n1,
+    n2 = n2,
+    a1 = incidenceAngles,
+    a2 = transmissionAngles)
+
+transverseMagneticReflectivity = parallelReflection(
+    n1 = n1,
+    n2 = n2,
+    a1 = incidenceAngles,
+    a2 = transmissionAngles)
+
+
+pyplot.plot(wavelength, transverseElectricReflectivity)
+pyplot.title('TE Polarization Reflectivity at Different Incidence Angles')
+pyplot.xlabel('wavelength')
+pyplot.ylabel('TE reflectivity')
+pyplot.legend(*numpy.round(numpy.rad2deg(incidenceAngles)))
+pyplot.savefig('figure/5-te.png')
+pyplot.show()
+
+pyplot.plot(wavelength, transverseMagneticReflectivity)
+pyplot.title('TM Polarization Reflectivity at Different Incidence Angles')
+pyplot.xlabel('wavelength')
+pyplot.ylabel('TM reflectivity')
+pyplot.legend(*numpy.round(numpy.rad2deg(incidenceAngles)))
+pyplot.savefig('figure/5-tm.png')
+pyplot.show()
+  #+end_src
+
+  #+RESULTS:
+
+  [[./figure/5-te.png]]
+  [[./figure/5-tm.png]]
+
+* 6 - Brewster's Angle
+  #+begin_src python :results output latex :exports both
+from numpy import arctan, sqrt, rad2deg
+
+wavelength = 580E-9
+schottIndex = 1.5427
+airIndex = 1
+brewsterAngle = rad2deg(arctan(sqrt(schottIndex/airIndex)))
+
+print(f'\[\\theta_B'
+      f' = \\tan^{{-1}}\sqrt{{\dfrac{{\epsilon_2}}{{\epsilon_1}}}}'
+      f' = {brewsterAngle:.2f}^{{\circ}}\]')
+  #+end_src
+
+  #+RESULTS:
+  #+begin_export latex
+  \[\theta_B = \tan^{-1}\sqrt{\dfrac{\epsilon_2}{\epsilon_1}} = 51.16^{\circ}\]
+  #+end_export
