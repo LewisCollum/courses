@@ -5,7 +5,6 @@ class Apple {
         this.color = [1.0, 0.0, 0.0, 1.0]
         
         this.eat()
-        drawer.addDrawable(this)
     }
     
     eat() {

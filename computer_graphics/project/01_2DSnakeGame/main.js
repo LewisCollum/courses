@@ -9,6 +9,7 @@ function init() {
     gl.clearColor(0.4, 1.0, 0.4, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT)
 
+    const drawer = new Drawer()
     drawer.setupWithGlAndShaders(gl, shaderProgram)
     drawer.strategy = gl.TRIANGLE_FAN
 
@@ -16,19 +17,25 @@ function init() {
     const apple = new Apple(grid)
     const snake = new Snake(grid)
 
+    drawer.addDrawable(snake.head)  
+    drawer.addDrawable(apple)
+
     const scoreElement = document.getElementById("score")
     const scoreTextNode = document.createTextNode("")
     scoreElement.appendChild(scoreTextNode)
     scoreTextNode.nodeValue = snake.length
 
     frameEventDispatcher.updateMillis = 100
-
+    frameEventDispatcher.addRenderingListener(() => {drawer.drawAll()})    
     frameEventDispatcher.addEventListener(() => {
         gl.clear(gl.COLOR_BUFFER_BIT)
 
-        if (Grid.areCoordinatesEqual(snake.headCoordinates, apple.coordinates)) {
+        snake.update()
+        
+        if (Grid.areCoordinatesEqual(snake.head.coordinates, apple.coordinates)) {
             snake.feed()
             apple.eat()
+            drawer.addDrawable(snake.tail)
             
             scoreTextNode.nodeValue = snake.length
             

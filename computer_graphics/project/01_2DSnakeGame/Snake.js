@@ -12,9 +12,6 @@ class Snake {
             color: [0.6, 0.3, 0.0, 1],
             coordinates: [Math.floor(this.grid.count/2), Math.floor(this.grid.count/2)]
         }]
-        drawer.addDrawable(this.body[0])  
-
-        frameEventDispatcher.addEventListener(() => this.update())
         
         this.setMovementKeyMap()
     }
@@ -33,8 +30,12 @@ class Snake {
     moveLeft() {this.drift = form.Translate.x(-this.driftVelocity)}
     stop() {this.drift = matrix.Identity(4)}
 
-    get headCoordinates() {
-        return this.body[0].coordinates
+    get head() {
+        return this.body[0]
+    }
+
+    get tail() {
+        return this.body[this.body.length-1]
     }
 
     get isOverlapping() {
@@ -63,8 +64,6 @@ class Snake {
             color: [0.6, 0.3, 0.0, 1],
             coordinates: [null, null]
         })
-
-        drawer.addDrawable(this.body[this.body.length-1])            
     }
     
     setMovementKeyMap() {
