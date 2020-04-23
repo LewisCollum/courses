@@ -14,7 +14,7 @@
     <script type="text/javascript" src="vector.js"></script>    
     <script type="text/javascript" src="form.js"></script>
     <script type="text/javascript" src="frameEventDispatcher.js"></script>            
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
     
     <script id="vertex-shader" type="x-shader/x-vertex">
       attribute vec4 position;
@@ -47,7 +47,130 @@
   </head>
 
   <body onload = "init()">
-    <canvas id="gl-canvas" height="512" width="512">
-    </canvas>
+    <div class="container" id="cameraContainer">
+      <form id="cameraPanel" class="sidepanel">
+        <p>Projection</p>
+        <ul id="projectionChoices"></ul>
+        <p>Lights</p>
+        <ul id="lightChoices"></ul>
+        <p>Modifiers</p>
+        <ul id="lightModifierChoices"></ul>
+      </form>
+
+      <button class="openbtn" id="cameraPanelButton">&#9776;</button>
+      <script>
+        var choiceCount = 0;
+        function generateChoice(label, inputType, subType="") {
+            var choice = document.createElement("li");
+            choice.setAttribute("id", `li_${label}${subType}`)
+            choice.innerHTML = `<input type=${inputType} value='${label}${subType}' name='${inputType}${subType}' id='${label}${subType}'/>
+              <label for='${label}${subType}'>${label}</label>`
+            choiceCount += 1
+            return choice
+        }
+
+        function labelsToChoices(labels, inputType, subType="") {
+            var choices = []
+            labels.forEach((label) => {
+                choices.push(generateChoice(label, inputType, subType))
+            })
+            return choices
+        }
+
+        function choicesToElementChildren(choices, element) {
+            choices.forEach((choice) => {
+                element.appendChild(choice)
+            })
+        }
+
+        var currentProjection = null
+          
+        var projectionChoicesContainer = document.getElementById("projectionChoices")
+        var projectionLabels = ['Parallel', 'Perspective']
+        var projectionChoices = labelsToChoices(projectionLabels, "radio")
+        projectionChoices.forEach((choice) => {
+            projectionChoicesContainer.appendChild(choice)
+        })
+
+        var lightChoicesContainer = document.getElementById("lightChoices")        
+        var lightLabels = ['Spot', 'Point']
+        var lightChoices = labelsToChoices(lightLabels, "checkbox", "_light")
+        lightChoices.forEach((choice) => {
+            lightChoicesContainer.appendChild(choice)
+        })
+
+        var lightChoicesContainer = document.getElementById("lightModifierChoices")        
+        var lightLabels = ['Specular']
+        var lightChoices = labelsToChoices(lightLabels, "checkbox", "_lightModifier")
+        lightChoices.forEach((choice) => {
+            lightChoicesContainer.appendChild(choice)
+        })
+
+        var currentProjectionElement = document.getElementById("Parallel")
+        currentProjectionElement.checked = true
+        currentProjection = currentProjectionElement.value        
+
+        var selectionSubject = {
+            observers: [],
+            addObserver: function(observer) {
+                this.observers.push(observer)
+            },
+            notify: function(selection) {
+                this.observers.forEach((observer) => {
+                    observer(selection)
+                })
+            }
+        }
+        selectionSubject.addObserver(console.log)
+
+        selectionSubject.notify({
+            projection: currentProjection,
+            lights: [],
+            modifiers: []
+        })
+        
+        var checkedLights = new Set()
+        var checkedModifiers = new Set()          
+          document.forms.cameraPanel.addEventListener('change', function(event) {
+              if(event.target.name === 'radio') {
+                  currentProjection = event.target.value
+              }
+              else if (event.target.name === 'checkbox_light') {
+                  let value = event.target.value
+                  let light = value.split("_")[0]
+                  let type = value.split("_")[1]                  
+                  
+                  if (checkedLights.has(light)) checkedLights.delete(light)
+                  else checkedLights.add(light)
+              }
+              else if (event.target.name === 'checkbox_lightModifier') {
+                  let value = event.target.value
+                  let modifier = value.split("_")[0]
+                  let type = value.split("_")[1]
+                  
+                  if (checkedModifiers.has(modifier)) checkedModifiers.delete(modifier)
+                  else checkedModifiers.add(modifier)
+              }
+
+              selectionSubject.notify({
+                  projection: currentProjection,
+                  lights: [...checkedLights,],
+                  modifiers: [...checkedModifiers,]
+              })
+          });
+          
+          var panel = document.getElementById("cameraPanel")
+          panel.addEventListener('click', (event) => event.stopPropagation())
+          
+          var cameraPanelButton = document.getElementById("cameraPanelButton")
+          cameraPanelButton.addEventListener('click', (event) => {
+              event.stopPropagation()
+              panel.style.width = "100px"
+          })
+
+          document.addEventListener('click', () => panel.style.width = "0")
+        </script>
+      <canvas id="gl-canvas" height="512" width="512"></canvas>
+    </div>
   </body>
 </html>

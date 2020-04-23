@@ -11,7 +11,7 @@ function init(){
     gl.clear(gl.COLOR_BUFFER_BIT)
 
     var camera = {
-        origin: [30.0, 40.0, 60.0],
+        origin: [30, 40, 60],
         lookAt: [0, 0, 0],
         up: [0, 1, 0]
     }
@@ -31,11 +31,26 @@ function init(){
         [0, 0, -2/(far-near), -(far+near)/(far-near)],
         [0, 0, 0, 1]]
 
+    var perspective = [
+        [2*near/(right-left), 0, (right+left)/(right-left), 0],
+        [0, 2*near/(top-bottom), (top+bottom)/(top-bottom), 0],
+        [0, 0, -(far+near)/(far-near), -2*far*near/(far-near)],
+        [0, 0, -1, 0]]    
+
     drawer = new Drawer()
     drawer.setupWithGlAndShaders(gl, shaderProgram)
     drawer.strategy = gl.LINES
-    drawer.projection = orthographic
     drawer.view = cameraViewMatrix
+    drawer.projection = orthographic    
+
+    const projectionLabelMap = {
+        'Parallel': orthographic,
+        'Perspective': perspective
+    }
+    selectionSubject.addObserver(function(selections) {
+        drawer.projection = projectionLabelMap[selections.projection]
+    })
+    
     
     const drawable = {
         points: getVertices(),
@@ -44,13 +59,13 @@ function init(){
         color: [0.6, 0.3, 0.0, 1]
     }
     drawer.addDrawable(drawable)
-    
-    frameEventDispatcher.updateMillis = 50
+
+    frameEventDispatcher.updateMillis = 30
     frameEventDispatcher.addRenderingListener(() => {drawer.drawAll()})
     frameEventDispatcher.addEventListener(() => {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
         var dt = frameEventDispatcher.dt()
-        var newRotation = form.Rotate.y(dt/1000.0)
+        var newRotation = form.Rotate.y(0.8 * dt/1000.0)
         drawable.transformation = matrix.dot(drawable.transformation, newRotation)
     })
     frameEventDispatcher.onFrameEvent()
