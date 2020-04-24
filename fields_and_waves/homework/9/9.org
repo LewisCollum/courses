@@ -184,3 +184,35 @@ print(f'\[\\theta_B'
   #+begin_export latex
   \[\theta_B = \tan^{-1}\sqrt{\dfrac{\epsilon_2}{\epsilon_1}} = 51.16^{\circ}\]
   #+end_export
+* Supplemental
+** 1 - Waveguides
+   ~phaseVelocity~: The speed of light, since the guide is hollow.
+
+   ~f~: Operating frequency.
+
+   ~f10~: Dominant Mode cutoff frequency.
+
+   ~f01~: Second Mode cutoff frequency.
+   #+begin_src python :results output latex
+import numpy
+from numpy import sqrt, pi
+
+phaseVelocity = 3E8
+
+f = 4E9
+f10 = (1-0.12)*f #dominant mode
+f01 = (1+0.15)*f #second mode
+
+a = phaseVelocity/(2*f10)
+b = phaseVelocity/(2*f01)
+
+print(f'\[a = {a*100:.2f}\si{{\cm}}\]')
+print(f'\[b = {b*100:.2f}\si{{\cm}}\]')
+   #+end_src
+   #+RESULTS:
+   #+begin_export latex
+   \[a = 4.26\si{\cm}\]
+   \[b = 3.26\si{\cm}\]
+   #+end_export
+
+** 2 - Resonant Cavities
