@@ -5,7 +5,6 @@
 #+bind: org-latex-minted-options (("bgcolor" "codeBackground")("fontsize" "\\scriptsize"))
 #+options: num:t tags:nil
 
-
 #+title: HW 9
 #+author: Lewis Collum
 #+date: Updated: \today
@@ -216,3 +215,48 @@ print(f'\[b = {b*100:.2f}\si{{\cm}}\]')
    #+end_export
 
 ** 2 - Resonant Cavities
+   #+begin_src python :results output 
+from numpy import sqrt, pi
+
+a, b, d = (6.4E-2, 4E-2, 5E-2)
+
+#Quality Factor
+mu0 = 4*pi*1E-7
+sigmaC = 5.8E7
+phaseVelocity = 3E8
+m, n, p = (1, 0, 1)
+f101 = phaseVelocity/2 * sqrt((m/a)**2 + (n/b)**2 + (p/d)**2)
+skinDepth = 1/sqrt(pi*f101*mu0*sigmaC)
+Q = 1/skinDepth * a*b*d*(a**2+d**2)/(a**3*(d+2*b) + d**3*(a+2*b))
+print(f'Q = {Q:.0f}\n')
+
+
+#Sorted Modes
+cutoffs = []
+for i in range(0,2):
+    for j in range(0,2):
+        for k in range(0,2):
+            cutoff = phaseVelocity/2 * sqrt((i/a)**2 + (j/b)**2 + (k/d)**2)
+            cutoffs.append((f'{i}{j}{k}', cutoff))
+
+cutoffs = sorted(cutoffs, key=lambda pair: pair[1])
+for mode, cutoff in cutoffs:
+    print(f'Mode {mode} with cutoff {cutoff:.2E} Hz')
+   #+end_src
+   #+RESULTS:
+   #+begin_example
+   Q = 15136
+
+   Mode 000 with cutoff 0.00E+00 Hz
+   Mode 100 with cutoff 2.34E+09 Hz
+   Mode 001 with cutoff 3.00E+09 Hz
+   Mode 010 with cutoff 3.75E+09 Hz
+   Mode 101 with cutoff 3.81E+09 Hz
+   Mode 110 with cutoff 4.42E+09 Hz
+   Mode 011 with cutoff 4.80E+09 Hz
+   Mode 111 with cutoff 5.34E+09 Hz
+   #+end_example
+
+   _Answer_: The Quality factor is *15136*. Also, I've listed the sorted modes (by
+   cutoff frequency). The first four lowest-order modes (ignoring mode
+   000), are: *100, 001, 010, 101*.
