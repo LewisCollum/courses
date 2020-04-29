@@ -1,0 +1,133 @@
+#+latex_class_options: [twocolumn, fleqn]
+#+latex_header: \usepackage{../homework}
+#+bind: org-latex-image-default-width "\\linewidth"
+#+property: header-args :exports both :eval no-export
+#+bind: org-latex-minted-options (("bgcolor" "codeBackground")("fontsize" "\\scriptsize"))
+#+options: num:t tags:nil
+
+#+title: EE381 HW 10
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* 1
+  #+begin_src python :results output latex
+from numpy import pi, sin, e
+
+f = 400E6
+c = 3E8
+wavelength = c/f
+
+I0 = 3
+r = 60
+l = 0.02*wavelength
+
+eta0 = 120*pi
+theta = pi/2
+k = 2*pi/wavelength
+E = 1j*I0*l*k*eta0/4/pi * (e**(-1j*k*r)/r) * sin(theta)
+print(f'\[|E| = {abs(E):.2f}\]')
+
+H = E/eta0
+print(f'\[|H| = {abs(H)*10000:.0f}\cdot 10^{{-4}}\]')
+
+RRad = 80*pi**2*(l/wavelength)**2
+print(f'\[R_{{rad}} = {RRad:.2f}\Omega\]')
+
+PRad = 1/2 * I0**2 * RRad
+print(f'\[P_{{rad}} = {PRad:.2f}W\]')
+  #+end_src
+  #+RESULTS:
+  #+begin_export latex
+  \[|E| = 0.19\]
+  \[|H| = 5\cdot 10^{-4}\]
+  \[R_{rad} = 0.32\Omega\]
+  \[P_{rad} = 1.42W\]
+  #+end_export
+
+* 2
+  #+begin_src python :results output latex
+from numpy import pi, sin, e, sqrt
+
+PRad = 4
+I0 = sqrt(PRad/36.6)
+print(f'\[I_0 = {I0:.3f}A\]')
+  #+end_src
+  #+RESULTS:
+  #+begin_export latex
+  \[I_0 = 0.331A\]
+  #+end_export
+
+* 3
+** (a) 
+   [[./figure/3-a.png]]
+** (b)
+   [[./figure/3-b.png]]
+** (c)  
+   [[./figure/3-c.png]]
+* 4
+** (a)
+  #+begin_src python :results output
+from numpy import pi, sin, e, sqrt, deg2rad, log10
+
+B = deg2rad(4)
+D = 4*pi / B**2
+G = 10*log10(D)
+print(f'Gain = {round(G, 2)}db')
+  #+end_src  
+
+  #+RESULTS:
+  : Gain = 34.11db
+
+** (b)
+  #+begin_src python :results output latex
+from numpy import pi, sin, e, sqrt, deg2rad, log10, rad2deg
+
+Bold = deg2rad(4)
+Dold = 4*pi / Bold**2
+Dnew = Dold * (1+0.5)
+Bnew = sqrt(4*pi/Dnew)
+Gnew = 10*log10(Dnew)
+print(f'\[G = {round(Gnew, 2)}db\]')
+print(f'\[\\beta = {rad2deg(Bnew):.2f}^{{\circ}}\]')
+  #+end_src  
+
+  #+RESULTS:
+  #+begin_export latex
+  \[G = 35.87db\]
+  \[\beta = 3.27^{\circ}\]
+  #+end_export
+
+** (c)
+  #+begin_src python :results output latex
+from numpy import pi, sin, e, sqrt, deg2rad, log10, rad2deg
+
+B0 = deg2rad(4)
+D0 = 4*pi / B0**2
+f0 = 15E9
+c = 3E8
+wavelength0 = c/f0
+Ap = D0 * wavelength0**2 / 4/pi
+
+f1 = 30E9
+wavelength1 = c/f1
+D1 = 4*pi*Ap/wavelength1**2
+G1 = 10*log10(D1)
+B1 = sqrt(4*pi/D1)
+
+print(f'\[G = {round(G1, 2)}db\]')
+print(f'\[\\beta = {rad2deg(B1):.2f}^{{\circ}}\]')
+  #+end_src  
+  #+RESULTS:
+  #+begin_export latex
+  \[G = 40.13db\]
+  \[\beta = 2.00^{\circ}\]
+  #+end_export
+* 5
+** (a)
+   [[./figure/5-a.png]]
+** (b)
+   [[./figure/5-b.png]]
+** (c)
+   [[./figure/5-c.png]]
+** (d)
+   [[./figure/5-d.png]]
