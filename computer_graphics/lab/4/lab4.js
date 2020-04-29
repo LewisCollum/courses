@@ -1,17 +1,72 @@
 //Lewis Collum
 
+class LightSwitch {
+    constructor(light) {
+        this.light = light
+        this.offColor = {
+            ambient: [0.0, 0.0, 0.0],
+            diffuse: [0.0, 0.0, 0.0],
+            specular: [0.0, 0.0, 0.0]
+        }
+        this.turnOff()
+   }
+
+    turnOn() {
+        this.isOn = true
+        this.light.color = Object.assign({}, this.light.onColor)
+    }
+
+    turnOff() {
+        this.isOn = false
+        this.light.color = this.offColor
+    }
+
+    turnOffSpecular() {
+        this.light.color.specular = [0.0, 0.0, 0.0]
+        console.log("SPEC OFF", this.light.onColor)
+    }
+
+    turnOnSpecular() {
+        if (this.isOn)
+            this.light.color.specular = this.light.onColor.specular
+        console.log("SPEC ON", this.light.onColor)
+    }    
+}
+
 function init(){
     const canvas = document.getElementById("gl-canvas")
     const gl = WebGLUtils.setupWebGL(canvas)
 
     const shaderProgram = initShaders(gl, "vertex-shader", "fragment-shader")
     gl.useProgram(shaderProgram)
+    gl.enable(gl.DEPTH_TEST);    
     gl.viewport(0, 0, 512, 512)
     gl.clearColor(0.0, 0.0, 0.0, 1.0)
     gl.clear(gl.COLOR_BUFFER_BIT)
+
+    var light = {
+        onColor: {
+            ambient: [0.0, 0.0, 0.01],
+            diffuse: [0.7, 0.3, 0.05],
+            specular: [1.0, 0.7, 1.0]
+        },
+        position: [40, 20, 60],
+    }
+    const lightSwitch = new LightSwitch(light)
+
+    var spotlight = {
+        onColor: {
+            ambient: [0.1, 0.1, 0.0],
+            diffuse: [0.9, 0.9, 0.6],
+            specular: [0.4, 0.7, 0.0]
+        },
+        position: [-40, 20, 60],
+        lookAt: [0, 0, 0]
+    }
+    const spotlightSwitch = new LightSwitch(spotlight)
     
     var camera = {
-        origin: [30, 40, 60],
+        origin: [0, 20, 60],
         lookAt: [0, 0, 0],
         up: [0, 1, 0]
     }
@@ -35,16 +90,7 @@ function init(){
         [2*near/(right-left), 0, (right+left)/(right-left), 0],
         [0, 2*near/(top-bottom), (top+bottom)/(top-bottom), 0],
         [0, 0, -(far+near)/(far-near), -2*far*near/(far-near)],
-        [0, 0, -1, 0]]    
-
-    var light = {
-        color: {
-            ambient: [0.0, 0.0, 1.0],
-            diffuse: [1.0, 0.0, 0.0],
-            specular: [0.0, 1.0, 0.0]
-        },
-        position: [30, 40, 65]
-    }
+        [0, 0, -1, 0]]
     
     drawer = new Drawer()
     drawer.setupWithGlAndShaders(gl, shaderProgram)
@@ -52,17 +98,30 @@ function init(){
     drawer.view = cameraViewMatrix
     drawer.viewInverse = cameraInverseViewMatrix
     drawer.projection = orthographic    
+
     drawer.addLight(light)
+    lightSwitch.turnOn()
+
+    //drawer.addLight(spotlight)
+    //light.turnOn()    
     
     const projectionLabelMap = {
         'Parallel': orthographic,
         'Perspective': perspective
     }
+
     selectionSubject.addObserver(function(selections) {
         drawer.projection = projectionLabelMap[selections.projection]
+        if (selections.lights.has('Point')) lightSwitch.turnOn()
+        else lightSwitch.turnOff()
+        if (selections.lights.has('Spot')) spotlightSwitch.turnOn()
+        else spotlightSwitch.turnOff()
+        if (selections.modifiers.has('Specular')) lightSwitch.turnOnSpecular()
+        else lightSwitch.turnOffSpecular()        
     })
     
-    
+
+    const shape = radial.make3d(30, 30)
     const drawable = {
         points: getVertices(),
         faces: getFaces(),
@@ -71,10 +130,11 @@ function init(){
     }
     drawer.addDrawable(drawable)
 
-    frameEventDispatcher.updateMillis = 60
+    frameEventDispatcher.updateMillis = 15
     frameEventDispatcher.addRenderingListener(() => {drawer.drawAll()})
     frameEventDispatcher.addEventListener(() => {
         var dt = frameEventDispatcher.dt()
+        //console.log(dt)
         var newRotation = form.Rotate.y(0.8 * dt/1000.0)
         drawable.transformation = matrix.dot(drawable.transformation, newRotation)
     })

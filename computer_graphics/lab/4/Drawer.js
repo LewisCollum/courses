@@ -38,7 +38,6 @@ class Drawer {
 
     drawLights() {
         this.lights.forEach((light) => {
-            console.log(light)
             this.drawLight(light)
         })
     }
@@ -61,7 +60,6 @@ class Drawer {
         const viewLocation = this.gl.getUniformLocation(this.shaderProgram, "camera.view");
         this.gl.uniformMatrix4fv(viewLocation, false, flattenedView);
         const flattenedViewInverse = this.viewInverse.flat()
-        console.log("FVI", flattenedViewInverse)
         const viewInverseLocation = this.gl.getUniformLocation(this.shaderProgram, "camera.viewInverse");
         this.gl.uniformMatrix4fv(viewInverseLocation, false, flattenedViewInverse);
         const flattenedProjection = matrix.transpose(this.projection).flat()

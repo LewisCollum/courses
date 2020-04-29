@@ -78,7 +78,7 @@
           
           fragmentDirectionToLight = normalize(lights[0].position - transformedPosition.xyz);
           fragmentDirectionToCamera = normalize(-transformedPosition.xyz);
-          fragmentNormal = normalize(vec3(camera.viewInverse * vec4(vertexNormal, 1.0)));
+          fragmentNormal = normalize((camera.viewInverse * transformation * vec4(vertexNormal, 1.0)).xyz);
       }
     </script>
     
@@ -133,7 +133,7 @@
           float shine = pow(max(directivity, 0.0), shininess);
           color.specular = lambertian > 0.0 ? lights[0].color.specular * shine : vec3(0.0);
 
-          vec3 clampedPhongSum = clamp(color.diffuse, 0.0, 1.0);
+          vec3 clampedPhongSum = clamp(color.diffuse + color.ambient + color.specular, 0.0, 1.0);
           gl_FragColor = vec4(clampedPhongSum, 1.0);
       }
     </script>
@@ -201,7 +201,7 @@
 
         var currentProjectionElement = document.getElementById("Parallel")
         currentProjectionElement.checked = true
-        currentProjection = currentProjectionElement.value        
+        currentProjection = currentProjectionElement.value
 
         var selectionSubject = {
             observers: [],
@@ -215,12 +215,6 @@
             }
         }
         selectionSubject.addObserver(console.log)
-
-        selectionSubject.notify({
-            projection: currentProjection,
-            lights: [],
-            modifiers: []
-        })
         
         var checkedLights = new Set()
         var checkedModifiers = new Set()          
@@ -247,8 +241,8 @@
 
               selectionSubject.notify({
                   projection: currentProjection,
-                  lights: [...checkedLights,],
-                  modifiers: [...checkedModifiers,]
+                  lights: checkedLights,
+                  modifiers: checkedModifiers
               })
           });
           
