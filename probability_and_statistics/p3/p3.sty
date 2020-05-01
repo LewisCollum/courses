@@ -1,0 +1,64 @@
+\ProvidesPackage{p3}
+\usepackage[
+  letterpaper,
+  hmargin=1in,
+  top=0.4in,
+  bottom=\dimexpr0.33in+1.2\baselineskip\relax,
+  includefoot]{geometry}
+
+\usepackage{siunitx}
+\usepackage[explicit]{titlesec}
+\usepackage[default]{roboto}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{enumitem}
+\setlist[enumerate]{label=\Alph*., noitemsep}
+\setlist[itemize]{noitemsep}
+
+\newcommand*\squared[1]{\tikz[baseline=(char.base)]{%
+    \node[shape=square,draw,inner sep=2pt] (char) {#1};}}
+
+\newcommand*\highlighted[1]{\tikz[baseline=(x.base)]{%
+    \node[rectangle,fill=black!20!white,draw,inner sep=2pt] (x) {#1};}}
+
+\setlength\parindent{0pt}
+
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+\begin{flushleft}
+  \textbf{\@title}
+
+  \@author
+
+  \@date
+\end{flushleft}\egroup
+}
+
+\titleformat{\section}{\scshape}{\highlighted{#1}}{.5em}{}
+\titlespacing{\section}{0pt}{5pt}{0pt}
+
+\titleformat{\subsection}{\bfseries}{}{0pt}{#1}
+\titlespacing{\subsection}{0pt}{10pt}{0pt}
+
+\titleformat{\subsubsection}{\itshape}{}{0pt}{#1}
+\titlespacing{\subsubsection}{0pt}{10pt}{0pt}
+
+\patchcmd{\@verbatim}
+  {\verbatim@font}
+  {\verbatim@font\small}
+  {}{}
+
+\makeatother
+
+\AtBeginDocument{
+  \setlength\abovedisplayskip{2pt}
+  \setlength\belowdisplayskip{2pt}
+  \setlength\abovedisplayshortskip{2pt}
+  \setlength\belowdisplayshortskip{5pt}
+}
+
+\definecolor{codeBackground}{rgb}{0.92,0.92,1.0}
+
+\linespread{1.2}
+\setlength{\mathindent}{0.25in}
+\pagenumbering{gobble}

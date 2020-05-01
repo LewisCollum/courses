@@ -1,0 +1,128 @@
+#+latex_class: IEEEtran
+#+options: num:t toc:t date:t
+#+property: header-args :exports results :eval no-export :session :results output
+
+#+title: Lane Detection: Handling Missing Lanes with State STAT 383 Final Project
+#+author: Lewis Collum (0621539)
+#+date: Updated: \today
+
+* COMMENT Notes
+- At least 3 testable questions (try to incorporate multiple analysis
+  types --t-test, Anova, Regression)
+- what, why, and discovery
+
+- Cover Page
+- Introduction
+  - What topic
+  - what is known
+  - why would someone be interested in the questions Im answering
+- Methods
+  - What stat analysis will be preformed
+  - How will the stat analysis be used to answer your question
+  - State hypothesis
+- Data
+  - What data you obtained
+- Analysis
+  - tests, p-values, confidence-intervals, figures, interpretations
+    and descriptions
+- Conclusion 
+  - state conclusions
+  - Issues with your analysis
+  - Future work (methods, better data)
+
+* Introduction
+  We are studying the NAEP reading and mathematics exam performance of
+  8th graders, across the states. In doing so, we are examining if a
+  relationship exists between performance and various factors
+  including state financials, gender and race. 
+
+  The scores have been gathered since the early 1990s. 
+
+  - State spending vs average performance of student
+    - regression
+  - 1way anova gender 8th grade
+  - 1way anova race 8th grade
+* Methods
+  
+* Data
+  We are using the =U.S. Education Datasets: Unification Project=
+  dataset which is designed to bring together multiple facets of
+  U.S. education data into one dataset.
+  #+begin_src python
+import pandas
+import numpy
+from matplotlib import pyplot
+from tabulate import tabulate
+
+def orgTable(data):
+    print(tabulate(data, headers='keys', tablefmt='orgtbl', showindex=False))
+
+
+def maleTag(subject):
+    return f'G08_A_M_{subject}'
+
+def femaleTag(subject):
+    return f'G08_A_F_{subject}'
+
+
+class EduData:
+    def __init__(self, data):
+        self.data = data
+
+
+    def yearRange(self, startYear, endYear):
+        sortedByYears = self.data.sort_values(by=['YEAR'])
+        return self.data.loc[self.data.YEAR.between(startYear, endYear)]
+
+    @property
+    def national(self):
+        return self.data.loc[self.data.STATE == 'NATIONAL']
+
+    def byState(self):
+        return self.data.groupby('STATE')
+    
+    def plotMaleVsFemaleNational(self, subject):
+        _, axes = pyplot.subplots()
+        axes.plot(self.national.YEAR, self.national[maleTag(subject)], '-o', label='male')
+        axes.plot(self.national.YEAR, self.national[femaleTag(subject)], '-o', label='female')
+        axes.set_title(f'8th Grade Boys & Girls NAEP {subject} Performance')
+        axes.set_xlabel('Year')
+        axes.set_ylabel('Average Score (out of 500)')
+        axes.legend()
+
+    def plotMaleVsFemaleState(self, subject):
+        _, axes = pyplot.subplots()
+        for name, state in self.byState():
+            female = state[femaleTag(subject)]
+            male = state[maleTag(subject)]
+            difference = male-female
+            mask = numpy.isfinite(difference)
+            x = state.YEAR[mask]
+            y = difference[mask]
+            axes.plot(x, y, '-o', label=name)
+            #axes.text(list(x)[-1], list(y)[-1], name)
+    
+edu = EduData(pandas.read_csv('data/states_all_extended.csv'))
+
+
+_, axes2 = pyplot.subplots()
+for name, state in edu.byState():
+    interest = 'G08_A_F_READING'
+    mask = numpy.isfinite(state[interest])
+    x = state.YEAR[mask]
+    y = state[interest][mask]
+    axes2.plot(x, y, '-o', label=name)
+    axes2.text(list(x)[-1], list(y)[-1], name)
+
+
+edu.plotMaleVsFemaleNational('MATHEMATICS')
+edu.plotMaleVsFemaleNational('READING')
+edu.plotMaleVsFemaleState('MATHEMATICS')
+pyplot.show()
+  #+end_src
+
+  #+RESULTS:
+
+* Analysis
+  Start with FINANCIAL REGRESSION
+* Conclusion
