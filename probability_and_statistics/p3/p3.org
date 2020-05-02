@@ -1,54 +1,475 @@
-#+latex_class: IEEEtran
+#+latex_class: article
+#+latex_header: \usepackage[letterpaper, top=0.4in, bottom=\dimexpr0.33in+1.2\baselineskip\relax, includefoot]{geometry}
 #+options: num:t toc:t date:t
-#+property: header-args :exports results :eval no-export :session :results output
+#+property: header-args :exports none :eval no-export :session :results output drawer
+#+bind: org-latex-image-default-width "0.5\\linewidth"
+#+bind: org-latex-default-figure-position "!h"
 
-#+title: Lane Detection: Handling Missing Lanes with State STAT 383 Final Project
+#+title: 8th Grade NAEP Reading Exam Scores as a Factor of Family Income, Divorce, and State Educational Expenditure
 #+author: Lewis Collum (0621539)
 #+date: Updated: \today
 
-* COMMENT Notes
-- At least 3 testable questions (try to incorporate multiple analysis
-  types --t-test, Anova, Regression)
-- what, why, and discovery
-
-- Cover Page
-- Introduction
-  - What topic
-  - what is known
-  - why would someone be interested in the questions Im answering
-- Methods
-  - What stat analysis will be preformed
-  - How will the stat analysis be used to answer your question
-  - State hypothesis
-- Data
-  - What data you obtained
-- Analysis
-  - tests, p-values, confidence-intervals, figures, interpretations
-    and descriptions
-- Conclusion 
-  - state conclusions
-  - Issues with your analysis
-  - Future work (methods, better data)
+\newpage
 
 * Introduction
-  We are studying the NAEP reading and mathematics exam performance of
-  8th graders, across the states. In doing so, we are examining if a
-  relationship exists between performance and various factors
-  including state financials, gender and race. 
-
-  The scores have been gathered since the early 1990s. 
-
-  - State spending vs average performance of student
-    - regression
-  - 1way anova gender 8th grade
-  - 1way anova race 8th grade
+  We are studying the National Assessment of Education Progress (NAEP)
+  reading exam performance of 8th graders, across the states. The test
+  is out of 500 points. NAEP administers tests across subjects at the
+  4th, 8th, and 12 grade levels, with randomly selected students. We
+  would like to see if the exam performance has nationally increased
+  since 1990. We would also like to see if we can find a significant
+  relationship between reading performance and average family income,
+  divorce rates, or educational expenditure, across the states.
 * Methods
-  
+  <<sec:methods>>
+** Is There an Increase in NAEP Reading Exam Scores Since 1990?
+   We use a simple linear regression with the model,
+   <<sec:hyp_year>>
+   #+begin_export latex
+   \begin{equation}
+     \hat{\texttt{score}} = \beta_0 + \beta_1 \cdot \texttt{year}. \label{eq:1}
+   \end{equation}
+   Our hypotheses are
+   \begin{align*} 
+     H_0&: \beta_1 = 0; \\
+     H_A&: \beta_1 \ne 0.
+   \end{align*}
+   #+end_export
+
+** Does State Educational Expenditure have a Significant Affect on Scores?
+   <<sec:hyp_exp>>
+   We use a simple linear regression with the model,
+   #+begin_export latex
+   \begin{equation}
+     \hat{\texttt{score}} = \beta_0 + \beta_1 \cdot \texttt{expenditure}
+   \end{equation}
+   Our hypotheses are
+   \begin{align*} 
+     H_0&: \beta_1 = 0; \\
+     H_A&: \beta_1 \ne 0.
+   \end{align*}
+   #+end_export
+
+** Does State Divorce Rate have a Significant Affect on Scores?
+   <<sec:hyp_div>>
+   We use a simple linear regression with the model,
+   #+begin_export latex
+   \begin{equation}
+     \hat{\texttt{score}} = \beta_0 + \beta_1 \cdot \texttt{divorce\_rate}
+   \end{equation}
+   Our hypotheses are
+   \begin{align*} 
+     H_0&: \beta_1 = 0; \\
+     H_A&: \beta_1 \ne 0.
+   \end{align*}
+   #+end_export
+
+** Does State Median Family Income have a Significant Affect on Scores?
+   <<sec:hyp_inc>>
+   We use a non-linear regression with the model,
+   #+begin_export latex
+   \begin{equation}
+     \hat{\texttt{score}} = \beta_0 + \beta_1 \cdot \texttt{income} + \beta_2 \cdot \texttt{income}^2
+   \end{equation}
+   Our hypotheses are
+   \begin{align*} 
+     H_0&: \beta_1 = 0; \\
+     H_A&: \beta_1 \ne 0.
+   \end{align*}
+   #+end_export
+
 * Data
-  We are using the =U.S. Education Datasets: Unification Project=
-  dataset which is designed to bring together multiple facets of
-  U.S. education data into one dataset.
-  #+begin_src python
+  All hypotheses in section [[sec:methods]] use the =U.S. Education
+  Datasets: Unification Project= dataset (section [[sec:data_unif]]) which
+  is designed to bring together multiple facets of U.S. education data
+  into one dataset. We use the =total expenditure= and =average
+  reading score= for eigth grade, from this dataset.
+
+  To find if state median family income has a significant affect on
+  reading scores (section [[sec:hyp_inc]]) we use an American Community
+  Survey (section [[sec:data_income]]) for median family income by state
+  from 2014 to 2018.
+
+  To find if state divorse rate has a significant affect on reading
+  scores (section [[sec:hyp_div]]) we use a CDC study (section
+  [[sec:data_divorce]]) for divorse rates in 2015.
+  
+  
+  #+begin_src python :exports results
+import pandas
+from matplotlib import pyplot
+from tabulate import tabulate
+from patsy import dmatrices
+import statsmodels.api as sm
+import seaborn
+
+def orgTable(data):
+    print(tabulate(data, headers='keys', tablefmt='orgtbl', showindex=False))
+
+data = pandas.read_csv('data/states_all.csv')
+national = data.loc[data.STATE == 'NATIONAL']
+state = data.loc[data.STATE != 'NATIONAL']
+
+divorce = pandas.read_excel('data/state-divorce-rates-90-95-99-18.xlsx')
+divorce2015 = divorce[['State', 2015]]
+divorce2015 = divorce2015.rename(columns={'State': 'STATE', 2015: 'DIVORCE_RATE'})
+divorce2015 = divorce2015.replace('---', numpy.nan)
+divorce2015.STATE = divorce2015.STATE.str.upper()
+divorce2015 = divorce2015.replace(' ', '_', regex=True)
+
+income = pandas.read_excel('data/median-household-income-by-state.xlsx')
+income = income.drop(columns=['Margin Of Error'])
+income = income.rename(columns={'State': 'STATE', 'Income': 'INCOME'})
+income.STATE = income.STATE.str.upper()
+income = income.replace(' ', '_', regex=True)
+income.INCOME = income.INCOME.replace('[\$,]', '', regex=True).astype(int)
+
+minimal2015 = state2015[['STATE', 'AVG_READING_8_SCORE', 'TOTAL_EXPENDITURE']]
+minimal2015 = pandas.merge(minimal2015, divorce2015, on=['STATE'])
+minimal2015 = pandas.merge(minimal2015, income, on=['STATE'])
+
+#orgTable(data[['STATE', 'YEAR', 'AVG_READING_8_SCORE']][data.YEAR == 2013].head())
+  #+end_src
+
+  #+RESULTS:
+  :results:
+  :end:
+
+* Analysis
+** Is There an Increase in NAEP Reading Exam Scores Since 1990?
+   We compare the NAEP reading scores from 1990 to 2018, to see if
+   there is a significant change. We find that 85% of the variance in
+   scores is explained by year (i.e. \(R^2\)). We also find that the
+   p-value is much less than the significance level of 0.05. As such
+   we reject the null hypothesis (eq. \ref{eq:1}) that scores have not
+   changed since 1990. We see that scores have increased since 1990
+   and the concrete model is
+   #+begin_export latex
+   \begin{equation}
+     \hat{\texttt{score}} = -1110 + 0.69 \cdot \texttt{year}. \label{eq:1-an}
+   \end{equation}
+   #+end_export
+   
+   The intercept is not interable since we do not have scores for
+   students for year 0, since the NAEP study started in 1990. For
+   every increase in year of 0.69, the national reading score
+   increases by 1 (out of 500 total points). 
+ 
+   #+begin_src python
+y, X = dmatrices(
+    'AVG_MATH_8_SCORE ~ YEAR',
+    data=national,
+    return_type="dataframe")
+
+model = sm.OLS(y, X).fit()
+print(model.summary())
+
+seaborn.regplot(x='YEAR', y='AVG_READING_8_SCORE', data=national)
+pyplot.savefig('figure/reading_year.png')
+pyplot.show()
+seaborn.residplot(x='YEAR', y='AVG_READING_8_SCORE', data=national)
+pyplot.savefig('figure/reading_year_resid.png')
+pyplot.show()
+   #+end_src
+
+   #+RESULTS:
+   :results:
+   OLS Regression Results                            
+   ==============================================================================
+   Dep. Variable:       AVG_MATH_8_SCORE   R-squared:                       0.854
+   Model:                            OLS   Adj. R-squared:                  0.841
+   Method:                 Least Squares   F-statistic:                     64.59
+   Date:                Fri, 01 May 2020   Prob (F-statistic):           6.25e-06
+   Time:                        23:20:48   Log-Likelihood:                -30.720
+   No. Observations:                  13   AIC:                             65.44
+   Df Residuals:                      11   BIC:                             66.57
+   Df Model:                           1                                         
+   Covariance Type:            nonrobust                                         
+   ==============================================================================
+                    coef    std err          t      P>|t|      [0.025      0.975]
+   ------------------------------------------------------------------------------
+   Intercept  -1110.6086    172.749     -6.429      0.000   -1490.827    -730.391
+   YEAR           0.6921      0.086      8.037      0.000       0.503       0.882
+   ==============================================================================
+   Omnibus:                        1.843   Durbin-Watson:                   0.565
+   Prob(Omnibus):                  0.398   Jarque-Bera (JB):                1.113
+   Skew:                          -0.421   Prob(JB):                        0.573
+   Kurtosis:                       1.839   Cond. No.                     4.47e+05
+   ==============================================================================
+
+   Warnings:
+   [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+   [2] The condition number is large, 4.47e+05. This might indicate that there are
+   strong multicollinearity or other numerical problems.
+   :end:
+
+   #+caption: Shows a positive trend between reading scores and year. This indicates reading scores have increased since 1990.
+   [[./figure/reading_year.png]]
+   #+caption: Reading Scores per Year Residuals. The residuals have no obvious bias and are homoscedastic.
+   [[./figure/reading_year_resid.png]]
+
+** Does State Educational Expenditure have a Significant Affect on Scores?
+   We compare the NAEP reading scores from 2015 to total educational
+   expenditure, per state, to see if there is a significant
+   affect. Since each state has a different enrollment count (due to
+   population), we divide the total expenditure by the number of
+   students enrolled. This gives us the expenditure per student
+   approximately. We find that the p-value is 0.49, which is much
+   greater than the significance level of 0.05. As such we fail to
+   reject the null hypothesis (eq. \ref{eq:2}). We see no significant
+   effect from expenditure on scores.
+   #+begin_src python
+state2015 = state[state.YEAR == 2015]
+state2015['EXPENDITURE_PER_STUDENT'] = state2015.TOTAL_EXPENDITURE / state2015.ENROLL
+#print(state[['STATE', 'EXPENDITURE_PER_STUDENT']])x
+
+y, X = dmatrices(
+    'AVG_READING_8_SCORE ~ EXPENDITURE_PER_STUDENT',
+    data=state2015,
+    return_type="dataframe")
+
+model = sm.OLS(y, X).fit()
+print(model.summary())
+
+seaborn.regplot(x='EXPENDITURE_PER_STUDENT', y='AVG_READING_8_SCORE', data=state2015)
+pyplot.savefig('figure/reading_expen.png')
+pyplot.show()
+seaborn.residplot(x='EXPENDITURE_PER_STUDENT', y='AVG_READING_8_SCORE', data=state2015)
+pyplot.savefig('figure/reading_expen_resid.png')
+pyplot.show()
+   #+end_src   
+
+   #+RESULTS:
+   :results:
+   OLS Regression Results                            
+   ===============================================================================
+   Dep. Variable:     AVG_READING_8_SCORE   R-squared:                       0.010
+   Model:                             OLS   Adj. R-squared:                 -0.011
+   Method:                  Least Squares   F-statistic:                    0.4724
+   Date:                 Fri, 01 May 2020   Prob (F-statistic):              0.495
+   Time:                         23:44:30   Log-Likelihood:                -160.85
+   No. Observations:                   51   AIC:                             325.7
+   Df Residuals:                       49   BIC:                             329.6
+   Df Model:                            1                                         
+   Covariance Type:             nonrobust                                         
+   ===========================================================================================
+                                 coef    std err          t      P>|t|      [0.025      0.975]
+   -------------------------------------------------------------------------------------------
+   Intercept                 263.1506      2.592    101.518      0.000     257.941     268.360
+   EXPENDITURE_PER_STUDENT     0.1208      0.176      0.687      0.495      -0.232       0.474
+   ==============================================================================
+   Omnibus:                       10.057   Durbin-Watson:                   1.921
+   Prob(Omnibus):                  0.007   Jarque-Bera (JB):                9.557
+   Skew:                          -0.939   Prob(JB):                      0.00841
+   Kurtosis:                       3.983   Cond. No.                         47.4
+   ==============================================================================
+
+   Warnings:
+   [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+   :end:
+   
+   #+caption: 
+   [[./figure/reading_expen.png]]
+   [[./figure/reading_expen_resid.png]]
+
+** Does State Divorce Rate have a Significant Affect on Scores?
+   We compare the NAEP reading scores from 2015 to divorse rate, per
+   state, to see if there is a significant affect. We find that the
+   p-value is 0.92, which is much greater than the significance level
+   of 0.05. In fact, there is almost no relation between the two
+   variables. As such we fail to reject the null hypothesis
+   (eq. \ref{eq:3}). We see no significant effect from divorse rate on
+   scores.
+   #+begin_src python :results output drawer
+y, X = dmatrices(
+    'AVG_READING_8_SCORE ~ DIVORCE_RATE',
+    data=b,
+    return_type="dataframe")
+
+model = sm.OLS(y, X).fit()
+print(model.summary())
+
+seaborn.regplot(x='DIVORCE_RATE', y='AVG_READING_8_SCORE', data=minimal2015)
+pyplot.savefig('figure/reading_divorce.png')
+pyplot.show()
+seaborn.residplot(x='DIVORCE_RATE', y='AVG_READING_8_SCORE', data=minimal2015)
+pyplot.savefig('figure/reading_divorce_resid.png')
+pyplot.show()
+   #+end_src
+
+   #+RESULTS:
+   :results:
+   OLS Regression Results                            
+   ===============================================================================
+   Dep. Variable:     AVG_READING_8_SCORE   R-squared:                       0.037
+   Model:                             OLS   Adj. R-squared:                  0.015
+   Method:                  Least Squares   F-statistic:                     1.692
+   Date:                 Fri, 01 May 2020   Prob (F-statistic):              0.200
+   Time:                         23:50:45   Log-Likelihood:                -144.75
+   No. Observations:                   46   AIC:                             293.5
+   Df Residuals:                       44   BIC:                             297.2
+   Df Model:                            1                                         
+   Covariance Type:             nonrobust                                         
+   ================================================================================
+                      coef    std err          t      P>|t|      [0.025      0.975]
+   --------------------------------------------------------------------------------
+   Intercept      270.4682      4.273     63.300      0.000     261.857     279.079
+   DIVORCE_RATE    -1.6740      1.287     -1.301      0.200      -4.268       0.920
+   ==============================================================================
+   Omnibus:                       10.000   Durbin-Watson:                   1.878
+   Prob(Omnibus):                  0.007   Jarque-Bera (JB):                9.424
+   Skew:                          -0.944   Prob(JB):                      0.00899
+   Kurtosis:                       4.162   Cond. No.                         18.2
+   ==============================================================================
+
+   Warnings:
+   [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+   :end:
+
+   [[./figure/reading_divorce.png]]
+   [[./figure/reading_divorce_resid.png]]
+
+** Does State Median Family Income have a Significant Affect on Scores?
+*** COMMENT Linear Model
+   #+begin_src python :results output drawer
+y, X = dmatrices(
+    'AVG_READING_8_SCORE ~ INCOME',
+    data=minimal2015,
+    return_type="dataframe")
+
+model = sm.OLS(y, X).fit()
+#print(model.summary())
+
+seaborn.regplot(x='INCOME', y='AVG_READING_8_SCORE', data=minimal2015, order=1)
+pyplot.savefig('figure/reading_income.png')
+pyplot.show()
+seaborn.residplot(x='INCOME', y='AVG_READING_8_SCORE', data=minimal2015, order=1)
+pyplot.savefig('figure/reading_income_resid.png')
+pyplot.show()
+   #+end_src
+
+   #+RESULTS:
+   :results:
+   :end:
+
+   [[./figure/reading_income.png]]
+   [[./figure/reading_income_resid.png]]
+
+*** Non-Linear Model
+   We compare the NAEP reading scores from 2015 to median family
+   income, per state, to see if there is a significant affect. We find
+   that 30% of the variance in scores is explained by year
+   (i.e. \(R^2\)). We also find that the p-value is much less than the
+   significance level of 0.05. As such we reject the null hypothesis
+   (eq. \ref{eq:4}). We see that scores non-linearly increase as
+   income increases. With high error towards the higher incomes, this
+   model is likely only useful for lower to mid-range incomes. The
+   concrete model is
+   #+begin_export latex
+   \begin{equation}
+     \hat{\texttt{score}} = 156.1 + 0.0034 \cdot \texttt{income} + -2.58\cdot 10^{-8} \cdot \texttt{income}^2 \label{eq:4-an}
+   \end{equation}
+   #+end_export
+   
+   The intercept is not interable since we do not have scores for
+   students for year 0, since the NAEP study started in 1990. For
+   every increase in year of 0.69, the national reading score
+   increases by 1 (out of 500 total points). 
+   #+begin_src python :results output drawer
+incomeWeights = numpy.polyfit(minimal2015.INCOME, minimal2015.AVG_READING_8_SCORE, 2)
+incomeModel = numpy.poly1d(incomeWeights)
+print(incomeModel)
+
+y, X = dmatrices(
+    'AVG_READING_8_SCORE ~ incomeModel(INCOME)',
+    data=minimal2015,
+    return_type="dataframe")
+
+model = sm.OLS(y, X).fit()
+print(model.summary())
+
+#pyplot.plot(minimal2015.INCOME, minimal2015.AVG_READING_8_SCORE, 'o')
+seaborn.regplot(x='INCOME', y='AVG_READING_8_SCORE', data=minimal2015, order=2)
+pyplot.savefig('figure/reading_income_nl.png')
+pyplot.show()
+seaborn.residplot(x='INCOME', y='AVG_READING_8_SCORE', data=minimal2015, order=2)
+pyplot.savefig('figure/reading_income_nl_resid.png')
+pyplot.show()
+   #+end_src
+
+   #+RESULTS:
+   :results:
+   2
+   -2.583e-08 x + 0.003404 x + 156.1
+                                OLS Regression Results                            
+   ===============================================================================
+   Dep. Variable:     AVG_READING_8_SCORE   R-squared:                       0.304
+   Model:                             OLS   Adj. R-squared:                  0.290
+   Method:                  Least Squares   F-statistic:                     21.39
+   Date:                 Fri, 01 May 2020   Prob (F-statistic):           2.76e-05
+   Time:                         23:53:20   Log-Likelihood:                -151.86
+   No. Observations:                   51   AIC:                             307.7
+   Df Residuals:                       49   BIC:                             311.6
+   Df Model:                            1                                         
+   Covariance Type:             nonrobust                                         
+   =======================================================================================
+                             coef    std err          t      P>|t|      [0.025      0.975]
+   ---------------------------------------------------------------------------------------
+   Intercept             4.15e-12     57.268   7.25e-14      1.000    -115.084     115.084
+   incomeModel(INCOME)     1.0000      0.216      4.625      0.000       0.565       1.435
+   ==============================================================================
+   Omnibus:                        0.580   Durbin-Watson:                   1.908
+   Prob(Omnibus):                  0.748   Jarque-Bera (JB):                0.442
+   Skew:                          -0.223   Prob(JB):                        0.802
+   Kurtosis:                       2.905   Cond. No.                     2.23e+04
+   ==============================================================================
+
+   Warnings:
+   [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+   [2] The condition number is large, 2.23e+04. This might indicate that there are
+   strong multicollinearity or other numerical problems.
+   :end:
+
+* Conclusion
+  Ultimately, we found that NAEP reading scores at the eigth grade
+  level have increased since 1990. We then looked at the reading
+  scores only in 2015, and attempted to find a factor that
+  significantly affects the scores. Such factors were, median family
+  income, divorse rate, and educational expediture. Of these factors,
+  median family income was the only to significantly affect reading
+  scores.
+
+  Furthermore, it may be useful to note, that since expenditure did
+  not have a significant effect on scores, we cannot conclude that
+  increasing money spent on education per state will have an impact on
+  score performance.
+
+  Also, this study used divorse rate per state, however it may be beneficial
+  to replace this factor with the number of single-family homes with
+  children in school. This may provide a factor that is more directly
+  related to students in school, since divorse rate includes all
+  couples, even those without children in school.
+
+  In the future, it would be appropriate to find more factors that
+  affect reading scores across states. It is unrealistic to expect
+  that a univariate analysis could accurately model a complex subject
+  such as student reading performance across states.
+
+* Datasets
+** Education Unification Project
+    <<sec:data_unif>>
+https://www.kaggle.com/noriuk/us-education-datasets-unification-project#states_all_extended.csv
+** 2014-2018 Income American Community Survey 5-Year Estimates
+    <<sec:data_income>>
+https://www.census.gov/search-results.html?q=Median+Household+income&page=1&stateGeo=none&searchtype=web&cssp=SERP&_charset_=UTF-8
+** Divorce Rates
+    <<sec:data_divorce>>
+https://www.cdc.gov/nchs/data/dvs/state-divorce-rates-90-95-99-18.xlsx
+  
+
+
+* COMMENT Misc
+  #+begin_src python 
 import pandas
 import numpy
 from matplotlib import pyplot
@@ -101,28 +522,28 @@ class EduData:
             y = difference[mask]
             axes.plot(x, y, '-o', label=name)
             #axes.text(list(x)[-1], list(y)[-1], name)
+
+
     
 edu = EduData(pandas.read_csv('data/states_all_extended.csv'))
+data = pandas.read_csv('data/states_all.csv')
+national = data.loc[data.STATE == 'NATIONAL']
+state = data.loc[data.STATE != 'NATIONAL']
+def notnull(data, columns):
+    return data[data[columns].notnull().all(1)]
+
+# _, axes2 = pyplot.subplots()
+# for name, state in edu.byState():
+#     interest = 'G08_A_F_READING'
+#     mask = numpy.isfinite(state[interest])
+#     x = state.YEAR[mask]
+#     y = state[interest][mask]
+#     axes2.plot(x, y, '-o', label=name)
+#     axes2.text(list(x)[-1], list(y)[-1], name)
 
 
-_, axes2 = pyplot.subplots()
-for name, state in edu.byState():
-    interest = 'G08_A_F_READING'
-    mask = numpy.isfinite(state[interest])
-    x = state.YEAR[mask]
-    y = state[interest][mask]
-    axes2.plot(x, y, '-o', label=name)
-    axes2.text(list(x)[-1], list(y)[-1], name)
-
-
-edu.plotMaleVsFemaleNational('MATHEMATICS')
-edu.plotMaleVsFemaleNational('READING')
-edu.plotMaleVsFemaleState('MATHEMATICS')
-pyplot.show()
+# edu.plotMaleVsFemaleNational('MATHEMATICS')
+# edu.plotMaleVsFemaleNational('READING')
+# edu.plotMaleVsFemaleState('MATHEMATICS')
+#pyplot.show()
   #+end_src
-
-  #+RESULTS:
-
-* Analysis
-  Start with FINANCIAL REGRESSION
-* Conclusion
