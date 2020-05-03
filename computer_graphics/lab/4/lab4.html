@@ -13,27 +13,40 @@
     <script type="text/javascript" src="matrix.js"></script>
     <script type="text/javascript" src="vector.js"></script>    
     <script type="text/javascript" src="form.js"></script>
-    <script type="text/javascript" src="frameEventDispatcher.js"></script>            
+    <script type="text/javascript" src="frameEventDispatcher.js"></script>
+    <script type="text/javascript" src="LightSwitch.js"></script>
+    <script type="text/javascript" src="Camera.js"></script>
+    <script type="text/javascript" src="viewBox.js"></script>        
     <link rel="stylesheet" href="style.css">
     
     <script id="vertex-shader" type="x-shader/x-vertex">
       precision mediump float;
-      
-      struct Color {
-          vec3 ambient;
-          vec3 diffuse;
-          vec3 specular;
+      struct Camera {
+          mat4 view;
+          mat4 viewInverse;          
+          mat4 projection;
       };
 
-      struct Light {
-          Color color;
-          vec3 position;
-      };
+      attribute vec4 vertexPosition;
+      attribute vec3 vertexNormal;
+      uniform mat4 transformation;
 
-      struct DirectionalLight {
-          Color color;
-          vec4 direction;
-      };
+      uniform Camera camera;
+
+      varying vec4 transformedPosition;
+      varying vec4 transformedNormal;
+      void main() {
+          gl_PointSize = 1.0;
+          
+          transformedPosition = camera.view * transformation * vertexPosition;
+          gl_Position = camera.projection * transformedPosition;
+
+          transformedNormal = transformation * vec4(vertexNormal, 1.0);         
+      }
+    </script>
+    
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
 
       struct Camera {
           mat4 view;
@@ -41,51 +54,7 @@
           mat4 projection;
       };
 
-      Color falloffAtPositionFromLight(vec4 position, Light light) {
-          float distance = length(light.position - position.xyz);          
-          float falloffScalar = 0.00005 * pow(distance, 2.0);
-          
-          Color falloffColor;
-          falloffColor.ambient = light.color.ambient / falloffScalar;
-          falloffColor.diffuse = light.color.diffuse / falloffScalar;
-          falloffColor.specular = light.color.specular / falloffScalar;
-          return falloffColor;
-      }      
-
-      attribute vec4 vertexPosition;
-      attribute vec3 vertexNormal;
-      uniform mat4 transformation;
-
-      uniform Camera camera;
-      uniform Light lights[2];
-
-      varying vec3 fragmentDirectionToLight;
-      varying vec3 fragmentDirectionToCamera;
-      varying vec3 fragmentNormal;
-
-      varying vec3 targetAmbient, targetDiffuse, targetSpecular;
-      
-      void main() {
-          gl_PointSize = 1.0;
-          
-          vec4 transformedPosition = camera.view * transformation * vertexPosition;
-          gl_Position = camera.projection * transformedPosition;
-              
-          Color targetFalloff = falloffAtPositionFromLight(transformedPosition, lights[0]);
-          targetAmbient = targetFalloff.ambient;
-          targetDiffuse = targetFalloff.diffuse;
-          targetSpecular = targetFalloff.specular;
-          
-          fragmentDirectionToLight = normalize(lights[0].position - transformedPosition.xyz);
-          fragmentDirectionToCamera = normalize(-transformedPosition.xyz);
-          fragmentNormal = normalize((camera.viewInverse * transformation * vec4(vertexNormal, 1.0)).xyz);
-      }
-    </script>
-    
-    <script id="fragment-shader" type="x-shader/x-fragment">
-      precision mediump float;
-
-      struct Color {
+      struct Colors {
           vec3 ambient;
           vec3 diffuse;
           vec3 specular;
@@ -97,43 +66,77 @@
           vec3 normal;
       };
 
-      struct Fragment {
-          FragmentDirection direction;
-          Color color;
+      struct Falloff {
+          float constant;
+          float linear;
+          float quadratic;
       };
-          
-      struct Light {
-          Color color;
+      float falloffAtDistance(Falloff falloff, float distance) {
+          return 1.0 / (falloff.constant +
+                        falloff.linear * distance +
+                        falloff.quadratic * pow(distance, 2.0));
+      }
+      
+      struct PointLight {
+          Colors colors;
+          Falloff falloff;
           vec3 position;
+          float shininess;
+      };
+      Colors colorsAtPositionFromPointLight(vec4 position, PointLight light) {
+          float distance = length(light.position - position.xyz);
+          float falloff = falloffAtDistance(light.falloff, distance);
+          
+          Colors colorsAtPosition;
+          colorsAtPosition.ambient = light.colors.ambient * falloff;
+          colorsAtPosition.diffuse = light.colors.diffuse * falloff;
+          colorsAtPosition.specular = light.colors.specular * falloff;
+          return colorsAtPosition;
+      }        
+
+      struct SpotLight {
+          Colors colors;
+          vec3 position;          
+          vec4 direction;
+          float angle;
       };
       
-      uniform Light lights[2];
+      uniform Camera camera;
+      uniform PointLight lights[1];
+      uniform SpotLight spotlights[1];
       float shininess = 4.0;
-
-      varying vec3 fragmentDirectionToLight;
-      varying vec3 fragmentDirectionToCamera;
-      varying vec3 fragmentNormal;
-
-      varying vec3 targetAmbient, targetDiffuse, targetSpecular;      
-      
+  
+      varying vec4 transformedPosition;
+      varying vec4 transformedNormal;
       void main() {
-          FragmentDirection direction;
-          direction.toLight = normalize(fragmentDirectionToLight);
-          direction.toCamera = normalize(fragmentDirectionToCamera);
-          direction.normal = normalize(fragmentNormal);
+          FragmentDirection direction;          
+          direction.toLight = normalize(lights[0].position - transformedPosition.xyz);
+          direction.toCamera = normalize(-transformedPosition.xyz);
+          direction.normal = normalize((camera.viewInverse * transformedNormal).xyz);
 
-          Color color;
-          color.ambient = lights[0].color.ambient * targetAmbient;
-          
           float lambertian = max(dot(direction.toLight, direction.normal), 0.0);
-          color.diffuse = lights[0].color.diffuse * targetDiffuse * lambertian;
-          
           vec3 reflection = reflect(-direction.toLight, direction.normal);
           float directivity = dot(reflection, direction.toCamera);
-          float shine = pow(max(directivity, 0.0), shininess);
-          color.specular = lambertian > 0.0 ? lights[0].color.specular * shine : vec3(0.0);
+          float shine = pow(max(directivity, 0.0), lights[0].shininess);
+          
+          //float dotFromDirection = dot(direction.toLight, -spotlights[0].direction);
+          //float inLight = step(spotlights[0].limitAngle, dotFromDirection);
+          //float light = inLight * dot(direction.normal, direction.toLight);
 
-          vec3 clampedPhongSum = clamp(color.diffuse + color.ambient + color.specular, 0.0, 1.0);
+          Colors pointLightColors;
+          pointLightColors = colorsAtPositionFromPointLight(transformedPosition, lights[0]);
+          
+          Colors colors = Colors(vec3(0.0), vec3(0.0), vec3(0.0));
+          colors.ambient += pointLightColors.ambient;
+          colors.diffuse += pointLightColors.diffuse * lambertian;
+          if (lambertian > 0.0) {
+              colors.specular += pointLightColors.specular * shine;
+          }
+          else {
+              colors.specular = vec3(0.0);
+          }
+
+          vec3 clampedPhongSum = clamp(colors.diffuse + colors.ambient + colors.specular, 0.0, 1.0);
           gl_FragColor = vec4(clampedPhongSum, 1.0);
       }
     </script>
@@ -149,115 +152,131 @@
         <p>Modifiers</p>
         <ul id="lightModifierChoices"></ul>
       </form>
-
       <button class="openbtn" id="cameraPanelButton">&#9776;</button>
-      <script>
-        var choiceCount = 0;
-        function generateChoice(label, inputType, subType="") {
-            var choice = document.createElement("li");
-            choice.setAttribute("id", `li_${label}${subType}`)
-            choice.innerHTML = `<input type=${inputType} value='${label}${subType}' name='${inputType}${subType}' id='${label}${subType}'/>
-              <label for='${label}${subType}'>${label}</label>`
-            choiceCount += 1
-            return choice
-        }
-
-        function labelsToChoices(labels, inputType, subType="") {
-            var choices = []
-            labels.forEach((label) => {
-                choices.push(generateChoice(label, inputType, subType))
-            })
-            return choices
-        }
-
-        function choicesToElementChildren(choices, element) {
-            choices.forEach((choice) => {
-                element.appendChild(choice)
-            })
-        }
-
-        var currentProjection = null
-          
-        var projectionChoicesContainer = document.getElementById("projectionChoices")
-        var projectionLabels = ['Parallel', 'Perspective']
-        var projectionChoices = labelsToChoices(projectionLabels, "radio")
-        projectionChoices.forEach((choice) => {
-            projectionChoicesContainer.appendChild(choice)
-        })
-
-        var lightChoicesContainer = document.getElementById("lightChoices")        
-        var lightLabels = ['Spot', 'Point']
-        var lightChoices = labelsToChoices(lightLabels, "checkbox", "_light")
-        lightChoices.forEach((choice) => {
-            lightChoicesContainer.appendChild(choice)
-        })
-
-        var lightChoicesContainer = document.getElementById("lightModifierChoices")        
-        var lightLabels = ['Specular']
-        var lightChoices = labelsToChoices(lightLabels, "checkbox", "_lightModifier")
-        lightChoices.forEach((choice) => {
-            lightChoicesContainer.appendChild(choice)
-        })
-
-        var currentProjectionElement = document.getElementById("Parallel")
-        currentProjectionElement.checked = true
-        currentProjection = currentProjectionElement.value
-
-        var selectionSubject = {
-            observers: [],
-            addObserver: function(observer) {
-                this.observers.push(observer)
-            },
-            notify: function(selection) {
-                this.observers.forEach((observer) => {
-                    observer(selection)
-                })
-            }
-        }
-        selectionSubject.addObserver(console.log)
-        
-        var checkedLights = new Set()
-        var checkedModifiers = new Set()          
-          document.forms.cameraPanel.addEventListener('change', function(event) {
-              if(event.target.name === 'radio') {
-                  currentProjection = event.target.value
-              }
-              else if (event.target.name === 'checkbox_light') {
-                  let value = event.target.value
-                  let light = value.split("_")[0]
-                  let type = value.split("_")[1]                  
-                  
-                  if (checkedLights.has(light)) checkedLights.delete(light)
-                  else checkedLights.add(light)
-              }
-              else if (event.target.name === 'checkbox_lightModifier') {
-                  let value = event.target.value
-                  let modifier = value.split("_")[0]
-                  let type = value.split("_")[1]
-                  
-                  if (checkedModifiers.has(modifier)) checkedModifiers.delete(modifier)
-                  else checkedModifiers.add(modifier)
-              }
-
-              selectionSubject.notify({
-                  projection: currentProjection,
-                  lights: checkedLights,
-                  modifiers: checkedModifiers
-              })
-          });
-          
-          var panel = document.getElementById("cameraPanel")
-          panel.addEventListener('click', (event) => event.stopPropagation())
-          
-          var cameraPanelButton = document.getElementById("cameraPanelButton")
-          cameraPanelButton.addEventListener('click', (event) => {
-              event.stopPropagation()
-              panel.style.width = "100px"
-          })
-
-          document.addEventListener('click', () => panel.style.width = "0")
-        </script>
       <canvas id="gl-canvas" height="512" width="512"></canvas>
+      <div class="bottom-left">FPS: <span id="fps"></span></div>
     </div>
   </body>
+
+  <script>
+    var choiceCount = 0;
+    function generateChoice(label, inputType, subType="") {
+        var choice = document.createElement("li");
+        choice.setAttribute("id", `li_${label}${subType}`)
+        choice.innerHTML = `<input type=${inputType} value='${label}${subType}' name='${inputType}${subType}' id='${label}${subType}'/>
+              <label for='${label}${subType}'>${label}</label>`
+        choiceCount += 1
+        return choice
+    }
+
+    function labelsToChoices(labels, inputType, subType="") {
+        var choices = []
+        labels.forEach((label) => {
+            choices.push(generateChoice(label, inputType, subType))
+        })
+        return choices
+    }
+
+    function choicesToElementChildren(choices, element) {
+        choices.forEach((choice) => {
+            element.appendChild(choice)
+        })
+    }
+
+    var currentProjection = null
+    var checkedLights = new Set()
+    var checkedModifiers = new Set()
+    
+    var projectionChoicesContainer = document.getElementById("projectionChoices")
+    var projectionLabels = ['Parallel', 'Perspective']
+    var projectionChoices = labelsToChoices(projectionLabels, "radio")
+    projectionChoices.forEach((choice) => {
+        projectionChoicesContainer.appendChild(choice)
+    })
+
+    var lightChoicesContainer = document.getElementById("lightChoices")        
+    var lightLabels = ['Spot', 'Point']
+    var lightChoices = labelsToChoices(lightLabels, "checkbox", "_light")
+    lightChoices.forEach((choice) => {
+        lightChoicesContainer.appendChild(choice)
+    })
+
+    var lightChoicesContainer = document.getElementById("lightModifierChoices")        
+    var lightLabels = ['Specular']
+    var lightChoices = labelsToChoices(lightLabels, "checkbox", "_lightModifier")
+    lightChoices.forEach((choice) => {
+        lightChoicesContainer.appendChild(choice)
+    })
+
+    
+    var selectionSubject = {
+        observers: [],
+        addObserver: function(observer) {
+            this.observers.push(observer)
+        },
+        notify: function(selection) {
+            this.observers.forEach((observer) => {
+                observer(selection)
+            })
+        },
+        initialize: function(selection) {
+            selection.lights.forEach((light) => {
+                var lightElement = document.getElementById(`${light}_light`)
+                lightElement.checked = true
+                checkedLights.add(light)                    
+            })
+            selection.modifiers.forEach((modifier) => {
+                var modifierElement = document.getElementById(`${modifier}_lightModifier`)
+                modifierElement.checked = true
+                checkedModifiers.add(modifier)                    
+            })                
+            
+            var currentProjectionElement = document.getElementById(selection.projection)
+            currentProjectionElement.checked = true
+            currentProjection = currentProjectionElement.value
+            
+            this.notify(selection)
+        }
+    }        
+    
+    document.forms.cameraPanel.addEventListener('change', function(event) {
+        if(event.target.name === 'radio') {
+            currentProjection = event.target.value
+        }
+        else if (event.target.name === 'checkbox_light') {
+            let value = event.target.value
+            let light = value.split("_")[0]
+            let type = value.split("_")[1]                  
+            
+            if (checkedLights.has(light)) checkedLights.delete(light)
+            else checkedLights.add(light)
+        }
+        else if (event.target.name === 'checkbox_lightModifier') {
+            let value = event.target.value
+            let modifier = value.split("_")[0]
+            let type = value.split("_")[1]
+            
+            if (checkedModifiers.has(modifier)) checkedModifiers.delete(modifier)
+            else checkedModifiers.add(modifier)
+        }
+
+        selectionSubject.notify({
+            projection: currentProjection,
+            lights: checkedLights,
+            modifiers: checkedModifiers
+        })
+    });
+    
+    var panel = document.getElementById("cameraPanel")
+    panel.addEventListener('click', (event) => event.stopPropagation())
+    
+    var cameraPanelButton = document.getElementById("cameraPanelButton")
+    cameraPanelButton.addEventListener('click', (event) => {
+        event.stopPropagation()
+        panel.style.width = "100px"
+    })
+
+    document.addEventListener('click', () => panel.style.width = "0")
+  </script>
+  
 </html>

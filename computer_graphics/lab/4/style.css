@@ -176,3 +176,12 @@ h2 {
   background-color: #8080F0;
   color: white;
 }
+
+.bottom-left {
+  position: absolute;
+  bottom: 8px;
+  left: 16px;
+  font-family: "Roboto";
+  font-size: 20px;
+  color: white;
+}

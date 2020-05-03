@@ -1,3 +1,19 @@
+// class LightDrawer {
+
+// }
+        // this.cameraShaderLocations = ShaderLocations(shaderProgram, {
+        //     view: "camera.view",
+        //     viewInverse: "camera.viewInverse",
+        //     projection: "camera.projection"
+        // })
+        // this.vertexShaderLocations = ShaderLocations(shaderProgram, {
+        //     position: "vertex.position",
+        //     transformation: "vertex.transformation",
+        //     normal: "vertex.normal"
+        // })
+        // this.lightShaderLocations = ShaderLocations(shaderProgram, {
+
+
 class Drawer {
     setupWithGlAndShaders(gl, shaderProgram) {
         this.gl = gl
@@ -5,12 +21,28 @@ class Drawer {
         this.strategy = this.gl.TRIANGLES
         this.drawables = []
         this.lights = []
+            
+        this.viewLocation = this.gl.getUniformLocation(this.shaderProgram, "camera.view");
+        this.viewInverseLocation = this.gl.getUniformLocation(this.shaderProgram, "camera.viewInverse");        
+        this.projectionLocation = this.gl.getUniformLocation(this.shaderProgram, "camera.projection");
+        this.pointPosition = this.gl.getAttribLocation(this.shaderProgram, "vertexPosition")
+        this.transformationLocation = this.gl.getUniformLocation(this.shaderProgram, "transformation")
+        this.vertexNormalLocation = this.gl.getAttribLocation(this.shaderProgram, "vertexNormal");
+        
     }
 
+    setDrawingStrategy(strategy) {
+        this.strategy = strategy
+    }
+
+    setCamera(camera) {
+        this.camera = camera
+    }
+    
     lightColorTypeLocation(index, colorType) {
-        return this.gl.getUniformLocation(this.shaderProgram, `lights[${index}].color.${colorType}`)
+        const location = `lights[${index}].colors.${colorType}`
+        return this.gl.getUniformLocation(this.shaderProgram, location)
     }
-
     lightColorLocation(index) {
         return {
             ambient: this.lightColorTypeLocation(index, 'ambient'),
@@ -21,19 +53,44 @@ class Drawer {
 
     lightPositionLocation(index) {
         return this.gl.getUniformLocation(this.shaderProgram, `lights[${index}].position`)
+    }
+
+    lightFalloffTypeLocation(index, falloffType) {
+        const location = `lights[${index}].falloff.${falloffType}`
+        return this.gl.getUniformLocation(this.shaderProgram, location)
+    }
+    lightFalloffLocation(index) {
+        return {
+            constant: this.lightFalloffTypeLocation(index, 'constant'),
+            linear: this.lightFalloffTypeLocation(index, 'linear'),
+            quadratic: this.lightFalloffTypeLocation(index, 'quadratic')
+        }
+    }
+
+    lightShininessLocation(index) {
+        return this.gl.getUniformLocation(this.shaderProgram, `lights[${index}].shininess`)
     }    
 
     addLight(light) {
         var index = this.lights.length
         light.colorLocation = this.lightColorLocation(index)
         light.positionLocation = this.lightPositionLocation(index)
+        light.falloffLocation = this.lightFalloffLocation(index)
+        light.shininessLocation = this.lightShininessLocation(index)
         this.lights.push(light)
     }
 
     drawLight(light) {
         for (const colorType in light.color)
-            this.gl.uniform3f(light.colorLocation[colorType], ...light.color[colorType])
+            this.gl.uniform3f(
+                light.colorLocation[colorType],
+                ...light.color[colorType])
+        for (const falloffType in light.falloff)
+            this.gl.uniform1f(
+                light.falloffLocation[falloffType],
+                light.falloff[falloffType])        
         this.gl.uniform3f(light.positionLocation, ...light.position)
+        this.gl.uniform1f(light.shininessLocation, light.shininess)
     }
 
     drawLights() {
@@ -41,8 +98,18 @@ class Drawer {
             this.drawLight(light)
         })
     }
+   
     
     addDrawable(drawable) {
+        drawable.flattenedPoints = Float32Array.from(drawable.points.flat())
+        drawable.flattenedFaces = Uint16Array.from(drawable.faces.flat())                
+        const faceNormals = getFaceNormals(
+            drawable.points,
+            drawable.flattenedFaces);
+        drawable.vertexNormals = getVertexNormals(
+            drawable.points,
+            drawable.flattenedFaces,
+            faceNormals);        
         this.drawables.push(drawable)
     }
     
@@ -51,52 +118,44 @@ class Drawer {
     }
 
     draw(drawable) {
+        //Lights
         this.drawLights()
-        
-        const transformationLocation = this.gl.getUniformLocation(this.shaderProgram, "transformation")
-        this.gl.uniformMatrix4fv(transformationLocation, false, matrix.transpose(drawable.transformation).flat())
 
-        const flattenedView = matrix.transpose(this.view).flat()
-        const viewLocation = this.gl.getUniformLocation(this.shaderProgram, "camera.view");
-        this.gl.uniformMatrix4fv(viewLocation, false, flattenedView);
-        const flattenedViewInverse = this.viewInverse.flat()
-        const viewInverseLocation = this.gl.getUniformLocation(this.shaderProgram, "camera.viewInverse");
-        this.gl.uniformMatrix4fv(viewInverseLocation, false, flattenedViewInverse);
+        //Camera
+        const flattenedView = matrix.transpose(this.camera.view).flat()
+        this.gl.uniformMatrix4fv(this.viewLocation, false, flattenedView);
+        const flattenedViewInverse = this.camera.viewInverse.flat()
+        this.gl.uniformMatrix4fv(this.viewInverseLocation, false, flattenedViewInverse);
         const flattenedProjection = matrix.transpose(this.projection).flat()
-        const projectionLocation = this.gl.getUniformLocation(this.shaderProgram, "camera.projection");
-        this.gl.uniformMatrix4fv(projectionLocation, false, flattenedProjection);
+        this.gl.uniformMatrix4fv(this.projectionLocation, false, flattenedProjection);
 
-        const flattenedPoints = Float32Array.from(drawable.points.flat())
+        
+        //Vertex
+        this.gl.uniformMatrix4fv(this.transformationLocation, false, matrix.transpose(drawable.transformation).flat())
+        
+
         const pointBuffer = this.gl.createBuffer()
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, pointBuffer)
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, flattenedPoints, this.gl.STATIC_DRAW)
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, drawable.flattenedPoints, this.gl.STATIC_DRAW)
 
-        const flattenedFaces = Uint16Array.from(drawable.faces.flat())        
+
         const indexBuffer = this.gl.createBuffer()
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
-        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, flattenedFaces, this.gl.STATIC_DRAW)
+        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, drawable.flattenedFaces, this.gl.STATIC_DRAW)
         
-        const pointPosition = this.gl.getAttribLocation(this.shaderProgram, "vertexPosition")
-        this.gl.vertexAttribPointer(pointPosition, 4, this.gl.FLOAT, false, 0, 0)
-        this.gl.enableVertexAttribArray(pointPosition)
+        this.gl.vertexAttribPointer(this.pointPosition, 4, this.gl.FLOAT, false, 0, 0)
+        this.gl.enableVertexAttribArray(this.pointPosition)
 
-        var faceNormals = getFaceNormals(
-            drawable.points,
-            flattenedFaces);
-        var vertexNormals = getVertexNormals(
-            drawable.points,
-            flattenedFaces,
-            faceNormals);
-
-        var normalsbuffer = this.gl.createBuffer();
+        const normalsbuffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, normalsbuffer);
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, Float32Array.from(vertexNormals.flat()), this.gl.STATIC_DRAW);
-        var vertexNormalPointer = this.gl.getAttribLocation(this.shaderProgram, "vertexNormal");
-        this.gl.vertexAttribPointer(vertexNormalPointer, 3, this.gl.FLOAT, false, 0, 0);
-        this.gl.enableVertexAttribArray(vertexNormalPointer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, Float32Array.from(drawable.vertexNormals.flat()), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.vertexNormalLocation, 3, this.gl.FLOAT, false, 0, 0);
+        this.gl.enableVertexAttribArray(this.vertexNormalLocation);
 
+        
+        //Render
         this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT );
-        this.gl.drawElements(this.strategy, flattenedFaces.length, this.gl.UNSIGNED_SHORT,0)
+        this.gl.drawElements(this.strategy, drawable.flattenedFaces.length, this.gl.UNSIGNED_SHORT,0)
     }
 }
 
