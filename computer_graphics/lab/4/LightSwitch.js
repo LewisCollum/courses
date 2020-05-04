@@ -1,6 +1,7 @@
 class LightSwitch {
     constructor(light) {
         this.light = light
+        this.onColor = this.copyColors(light.colors)
         this.offColor = {
             ambient: [0.0, 0.0, 0.0],
             diffuse: [0.0, 0.0, 0.0],
@@ -11,20 +12,28 @@ class LightSwitch {
 
     turnOn() {
         this.isOn = true
-        this.light.color = Object.assign({}, this.light.onColor)
+        Object.assign(this.light.colors, this.onColor)
     }
 
     turnOff() {
         this.isOn = false
-        this.light.color = this.offColor
+        Object.assign(this.light.colors, this.offColor)
     }
 
     turnOffSpecular() {
-        this.light.color.specular = [0.0, 0.0, 0.0]
+        this.light.colors.specular = [0, 0, 0]
     }
 
     turnOnSpecular() {
         if (this.isOn)
-            this.light.color.specular = this.light.onColor.specular
-    }    
+            this.light.colors.specular = [...this.onColor.specular]
+    }
+
+    copyColors(colors) {
+        return {
+            ambient: [...colors.ambient],
+            diffuse: [...colors.diffuse],
+            specular: [...colors.specular]
+        }
+    }
 }

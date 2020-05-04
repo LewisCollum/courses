@@ -1,11 +1,16 @@
-class Camera {
-    constructor(vectors) {
-        this.viewPlane = this.viewPlaneFromVectors(vectors)
-        this.viewInverse = this.inverseViewMatrixFromPlane(this.viewPlane)
-        this.view = this.viewMatrixFromPlane(this.viewPlane)
+const camera = new function() {
+    this.create = function(rawCamera) {
+        let viewPlane = viewPlaneFromVectors(rawCamera)
+        let view = viewMatrixFromPlane(viewPlane)
+        let viewInverse = inverseViewMatrixFromPlane(viewPlane) 
+        
+        return {
+            viewInverse: viewInverse.flat(),
+            view: matrix.transpose(view).flat()
+        }
     }
 
-    viewPlaneFromVectors(vectors) {
+    viewPlaneFromVectors = function(vectors) {
         var viewPlane = {}
 
         viewPlane.origin = vectors.origin
@@ -23,19 +28,19 @@ class Camera {
     }
 
 
-    inverseViewMatrixFromPlane(viewPlane) {
+    inverseViewMatrixFromPlane = function(viewPlane) {
         const planeRotation = this.rotationMatrixFromPlane(viewPlane)
         const planeTranslation = form.Translate.each(...viewPlane.origin)
         return matrix.dot(planeTranslation, planeRotation)
     }
 
-    viewMatrixFromPlane(viewPlane) {
+    viewMatrixFromPlane = function(viewPlane) {
         const planeRotation = matrix.transpose(this.rotationMatrixFromPlane(viewPlane))
         const planeTranslation = form.Translate.each(...vector.negate(viewPlane.origin))
         return matrix.dot(planeRotation, planeTranslation)
     }
 
-    rotationMatrixFromPlane(viewPlane) {
+    rotationMatrixFromPlane = function(viewPlane) {
         const u = viewPlane.horizontalAxis
         const v = viewPlane.verticalAxis
         const n = viewPlane.normal
@@ -45,5 +50,4 @@ class Camera {
             [u[2], v[2], n[2], 0],        
             [0, 0, 0, 1]]
     }
-    
 }

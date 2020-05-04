@@ -8,61 +8,30 @@ function init(){
     gl.useProgram(shaderProgram)
     gl.enable(gl.DEPTH_TEST);    
     gl.viewport(0, 0, 512, 512)
-    gl.clearColor(0.0, 0.0, 0.0, 1.0)
+    gl.clearColor(0, 0, 0, 1.0)
 
-    var light = {
-        onColor: {
-            ambient: [0.0, 0.0, 0.01],
-            diffuse: [0.5, 0.2, 0.05],
-            specular: [0.4, 0.4, 0.6]
-        },
-        falloff: {
-            constant: 0,
-            linear: 0,
-            quadratic: 0.00005
-        },
-        shininess: 5,
-        position: [40, 20, 60]
-    }
-    const lightSwitch = new LightSwitch(light)
+    const lightSwitch = new LightSwitch(scene.lights.point[0])
+    //const directionalLightSwitch = new LightSwitch(scene.lights.point[0])
 
-    var spotlight = {
-        onColor: {
-            ambient: [0.1, 0.1, 0.0],
-            diffuse: [0.9, 0.9, 0.6],
-            specular: [0.4, 0.7, 0.0]
-        },
-        position: [-40, 20, 60],
-        lookAt: [0, 0, 0]
-    }
-    const spotlightSwitch = new LightSwitch(spotlight)
-    
-    var camera = new Camera({
-        origin: [0, 20, 60],
-        lookAt: [0, 0, 0],
-        up: [0, 1, 0]
-    })
-    
-    drawer = new Drawer()
-    drawer.setupWithGlAndShaders(gl, shaderProgram)
-    drawer.setDrawingStrategy(gl.TRIANGLES)
-    drawer.setCamera(camera)
-    drawer.addLight(light)
-    //drawer.addLight(spotlight)
+    const drawer = new Drawer(gl, shaderProgram)
+    const sceneImporter = new SceneImporter(gl, shaderProgram)
+    var sceneCallables = sceneImporter.sceneToCallables(scene)
+    drawer.addCallables(sceneCallables)
 
-    const viewBox = {left: -5, right: 5, top: 5, bottom: -5, near: 50, far: 100}
+    console.log(scene)
+
     const projectionLabelMap = {
-        'Parallel': function() {drawer.projection = orthographicFromViewBox(viewBox)},
-        'Perspective': function() {drawer.projection = perspectiveFromViewBox(viewBox)}
+        'Parallel': function() {scene.projection = projection.orthographic.create(scene.internal.viewBox)},
+        'Perspective': function() {scene.projection = projection.perspective.create(scene.internal.viewBox)}
     }
 
     const lightLabelMap = {
         'Point': function() {lightSwitch.turnOn()},
-        'Spot': function() {spotlightSwitch.turnOn()}
+        'Spot': function() {},//directionalLightSwitch.turnOn()}
     }
     const lightRemainsLabelMap = {
         'Point': function() {lightSwitch.turnOff()},
-        'Spot': function() {spotlightSwitch.turnOff()}
+        'Spot': function() {},//directionalLightSwitch.turnOff()}
     }
 
     const modifierLabelMap = {
@@ -93,38 +62,27 @@ function init(){
         modifierRemains.forEach((modifier) => {
             modifierRemainsLabelMap[modifier]()
         })
-
     })
+    selectionSubject.addObserver(function() {console.log(scene.lights.point[0])})
     selectionSubject.initialize({
         projection: 'Parallel',
         lights: new Set(["Point"]),
         modifiers: new Set(["Specular"])
     })
     
-
-    const shape = radial.make3d(30, 30)
-    const drawable = {
-        points: getVertices(),
-        faces: getFaces(),
-        transformation: matrix.Identity(4),
-        color: [0.6, 0.3, 0.0, 1]
-    }
-    drawer.addDrawable(drawable)
-
     const fpsElement = document.getElementById("fps")
     const fpsTextNode = document.createTextNode("")
     fpsElement.appendChild(fpsTextNode)
     
-    frameEventDispatcher.updateMillis = 0
+    frameEventDispatcher.updateMillis = 20
     frameEventDispatcher.addRenderingListener(() => {drawer.drawAll()})
     frameEventDispatcher.addEventListener(() => {
         var dt = frameEventDispatcher.dt()
         
-        if (Math.round(frameEventDispatcher.currentMillis)%5 == 0)
-            fpsTextNode.nodeValue = Math.round(dt)
+        fpsTextNode.nodeValue = Math.round(1000/dt/5)*5 //round to nearest multiple of 5
         
         var newRotation = form.Rotate.y(0.8 * dt/1000.0)
-        drawable.transformation = matrix.dot(drawable.transformation, newRotation)
+        mesh.updateTransformation(scene.meshes.head, newRotation)
     })
     frameEventDispatcher.onFrameEvent()
 };
