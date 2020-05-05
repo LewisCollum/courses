@@ -4,16 +4,16 @@ scene['lights'] = {
         {
             colors: {
                 ambient: [0.0, 0.0, 0.01],
-                diffuse: [0.3, 0.05, 0.01],
-                specular: [0.2, 0.1, 0.15]
+                diffuse: [0.8, 0.4, 0.2],
+                specular: [.5, 0.1, 0.5]
             },
             falloff: {
                 constant: 0,
-                linear: 0,
-                quadratic: 0.000052
+                linear: 0.0009,
+                quadratic: 0.0001
             },
-            shininess: 5,
-            position: [20, 5, 20]
+            shininess: 30,
+            position: [0, 20, 5]
         }
     ],
     
@@ -21,8 +21,8 @@ scene['lights'] = {
         {
             colors: {
                 ambient: [0.1, 0.1, 0.0],
-                diffuse: [1.0, 1.0, 0.8],
-                specular: [0.0, 0.0, 1.0]
+                diffuse: [0.5, 0.5, 0.4],
+                specular: [0.1, 0.1, 0.1]
             },
             direction: [0, -1, 0]
         }
@@ -40,12 +40,12 @@ scene['meshes'] = {
     head: mesh.create({
         points: getVertices(),
         faces: getFaces(),
-        transformation: form.Translate.x(0)
+        transformation: form.Translate.z(-0.5)
     }),
     ground: mesh.create({
         points: radial.make2d(100),
         faces: radial.make2dIndices(100),
-        transformation: matrix.dotMatrices([
+        transformation: matrix.multiplyAll([
             form.Translate.y(-2.5),            
             form.Scale.all(3),
             form.Rotate.x(-Math.PI/2),            

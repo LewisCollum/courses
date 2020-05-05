@@ -15,8 +15,8 @@ const mesh = new function() {
         }
     }
 
-    this.updateTransformation = function(entity, newTransformation) {
-        let transformation = matrix.dot(entity.internal.transformation, newTransformation)
+    this.transform = function(entity, newTransformation) {
+        let transformation = matrix.multiply(entity.internal.transformation, newTransformation)
         entity.internal.transformation = transformation        
         entity.transformation = matrix.transpose(transformation).flat()
     }

@@ -27,6 +27,10 @@ FrameDispatcher = {};
         return currentMillis - lastMillis
     }
 
+    context.millis = function() {
+        return currentMillis
+    }
+
     context.begin = function() {
         onFrame()
     }    

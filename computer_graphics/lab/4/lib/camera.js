@@ -5,9 +5,22 @@ const camera = new function() {
         let viewInverse = inverseViewMatrixFromPlane(viewPlane) 
         
         return {
+            origin: rawCamera.origin,
+            lookAt: rawCamera.lookAt,
+            up: rawCamera.up,
             viewInverse: viewInverse.flat(),
             view: matrix.transpose(view).flat()
         }
+    }
+
+    this.transform = function(camera, transformation) {
+        let origin = matrix.dotVector([...camera.origin, 1], transformation)
+        console.log(origin)
+        Object.assign(camera, this.create({
+            origin: origin[0],
+            lookAt: camera.lookAt,
+            up: camera.up
+        }))
     }
 
     viewPlaneFromVectors = function(vectors) {
@@ -31,13 +44,13 @@ const camera = new function() {
     inverseViewMatrixFromPlane = function(viewPlane) {
         const planeRotation = this.rotationMatrixFromPlane(viewPlane)
         const planeTranslation = form.Translate.each(...viewPlane.origin)
-        return matrix.dot(planeTranslation, planeRotation)
+        return matrix.multiply(planeTranslation, planeRotation)
     }
 
     viewMatrixFromPlane = function(viewPlane) {
         const planeRotation = matrix.transpose(this.rotationMatrixFromPlane(viewPlane))
         const planeTranslation = form.Translate.each(...vector.negate(viewPlane.origin))
-        return matrix.dot(planeRotation, planeTranslation)
+        return matrix.multiply(planeRotation, planeTranslation)
     }
 
     rotationMatrixFromPlane = function(viewPlane) {

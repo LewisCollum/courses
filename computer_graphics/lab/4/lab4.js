@@ -18,8 +18,12 @@ function init(){
     var sceneCallables = sceneImporter.sceneToCallables(scene)
     drawer.addCallables(sceneCallables)
 
-    console.log(scene)
-
+    console.log(scene.camera)
+    console.log(matrix.transpose([[1, 2, 3, 4]]))
+    console.log(matrix.dot(form.Translate.y(1), [[1, 2, 3, 1]]))
+    //camera.transform(scene.camera, form.Translate.y(10))
+    //console.log(scene.camera)
+    
     const projectionLabelMap = {
         'Parallel': function() {scene.projection = projection.orthographic.create(scene.internal.viewBox)},
         'Perspective': function() {scene.projection = projection.perspective.create(scene.internal.viewBox)}
@@ -73,15 +77,17 @@ function init(){
     const fpsTextNode = document.createTextNode("")
     fpsElement.appendChild(fpsTextNode)
 
-    FrameDispatcher.setUpdateMillis(33)
+    FrameDispatcher.setUpdateMillis(20)
     FrameDispatcher.addRenderingListener(() => {drawer.drawAll()})
     FrameDispatcher.addListener(() => {
         var dt = FrameDispatcher.dt()
         
         fpsTextNode.nodeValue = Math.round(1000/dt/5)*5 //round to nearest multiple of 5
-        
-        var newRotation = form.Rotate.y(0.8 * dt/1000.0)
-        mesh.updateTransformation(scene.meshes.head, newRotation)
+
+        mesh.transform(
+            scene.meshes.head,
+            form.Rotate.y(0.8 * dt/1000.0))
     })
+    
     FrameDispatcher.begin()
 };
