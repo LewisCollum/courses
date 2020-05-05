@@ -72,16 +72,16 @@ function init(){
     const fpsElement = document.getElementById("fps")
     const fpsTextNode = document.createTextNode("")
     fpsElement.appendChild(fpsTextNode)
-    
-    frameEventDispatcher.updateMillis = 20
-    frameEventDispatcher.addRenderingListener(() => {drawer.drawAll()})
-    frameEventDispatcher.addEventListener(() => {
-        var dt = frameEventDispatcher.dt()
+
+    FrameDispatcher.setUpdateMillis(33)
+    FrameDispatcher.addRenderingListener(() => {drawer.drawAll()})
+    FrameDispatcher.addListener(() => {
+        var dt = FrameDispatcher.dt()
         
         fpsTextNode.nodeValue = Math.round(1000/dt/5)*5 //round to nearest multiple of 5
         
         var newRotation = form.Rotate.y(0.8 * dt/1000.0)
         mesh.updateTransformation(scene.meshes.head, newRotation)
     })
-    frameEventDispatcher.onFrameEvent()
+    FrameDispatcher.begin()
 };
