@@ -7,7 +7,6 @@ class Drawer {
 
     addCallables(callables) {
         this.callables.push(...callables)
-        console.log(this.callables)
     }
     
     drawAll() {

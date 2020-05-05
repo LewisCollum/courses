@@ -11,7 +11,7 @@ function init(){
     gl.clearColor(0, 0, 0, 1.0)
 
     const lightSwitch = new LightSwitch(scene.lights.point[0])
-    //const directionalLightSwitch = new LightSwitch(scene.lights.point[0])
+    const directionalLightSwitch = new LightSwitch(scene.lights.directional[0])
 
     const drawer = new Drawer(gl, shaderProgram)
     const sceneImporter = new SceneImporter(gl, shaderProgram)
@@ -27,11 +27,11 @@ function init(){
 
     const lightLabelMap = {
         'Point': function() {lightSwitch.turnOn()},
-        'Spot': function() {},//directionalLightSwitch.turnOn()}
+        'Directional': function() {directionalLightSwitch.turnOn()}
     }
     const lightRemainsLabelMap = {
         'Point': function() {lightSwitch.turnOff()},
-        'Spot': function() {},//directionalLightSwitch.turnOff()}
+        'Directional': function() {directionalLightSwitch.turnOff()}
     }
 
     const modifierLabelMap = {
@@ -63,10 +63,9 @@ function init(){
             modifierRemainsLabelMap[modifier]()
         })
     })
-    selectionSubject.addObserver(function() {console.log(scene.lights.point[0])})
     selectionSubject.initialize({
         projection: 'Parallel',
-        lights: new Set(["Point"]),
+        lights: new Set(["Point", "Directional"]),
         modifiers: new Set(["Specular"])
     })
     

@@ -18,14 +18,14 @@ scene['lights'] = {
     ],
     
     directional: [
-        // {
-        //     colors: {
-        //         ambient: [0.1, 0.1, 0.0],
-        //         diffuse: [0.9, 0.9, 0.6],
-        //         specular: [0.4, 0.7, 0.0]
-        //     },
-        //     direction: [0, 0, 0]
-        // }
+        {
+            colors: {
+                ambient: [0.1, 0.1, 0.0],
+                diffuse: [1.0, 1.0, 0.8],
+                specular: [0.0, 0.0, 1.0]
+            },
+            direction: [0, -1, 0]
+        }
     ]
 }
 
@@ -42,6 +42,16 @@ scene['meshes'] = {
         faces: getFaces(),
         transformation: form.Translate.x(0)
     }),
+    ground: mesh.create({
+        points: radial.make2d(100),
+        faces: radial.make2dIndices(100),
+        transformation: matrix.dotMatrices([
+            form.Translate.y(-2.5),            
+            form.Scale.all(3),
+            form.Rotate.x(-Math.PI/2),            
+            form.Rotate.z(Math.PI/4),            
+        ])
+    })      
 }
 
 scene['internal'] = {}

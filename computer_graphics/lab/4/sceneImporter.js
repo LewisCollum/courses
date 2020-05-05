@@ -37,20 +37,16 @@ class SceneImporter {
                 let valuesTag = tag + `${name}`
                 let location = this.locationFromTag(valuesTag)
                 if (location) {
-                    console.log(valuesTag, entity)                                    
                     if (entity.length == 3) {
                         //vec3
-                        console.log('vec3', ...object[name])
                         returnables.push(function(gl) {gl.uniform3f(location, ...object[name])})
                     }
                     else if (object.length == 4) {
                         //vec4
-                        //console.log('vec4')                                                
                         returnables.push(function(gl) {gl.uniform4f(location, ...object[name])})                        
                     }
                     else {
                         //Matrix
-                        //console.log('matrix')                        
                         returnables.push(function(gl) {gl.uniformMatrix4fv(location, false, object[name])})
                     }                    
                 }
@@ -59,7 +55,6 @@ class SceneImporter {
                 let valueTag = tag + `${name}`
                 let location = this.locationFromTag(valueTag)
                 if (location) {
-                    console.log(valueTag, entity)
                     returnables.push(function(gl) {gl.uniform1f(location, object[name])})
                 }
             }            

@@ -147,21 +147,23 @@
           }
 
 
-          // for (int i = 0; i < 2; ++i) {
-          //     Colors attenuated = pointLightColorsAtPosition(lights.point[i], transformedPosition);
-          //     Directions directions;
-          //     directions.toLight = normalize(vec3(-lights.directional[i].direction));
-          //     directions.toCamera = normalize(-transformedPosition.xyz);
-          //     directions.normal = normalize((camera.viewInverse * transformedNormal).xyz);
-          //     // float lambertian = max(dot(directions.toLight, directions.normal), 0.0);
-          //     // vec3 reflection = reflect(-directions.toLight, directions.normal);
-          //     // float directivity = dot(reflection, directions.toCamera);
-          //     // float shine = pow(max(directivity, 0.0), lights.point[i].shininess);
-          //     // vec3 ambient = attenuated.ambient;
-          //     // vec3 diffuse = attenuated.diffuse * lambertian;
-          //     // vec3 specular = lambertian > 0.0 ? attenuated.specular * shine : vec3(0.0);
-          //     // pointLightColors += ambient + diffuse + specular;
-          // }
+          for (int i = 0; i < 2; ++i) {
+              if (i < count.directional) {
+                  //Colors attenuated = pointLightColorsAtPosition(lights.point[i], transformedPosition);
+                  Directions directions;
+                  directions.toLight = normalize(vec3(-lights.directional[i].direction));
+                  directions.normal = normalize((camera.viewInverse * transformedNormal).xyz);
+                  directions.toCamera = normalize(-transformedPosition.xyz);
+                  float lambertian = max(dot(directions.normal, directions.toLight), 0.0);
+                  vec3 reflection = reflect(-directions.toLight, directions.normal);
+                  float directivity = dot(directions.toCamera, reflection);
+                  float shine = pow(max(directivity, 0.0), lights.point[i].shininess);
+                  vec3 ambient = lights.directional[i].colors.ambient;
+                  vec3 diffuse = lights.directional[i].colors.diffuse * lambertian;
+                  vec3 specular = lambertian > 0.0 ? lights.directional[i].colors.specular * shine : vec3(0.0);
+                  pointLightColors += ambient + diffuse + specular;
+              }
+          }
 
           
           vec3 colors = vec3(0.0);
@@ -224,7 +226,7 @@
     })
 
     var lightChoicesContainer = document.getElementById("lightChoices")        
-    var lightLabels = ['Spot', 'Point']
+    var lightLabels = ['Directional', 'Point']
     var lightChoices = labelsToChoices(lightLabels, "checkbox", "_light")
     lightChoices.forEach((choice) => {
         lightChoicesContainer.appendChild(choice)

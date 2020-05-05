@@ -2,13 +2,24 @@ const radial = {};
 (function(context) {
     context.make2d = function(pointCount) {
         const vectorAngle = 2 * Math.PI / pointCount
-        var points = []
+        var points = [[0, 0, 0, 1]]
         for (let i = 0; i < pointCount; ++i) {
             let x = Math.cos(vectorAngle * i)
             let y = Math.sin(vectorAngle * i)
             points.push([x, y, 0, 1])
         }
         return points
+    }
+
+    context.make2dIndices = function(pointCount) {
+        let faceIndices = []
+        for (let i = 0; i < pointCount; ++i) {
+            if (i !== pointCount-1)
+                faceIndices.push(0, i+1, i+2)
+            else
+                faceIndices.push(0, i+1, 1)
+        }
+        return faceIndices
     }
 
     //TODO extract functions
