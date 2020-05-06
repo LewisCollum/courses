@@ -43,13 +43,13 @@ const camera = new function() {
 
     inverseViewMatrixFromPlane = function(viewPlane) {
         const planeRotation = this.rotationMatrixFromPlane(viewPlane)
-        const planeTranslation = form.Translate.each(...viewPlane.origin)
+        const planeTranslation = form.translate.each(...viewPlane.origin)
         return matrix.multiply(planeTranslation, planeRotation)
     }
 
     viewMatrixFromPlane = function(viewPlane) {
         const planeRotation = matrix.transpose(this.rotationMatrixFromPlane(viewPlane))
-        const planeTranslation = form.Translate.each(...vector.negate(viewPlane.origin))
+        const planeTranslation = form.translate.each(...vector.negate(viewPlane.origin))
         return matrix.multiply(planeRotation, planeTranslation)
     }
 

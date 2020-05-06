@@ -4,9 +4,10 @@ const matrix = {};
         return Array(rows).fill().map(rows => Array(columns).fill().map(columns => fill))
     }
 
-    context.multiply = (a, b) => a.map(x => context.transpose(b).map(y => context.dot(x, y)));
-    context.dot = (a, b) => a.map((x, i) => a[i] * b[i]).reduce((m, n) => m + n);
-    context.transpose = a => a[0].map((x, i) => a.map(y => y[i]));    
+    context.multiply = (a, b) => a.map(x => context.transpose(b).map(y => context.dot(x, y)))
+    context.multiplyAll = a => a.reduce((product, rest) => context.multiply(product, rest))
+    context.dot = (a, b) => a.map((x, i) => a[i] * b[i]).reduce((m, n) => m + n)
+    context.transpose = a => a[0].map((x, i) => a.map(y => y[i]))
 
     context.Identity = function(size) {
         identity = context.make(size, size, 0)
@@ -23,7 +24,5 @@ const matrix = {};
         return first.map((value, index) => value * second[index]).reduce((sum, rest) => sum + rest)
     }
 
-    context.multiplyAll = function(matrices) {
-        return matrices.reduce((interpolation, rest) => context.multiply(interpolation, rest))
-    }
+
 })(matrix);

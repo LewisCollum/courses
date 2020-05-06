@@ -73,7 +73,8 @@ function init(){
         lights: new Set(["Point", "Directional"]),
         modifiers: new Set(["Specular"])
     })
-    
+
+
     const scoreElement = document.getElementById("score")
     const scoreTextNode = document.createTextNode("")
     scoreElement.appendChild(scoreTextNode)
@@ -84,10 +85,8 @@ function init(){
         var dt = FrameDispatcher.dt()
         
         scoreTextNode.nodeValue = Math.round(1000/dt/5)*5 //round to nearest multiple of 5
-
-        mesh.transform(
-            scene.meshes.head,
-            form.Translate.z(1*Math.cos(FrameDispatcher.millis()/500)))
+        scene.meshes.head.rotation = form.rotate.y(FrameDispatcher.millis()/1000)
+        scene.meshes.head.position = form.translate.z(30*Math.cos(FrameDispatcher.millis()/500))
     })
     
     FrameDispatcher.begin()

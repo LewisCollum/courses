@@ -13,7 +13,7 @@ scene['lights'] = {
                 quadratic: 0.0001
             },
             shininess: 30,
-            position: [0, 20, 5]
+            position: [0, 10, 60]
         }
     ],
     
@@ -38,29 +38,29 @@ scene['camera'] = camera.create({
 
 
 scene['meshes'] = {
-    // head: mesh.create({
-    //     points: getVertices(),
-    //     faces: getFaces(),
-    //     transformation: form.Translate.z(-0.5)
-    // }),
-    ground: mesh.create({
-        points: radial.make2d(100),
-        faces: radial.make2dIndices(100),
-        transformation: matrix.multiplyAll([
-            form.Translate.y(-2.5),            
-            form.Scale.all(3),
-            form.Rotate.x(-Math.PI/2),            
-            form.Rotate.z(Math.PI/4),            
-        ])
+    head: new Mesh({
+        points: getVertices(),
+        faces: getFaces(),
+        scale: form.scale.all(3)
     }),
-    head: mesh.create({
-        points: radial.make3d(20, 20),
-        faces: radial.make3dIndices(20, 20),
-        transformation: form.Scale.all(1)
-    })
+    // ground: mesh.create({
+    //     points: radial.make2d(100),
+    //     faces: radial.make2dIndices(100),
+    //     transformation: matrix.multiplyAll([
+    //         form.translate.y(-2.5),            
+    //         form.scale.all(3),
+    //         form.rotate.x(-Math.PI/2),            
+    //         form.rotate.z(Math.PI/4),            
+    //     ])
+    // }),
+    // head: new Mesh({
+    //     points: radial.make3d(20, 20),
+    //     faces: radial.make3dIndices(20, 20),
+    //     scale: form.scale.all(3)
+    // })
     
 }
 
 scene['internal'] = {}
-scene.internal['viewBox'] = {left: -15, right: 15, top: 15, bottom: -15, near: 50, far: 1000}
+scene.internal['viewBox'] = {left: -15, right: 15, top: 15, bottom: -15, near: 25, far: 100}
 scene['projection'] = projection.orthographic.create(scene.internal.viewBox)

@@ -1,6 +1,6 @@
 const form = {};
 (function(context) {
-    context.Rotate = class {
+    context.rotate = class {
         static noZ(radians) {
             return [[Math.cos(radians), -Math.sin(radians), 0, 0],
                     [Math.sin(radians), Math.cos(radians), 0, 0],
@@ -31,7 +31,7 @@ const form = {};
     }
 
 
-    context.Translate = class {
+    context.translate = class {
         static x(translation) {return this.each(translation, 0, 0)}
         static y(translation) {return this.each(0, translation, 0)}
         static z(translation) {return this.each(0, 0, translation)}
@@ -47,7 +47,7 @@ const form = {};
     }
 
 
-    context.Scale = class {
+    context.scale = class {
         static x(value) {
             return [[value, 0, 0, 0],
                     [0, 1, 0, 0],

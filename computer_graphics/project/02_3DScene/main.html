@@ -17,7 +17,7 @@
     <script type="text/javascript" src="lib/LightSwitch.js"></script>
     <script type="text/javascript" src="lib/camera.js"></script>
     <script type="text/javascript" src="lib/SceneImporter.js"></script>
-    <script type="text/javascript" src="lib/mesh.js"></script>
+    <script type="text/javascript" src="lib/Mesh.js"></script>
     <script type="text/javascript" src="lib/projection.js"></script>
 
     <script type="text/javascript" src="object.js"></script>    
@@ -48,7 +48,7 @@
           transformedPosition = camera.view * transformation * position;
           gl_Position = projection * transformedPosition;
 
-          transformedNormal = vec4(normal, 1.0);         
+          transformedNormal = camera.view * transformation * vec4(normal, 0.0);         
       }
     </script>
     
@@ -138,13 +138,13 @@
                   Directions directions;
                   directions.toLight = normalize(lights.point[i].position - transformedPosition.xyz);
                   directions.toCamera = normalize(-transformedPosition.xyz);
-                  directions.normal = normalize((camera.viewInverse * transformedNormal).xyz);
-                  float lambertian = max(dot(directions.toLight, directions.normal), 0.0);
+                  directions.normal = normalize(transformedNormal.xyz);
+                  float lambertian = max(dot(directions.normal, directions.toLight), 0.0);
                   vec3 reflection = reflect(-directions.toLight, directions.normal);
                   float directivity = dot(directions.toCamera, reflection);
                   float shine = pow(max(directivity, 0.0), lights.point[i].shininess);
                   vec3 ambient = attenuated.ambient;
-                  vec3 diffuse = attenuated.diffuse * lambertian;
+                  vec3 diffuse = lambertian * attenuated.diffuse;
                   vec3 specular = lambertian > 0.0 ? attenuated.specular * shine : vec3(0.0);
                   pointLightColors += ambient + diffuse + specular;
               }
@@ -156,7 +156,7 @@
                   //Colors attenuated = pointLightColorsAtPosition(lights.point[i], transformedPosition);
                   Directions directions;
                   directions.toLight = normalize(vec3(-lights.directional[i].direction));
-                  directions.normal = normalize((camera.viewInverse * transformedNormal).xyz);
+                  directions.normal = normalize(transformedNormal.xyz);
                   directions.toCamera = normalize(-transformedPosition.xyz);
                   float lambertian = max(dot(directions.normal, directions.toLight), 0.0);
                   vec3 reflection = reflect(-directions.toLight, directions.normal);
