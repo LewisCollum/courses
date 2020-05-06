@@ -87,7 +87,7 @@ function init(){
 
         mesh.transform(
             scene.meshes.head,
-            form.Rotate.y(0.8 * dt/1000.0))
+            form.Translate.z(1*Math.cos(FrameDispatcher.millis()/500)))
     })
     
     FrameDispatcher.begin()

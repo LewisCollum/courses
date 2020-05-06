@@ -48,7 +48,7 @@
           transformedPosition = camera.view * transformation * position;
           gl_Position = projection * transformedPosition;
 
-          transformedNormal = transformation * vec4(normal, 1.0);         
+          transformedNormal = vec4(normal, 1.0);         
       }
     </script>
     

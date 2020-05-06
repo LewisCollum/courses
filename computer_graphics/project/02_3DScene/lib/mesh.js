@@ -21,6 +21,11 @@ const mesh = new function() {
         entity.transformation = matrix.transpose(transformation).flat()
     }
 
+    this.setTransform = function(entity, newTransformation) {
+        entity.internal.transformation = newTransformation        
+        entity.transformation = matrix.transpose(newTransformation).flat()
+    }
+    
     this.flipNormals = function(normals) {
         let copy = [...normals]
         for (let i = 0; i < normals.length; i+=3) {
