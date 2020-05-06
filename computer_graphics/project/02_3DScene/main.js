@@ -8,7 +8,7 @@ function init(){
     gl.useProgram(shaderProgram)
     gl.enable(gl.DEPTH_TEST);    
     gl.viewport(0, 0, 512, 512)
-    gl.clearColor(0.2, 0.2, 0.2, 1.0)
+    gl.clearColor(0, 0, 0, 1.0)
 
     const lightSwitch = new LightSwitch(scene.lights.point[0])
     const directionalLightSwitch = new LightSwitch(scene.lights.directional[0])
@@ -87,6 +87,7 @@ function init(){
         scoreTextNode.nodeValue = Math.round(1000/dt/5)*5 //round to nearest multiple of 5
         scene.meshes.head.rotation = form.rotate.y(FrameDispatcher.millis()/1000)
         scene.meshes.head.position = form.translate.z(30*Math.cos(FrameDispatcher.millis()/500))
+        scene.meshes.ground.rotation = form.rotate.x(FrameDispatcher.millis()/10000)
     })
     
     FrameDispatcher.begin()
