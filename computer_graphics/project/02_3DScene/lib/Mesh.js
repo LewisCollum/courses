@@ -31,7 +31,7 @@ class Mesh {
         this.drawable = {
             points: Float32Array.from(this.settings.points.flat()),
             faces: flattenedFaces,
-            normals: Float32Array.from(getVertexNormals(this.settings.points, flattenedFaces, faceNormals).flat()),
+            normals: Float32Array.from(getVertexNormals(this.settings.points.flat(), flattenedFaces, faceNormals).flat()),
             transformation: Float32Array.from(matrix.transpose(this.settings.transformation).flat())
         }
     }

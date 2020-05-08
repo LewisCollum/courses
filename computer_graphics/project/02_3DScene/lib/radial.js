@@ -40,7 +40,7 @@ const radial = {};
                 let y = Math.cos(pitch) * Math.sin(yaw)
                 let z = Math.sin(pitch)
 
-                points.push([x, y, z])
+                points.push(x, y, z)
             }
         }
         points.push([0, 0, 1])

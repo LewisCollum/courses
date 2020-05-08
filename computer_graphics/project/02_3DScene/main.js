@@ -83,10 +83,10 @@ function init(){
     FrameDispatcher.addRenderingListener(() => {drawer.drawAll()})
     FrameDispatcher.addListener(() => {
         var dt = FrameDispatcher.dt()
-        
+
         scoreTextNode.nodeValue = Math.round(1000/dt/5)*5 //round to nearest multiple of 5
-        scene.meshes.head.rotation = form.rotate.y(FrameDispatcher.millis()/1000)
-        scene.meshes.head.position = form.translate.z(30*Math.cos(FrameDispatcher.millis()/500))
+        scene.meshes.coin.rotation = form.rotate.y(3*FrameDispatcher.millis()/1000)
+        scene.meshes.coin.position = form.translate.y(5*Math.cos(FrameDispatcher.millis()/500))
         scene.meshes.ground.rotation = form.rotate.x(FrameDispatcher.millis()/10000)
     })
     

@@ -50,22 +50,17 @@ scene['camera'] = camera.create({
 
 scene['meshes'] = {
     coin: new Mesh({
-      points: coin.vertices, //getVertices(),
-      faces: coin.vertices, //getFaces(),
-      scale: form.scale.all(3),
-    }),
-    head: new Mesh({
-        points: radial.make3d(20, 20), //getVertices(),
-        faces: radial.make3dIndices(20, 20), //getFaces(),
-        scale: form.scale.all(3),
+        points: coin.vertices, //getVertices(),
+        faces: coin.indices, //getFaces(),
+        scale: form.scale.all(20),
         material: {
             colors: {
                 ambient: [0, 0, 0],
-                diffuse: [0, 0.8, 1],
-                specular: [0.5, 0.5, 0.5]
+                diffuse: [0.9, 0.9, 0.2],
+                specular: [1, 1, 1]
             },
-            shininess: 100
-        }
+            shininess: 20
+        }        
     }),
     ground: new Mesh({
         points: radial.make3d(22, 50),
