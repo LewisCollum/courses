@@ -3,6 +3,9 @@
   <head>
     <title>Lab 4: Viewing & Lighting</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <img id="texture_planet" hidden src="resource/planet.jpg"/>
+    <img id="texture_brick" hidden src="resource/brick.jpg"/>
+    <img id="texture_concrete" hidden src="resource/concrete.jpg"/>            
 
     <script type="text/javascript" src="./Common/webgl-utils.js"></script>
     <script type="text/javascript" src="./Common/initShaders.js"></script>
@@ -17,14 +20,16 @@
     <script type="text/javascript" src="lib/LightSwitch.js"></script>
     <script type="text/javascript" src="lib/camera.js"></script>
     <script type="text/javascript" src="lib/SceneImporter.js"></script>
-    <script type="text/javascript" src="lib/Mesh.js"></script>
     <script type="text/javascript" src="lib/projection.js"></script>
-    <script type="text/javascript" src="lib/loadObj.js"></script>    
+    <script type="text/javascript" src="lib/ObjLoader.js"></script>
+    <script type="text/javascript" src="lib/Mesh.js"></script>    
 
-    <script type="text/javascript" src="coin.js"></script>
+    <!-- <script type="text/javascript" src="obj/sphere.js"></script>     -->
+    <script type="text/javascript" src="obj/coin.js"></script>
+    <script type="text/javascript" src="obj/wall.js"></script>    
     <script type="text/javascript" src="scene.js"></script>
     <script type="text/javascript" src="main.js"></script>
-
+    
     <link rel="stylesheet" href="style.css">
 
     <script id="vertex-shader" type="x-shader/x-vertex">
@@ -36,6 +41,7 @@
 
       attribute vec3 position;
       attribute vec3 normal;
+      attribute vec2 textureCoordinates;
       uniform mat4 transformation;
 
       uniform Camera camera;
@@ -43,6 +49,7 @@
 
       varying vec4 transformedPosition;
       varying vec4 transformedNormal;
+      varying vec2 transformedTextureCoordinates;
       void main() {
           gl_PointSize = 1.0;
 
@@ -50,6 +57,7 @@
           gl_Position = projection * transformedPosition;
 
           transformedNormal = camera.view * transformation * vec4(normal, 0.0);
+          transformedTextureCoordinates = textureCoordinates;
       }
     </script>
 
@@ -132,9 +140,12 @@
       uniform Camera camera;
       uniform Count count;
       uniform Material material;
+      uniform int isTextured;
+      uniform sampler2D textureSampler;
 
       varying vec4 transformedPosition;
       varying vec4 transformedNormal;
+      varying vec2 transformedTextureCoordinates;
       void main() {
           vec3 pointLightColors = vec3(0.0);
           for (int i = 0; i < lightMaxCount; ++i) {
@@ -148,6 +159,7 @@
                   vec3 reflection = reflect(-directions.toLight, directions.normal);
                   float directivity = dot(directions.toCamera, reflection);
                   float shine = pow(max(directivity, 0.0), material.shininess);
+                  
                   vec3 ambient = attenuated.ambient * material.colors.ambient;
                   vec3 diffuse = lambertian * attenuated.diffuse * material.colors.diffuse;
                   vec3 specular = lambertian > 0.0 ?
@@ -178,9 +190,12 @@
           }
 
 
-          vec3 colors = vec3(0.0);
-          colors += pointLightColors;
-          gl_FragColor = vec4(colors, 1.0);
+          vec4 colors = vec4(0.0);
+          colors += vec4(pointLightColors, 1.0);
+          if (isTextured != 0) {
+              colors *= texture2D(textureSampler, transformedTextureCoordinates);
+          }
+          gl_FragColor = colors;
       }
     </script>
   </head>
@@ -188,12 +203,8 @@
   <body onload = "init()">
     <div class="container" id="cameraContainer">
       <form id="cameraPanel" class="sidepanel">
-        <p>Projection</p>
-        <ul id="projectionChoices"></ul>
         <p>Lights</p>
         <ul id="lightChoices"></ul>
-        <p>Modifiers</p>
-        <ul id="lightModifierChoices"></ul>
       </form>
       <button class="openbtn" id="cameraPanelButton">&#9776;</button>
       <canvas id="gl-canvas" height="512" width="512"></canvas>
@@ -226,16 +237,7 @@
         })
     }
 
-    var currentProjection = null
     var checkedLights = new Set()
-    var checkedModifiers = new Set()
-
-    var projectionChoicesContainer = document.getElementById("projectionChoices")
-    var projectionLabels = ['Parallel', 'Perspective']
-    var projectionChoices = labelsToChoices(projectionLabels, "radio")
-    projectionChoices.forEach((choice) => {
-        projectionChoicesContainer.appendChild(choice)
-    })
 
     var lightChoicesContainer = document.getElementById("lightChoices")
     var lightLabels = ['Directional', 'Point']
@@ -243,14 +245,6 @@
     lightChoices.forEach((choice) => {
         lightChoicesContainer.appendChild(choice)
     })
-
-    var lightChoicesContainer = document.getElementById("lightModifierChoices")
-    var lightLabels = ['Specular']
-    var lightChoices = labelsToChoices(lightLabels, "checkbox", "_lightModifier")
-    lightChoices.forEach((choice) => {
-        lightChoicesContainer.appendChild(choice)
-    })
-
 
     var selectionSubject = {
         observers: [],
@@ -268,25 +262,12 @@
                 lightElement.checked = true
                 checkedLights.add(light)
             })
-            selection.modifiers.forEach((modifier) => {
-                var modifierElement = document.getElementById(`${modifier}_lightModifier`)
-                modifierElement.checked = true
-                checkedModifiers.add(modifier)
-            })
-
-            var currentProjectionElement = document.getElementById(selection.projection)
-            currentProjectionElement.checked = true
-            currentProjection = currentProjectionElement.value
-
             this.notify(selection)
         }
     }
 
     document.forms.cameraPanel.addEventListener('change', function(event) {
-        if(event.target.name === 'radio') {
-            currentProjection = event.target.value
-        }
-        else if (event.target.name === 'checkbox_light') {
+        if (event.target.name === 'checkbox_light') {
             let value = event.target.value
             let light = value.split("_")[0]
             let type = value.split("_")[1]
@@ -294,19 +275,9 @@
             if (checkedLights.has(light)) checkedLights.delete(light)
             else checkedLights.add(light)
         }
-        else if (event.target.name === 'checkbox_lightModifier') {
-            let value = event.target.value
-            let modifier = value.split("_")[0]
-            let type = value.split("_")[1]
-
-            if (checkedModifiers.has(modifier)) checkedModifiers.delete(modifier)
-            else checkedModifiers.add(modifier)
-        }
 
         selectionSubject.notify({
-            projection: currentProjection,
-            lights: checkedLights,
-            modifiers: checkedModifiers
+            lights: checkedLights
         })
     });
 

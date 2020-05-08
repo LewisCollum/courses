@@ -42,17 +42,20 @@ scene['lights'] = {
     ]
 }
 
+
 scene['camera'] = camera.create({
     origin: [0, 10, -60],
     lookAt: [0, 0, 0],
     up: [0, 1, 0]
 })
 
+console.log(wall)
+console.log(coin)
 scene['meshes'] = {
     coin: new Mesh({
-        points: coin.vertices, //getVertices(),
-        faces: coin.indices, //getFaces(),
-        scale: form.scale.all(20),
+        vertices: coin.vertices,
+        scale: form.scale.all(10),
+        origin: form.translate.each(0, 0, -20),
         material: {
             colors: {
                 ambient: [0, 0, 0],
@@ -60,16 +63,32 @@ scene['meshes'] = {
                 specular: [1, 1, 1]
             },
             shininess: 20
-        }        
+        }
+    }),
+    wall: new Mesh({
+        vertices: wall.vertices,
+        scale: form.scale.each(3, 5, 8),
+        origin: form.translate.each(0, 0, -10),
+        texture: {
+            image: document.getElementById('texture_concrete'),
+            textureCoordinates: wall.textureCoordinates
+        }                    
     }),
     ground: new Mesh({
-        points: radial.make3d(22, 50),
-        faces: radial.make3dIndices(22, 50),
-        scale: form.scale.all(200),
-        position: form.translate.each(0, -210, 50)
+        // vertices: sphere.vertices,
+        vertices: {
+            values: Float32Array.from(radial.make3d(22, 50)),
+            indices: Uint16Array.from(radial.make3dIndices(22, 50))
+        },
+        scale: form.scale.all(1),
+        origin: form.translate.each(0, 0, 0),
+        // texture: {
+        //     image: document.getElementById('texture_concrete'),
+        //     textureCoordinates: sphere.textureCoordinates
+        // }
     })
 }
 
 scene['internal'] = {}
 scene.internal['viewBox'] = {left: -15, right: 15, top: 15, bottom: -15, near: 25, far: 1000}
-scene['projection'] = projection.orthographic.create(scene.internal.viewBox)
+scene['projection'] = projection.perspective.create(scene.internal.viewBox)

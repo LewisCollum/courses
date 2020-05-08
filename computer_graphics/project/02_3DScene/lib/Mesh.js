@@ -7,6 +7,8 @@ class Mesh {
 
     setDefaults() {
         this.settings.transformation = matrix.Identity(4)
+        if (!this.settings.hasOwnProperty('origin'))
+            this.settings.origin = matrix.Identity(4)        
         if (!this.settings.hasOwnProperty('position'))
             this.settings.position = matrix.Identity(4)
         if (!this.settings.hasOwnProperty('scale'))
@@ -25,15 +27,26 @@ class Mesh {
     }
 
     setDrawable() {
-        let flattenedFaces = Uint16Array.from(this.settings.faces.flat())
-        let faceNormals = getFaceNormals(this.settings.points.flat(), flattenedFaces)
+        let faceNormals = getFaceNormals(this.settings.vertices.values, this.settings.vertices.indices)
+        let vertexNormals = getVertexNormals(
+                this.settings.vertices.values,
+                this.settings.vertices.indices,
+                faceNormals)
 
         this.drawable = {
-            points: Float32Array.from(this.settings.points.flat()),
-            faces: flattenedFaces,
-            normals: Float32Array.from(getVertexNormals(this.settings.points.flat(), flattenedFaces, faceNormals).flat()),
+            vertices: this.settings.vertices,
+            normals: Float32Array.from(vertexNormals.flat()),
             transformation: Float32Array.from(matrix.transpose(this.settings.transformation).flat())
         }
+
+        if (this.settings.hasOwnProperty('texture'))
+            this.drawable['texture'] = this.settings.texture
+
+        console.log("DRAWABLE", this.drawable)
+    }
+
+    set origin(matrix) {
+        this.settings.origin = matrix
     }
 
     set position(matrix) {
@@ -53,7 +66,7 @@ class Mesh {
     }
 
     update() {
-        this.settings.transformation = matrix.multiplyAll([this.settings.position, this.settings.scale, this.settings.rotation])
+        this.settings.transformation = matrix.multiplyAll([this.settings.origin, this.settings.position, this.settings.scale, this.settings.rotation])
         this.drawable.transformation = Float32Array.from(matrix.transpose(this.settings.transformation).flat())
         return this.drawable
     }

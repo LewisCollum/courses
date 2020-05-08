@@ -18,12 +18,8 @@ function init(){
 
     var sceneCallables = sceneImporter.sceneToCallables(scene)
     drawer.addCallables(sceneCallables)
-    
-    const projectionLabelMap = {
-        'Parallel': function() {scene.projection = projection.orthographic.create(scene.internal.viewBox)},
-        'Perspective': function() {scene.projection = projection.perspective.create(scene.internal.viewBox)}
-    }
 
+    
     const lightLabelMap = {
         'Point': function() {lightSwitch.turnOn()},
         'Directional': function() {directionalLightSwitch.turnOn()}
@@ -32,24 +28,8 @@ function init(){
         'Point': function() {lightSwitch.turnOff()},
         'Directional': function() {directionalLightSwitch.turnOff()}
     }
-
-    const modifierLabelMap = {
-        'Specular': function() {
-            lightSwitch.turnOnSpecular()
-            directionalLightSwitch.turnOnSpecular()
-        }
-    }    
-    const modifierRemainsLabelMap = {
-        'Specular': function() {
-            lightSwitch.turnOffSpecular()
-            directionalLightSwitch.turnOffSpecular()
-        }
-    }
     
-    selectionSubject.addObserver(console.log)    
     selectionSubject.addObserver(function(selections) {
-        projectionLabelMap[selections.projection]()
-
         var lightRemains = new Set(Object.keys(lightLabelMap))
         selections.lights.forEach((light) => {
             lightLabelMap[light]()
@@ -58,20 +38,9 @@ function init(){
         lightRemains.forEach((light) => {
             lightRemainsLabelMap[light]()            
         })
-
-        var modifierRemains = new Set(Object.keys(modifierLabelMap))
-        selections.modifiers.forEach((modifier) => {
-            modifierLabelMap[modifier]()
-            modifierRemains.delete(modifier)
-        })
-        modifierRemains.forEach((modifier) => {
-            modifierRemainsLabelMap[modifier]()
-        })
     })
     selectionSubject.initialize({
-        projection: 'Parallel',
-        lights: new Set(["Point", "Directional"]),
-        modifiers: new Set(["Specular"])
+        lights: new Set(["Point", "Directional"])
     })
 
 
@@ -85,9 +54,14 @@ function init(){
         var dt = FrameDispatcher.dt()
 
         scoreTextNode.nodeValue = Math.round(1000/dt/5)*5 //round to nearest multiple of 5
-        scene.meshes.coin.rotation = form.rotate.y(3*FrameDispatcher.millis()/1000)
-        scene.meshes.coin.position = form.translate.y(5*Math.cos(FrameDispatcher.millis()/500))
-        scene.meshes.ground.rotation = form.rotate.x(FrameDispatcher.millis()/10000)
+        if (scene.meshes.coin) {
+            scene.meshes.coin.rotation = form.rotate.y(3*FrameDispatcher.millis()/1000)
+            scene.meshes.coin.position = form.translate.y(2.5*Math.cos(FrameDispatcher.millis()/500))
+        }
+        if (scene.meshes.ground) {
+            scene.meshes.ground.rotation = form.rotate.x(FrameDispatcher.millis()/10000)
+        }
+        scene.meshes.wall.rotation = form.translate.x(5*Math.cos(2*FrameDispatcher.millis()/1000))        
     })
     
     FrameDispatcher.begin()

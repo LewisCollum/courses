@@ -6,7 +6,7 @@ const radial = {};
         for (let i = 0; i < pointCount; ++i) {
             let x = Math.cos(vectorAngle * i)
             let y = Math.sin(vectorAngle * i)
-            points.push([x, y, 0, 1])
+            points.push(x, y, 0)
         }
         return points
     }
@@ -29,7 +29,7 @@ const radial = {};
         const pitchAngleStep = Math.PI/stackCount
         var points = []
 
-        points.push([0, 0, -1])
+        points.push(0, 0, -1)
         for (let pitchIndex = 1; pitchIndex < stackCount; ++pitchIndex) {
             let pitch = pitchIndex * pitchAngleStep - Math.PI/2
             
@@ -43,7 +43,7 @@ const radial = {};
                 points.push(x, y, z)
             }
         }
-        points.push([0, 0, 1])
+        points.push(0, 0, 1)
         return points
     }
 
