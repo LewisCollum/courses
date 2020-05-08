@@ -2,16 +2,16 @@
 <html>
   <head>
     <title>Lab 4: Viewing & Lighting</title>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >    
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
 
     <script type="text/javascript" src="./Common/webgl-utils.js"></script>
     <script type="text/javascript" src="./Common/initShaders.js"></script>
     <script type="text/javascript" src="./Common/MV.js"></script>
-    
+
     <script type="text/javascript" src="lib/Drawer.js"></script>
     <script type="text/javascript" src="lib/radial.js"></script>
     <script type="text/javascript" src="lib/matrix.js"></script>
-    <script type="text/javascript" src="lib/vector.js"></script>    
+    <script type="text/javascript" src="lib/vector.js"></script>
     <script type="text/javascript" src="lib/form.js"></script>
     <script type="text/javascript" src="lib/FrameDispatcher.js"></script>
     <script type="text/javascript" src="lib/LightSwitch.js"></script>
@@ -19,18 +19,19 @@
     <script type="text/javascript" src="lib/SceneImporter.js"></script>
     <script type="text/javascript" src="lib/Mesh.js"></script>
     <script type="text/javascript" src="lib/projection.js"></script>
-
-    <script type="text/javascript" src="object.js"></script>    
+    
+    <script type="text/javascript" src="coin.js"></script>
+    <script type="text/javascript" src="object.js"></script>
     <script type="text/javascript" src="scene.js"></script>
-    <script type="text/javascript" src="main.js"></script>    
-    
+    <script type="text/javascript" src="main.js"></script>
+
     <link rel="stylesheet" href="style.css">
-    
+
     <script id="vertex-shader" type="x-shader/x-vertex">
       precision mediump float;
       struct Camera {
           mat4 view;
-          mat4 viewInverse;          
+          mat4 viewInverse;
       };
 
       attribute vec3 position;
@@ -38,26 +39,26 @@
       uniform mat4 transformation;
 
       uniform Camera camera;
-      uniform mat4 projection;      
+      uniform mat4 projection;
 
       varying vec4 transformedPosition;
       varying vec4 transformedNormal;
       void main() {
           gl_PointSize = 1.0;
-          
+
           transformedPosition = camera.view * transformation * vec4(position, 1.0);
           gl_Position = projection * transformedPosition;
 
-          transformedNormal = camera.view * transformation * vec4(normal, 0.0);         
+          transformedNormal = camera.view * transformation * vec4(normal, 0.0);
       }
     </script>
-    
+
     <script id="fragment-shader" type="x-shader/x-fragment">
       precision mediump float;
 
       struct Camera {
           mat4 view;
-          mat4 viewInverse;          
+          mat4 viewInverse;
       };
 
       struct Colors {
@@ -69,8 +70,8 @@
       struct Material {
           Colors colors;
           float shininess;
-      }; 
-      
+      };
+
       struct Directions {
           vec3 toLight;
           vec3 toCamera;
@@ -87,7 +88,7 @@
                         falloff.linear * distance +
                         falloff.quadratic * pow(distance, 2.0));
       }
-      
+
       struct PointLight {
           Colors colors;
           Falloff falloff;
@@ -96,7 +97,7 @@
       Colors pointLightColorsAtPosition(PointLight light, vec4 position) {
           float distance = length(light.position - position.xyz);
           float falloff = falloffAtDistance(light.falloff, distance);
-          
+
           Colors colorsAtPosition;
           colorsAtPosition.ambient = light.colors.ambient * falloff;
           colorsAtPosition.diffuse = light.colors.diffuse * falloff;
@@ -106,7 +107,7 @@
 
       struct SpotLight {
           Colors colors;
-          vec3 position;          
+          vec3 position;
           vec4 direction;
           float angle;
       };
@@ -131,7 +132,7 @@
       uniform Camera camera;
       uniform Count count;
       uniform Material material;
-      
+
       varying vec4 transformedPosition;
       varying vec4 transformedNormal;
       void main() {
@@ -176,7 +177,7 @@
               }
           }
 
-          
+
           vec3 colors = vec3(0.0);
           colors += pointLightColors;
           gl_FragColor = vec4(colors, 1.0);
@@ -228,7 +229,7 @@
     var currentProjection = null
     var checkedLights = new Set()
     var checkedModifiers = new Set()
-    
+
     var projectionChoicesContainer = document.getElementById("projectionChoices")
     var projectionLabels = ['Parallel', 'Perspective']
     var projectionChoices = labelsToChoices(projectionLabels, "radio")
@@ -236,21 +237,21 @@
         projectionChoicesContainer.appendChild(choice)
     })
 
-    var lightChoicesContainer = document.getElementById("lightChoices")        
+    var lightChoicesContainer = document.getElementById("lightChoices")
     var lightLabels = ['Directional', 'Point']
     var lightChoices = labelsToChoices(lightLabels, "checkbox", "_light")
     lightChoices.forEach((choice) => {
         lightChoicesContainer.appendChild(choice)
     })
 
-    var lightChoicesContainer = document.getElementById("lightModifierChoices")        
+    var lightChoicesContainer = document.getElementById("lightModifierChoices")
     var lightLabels = ['Specular']
     var lightChoices = labelsToChoices(lightLabels, "checkbox", "_lightModifier")
     lightChoices.forEach((choice) => {
         lightChoicesContainer.appendChild(choice)
     })
 
-    
+
     var selectionSubject = {
         observers: [],
         addObserver: function(observer) {
@@ -265,22 +266,22 @@
             selection.lights.forEach((light) => {
                 var lightElement = document.getElementById(`${light}_light`)
                 lightElement.checked = true
-                checkedLights.add(light)                    
+                checkedLights.add(light)
             })
             selection.modifiers.forEach((modifier) => {
                 var modifierElement = document.getElementById(`${modifier}_lightModifier`)
                 modifierElement.checked = true
-                checkedModifiers.add(modifier)                    
-            })                
-            
+                checkedModifiers.add(modifier)
+            })
+
             var currentProjectionElement = document.getElementById(selection.projection)
             currentProjectionElement.checked = true
             currentProjection = currentProjectionElement.value
-            
+
             this.notify(selection)
         }
-    }        
-    
+    }
+
     document.forms.cameraPanel.addEventListener('change', function(event) {
         if(event.target.name === 'radio') {
             currentProjection = event.target.value
@@ -288,8 +289,8 @@
         else if (event.target.name === 'checkbox_light') {
             let value = event.target.value
             let light = value.split("_")[0]
-            let type = value.split("_")[1]                  
-            
+            let type = value.split("_")[1]
+
             if (checkedLights.has(light)) checkedLights.delete(light)
             else checkedLights.add(light)
         }
@@ -297,7 +298,7 @@
             let value = event.target.value
             let modifier = value.split("_")[0]
             let type = value.split("_")[1]
-            
+
             if (checkedModifiers.has(modifier)) checkedModifiers.delete(modifier)
             else checkedModifiers.add(modifier)
         }
@@ -308,10 +309,10 @@
             modifiers: checkedModifiers
         })
     });
-    
+
     var panel = document.getElementById("cameraPanel")
     panel.addEventListener('click', (event) => event.stopPropagation())
-    
+
     var cameraPanelButton = document.getElementById("cameraPanelButton")
     cameraPanelButton.addEventListener('click', (event) => {
         event.stopPropagation()
@@ -320,5 +321,5 @@
 
     document.addEventListener('click', () => panel.style.width = "0")
   </script>
-  
+
 </html>

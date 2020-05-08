@@ -27,9 +27,9 @@ scene['lights'] = {
                 quadratic: 0.0001
             },
             position: [20, 10, 60]
-        }        
+        }
     ],
-    
+
     directional: [
         {
             colors: {
@@ -49,6 +49,11 @@ scene['camera'] = camera.create({
 })
 
 scene['meshes'] = {
+    coin: new Mesh({
+      points: coin.vertices, //getVertices(),
+      faces: coin.vertices, //getFaces(),
+      scale: form.scale.all(3),
+    }),
     head: new Mesh({
         points: radial.make3d(20, 20), //getVertices(),
         faces: radial.make3dIndices(20, 20), //getFaces(),
