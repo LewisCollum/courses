@@ -26,7 +26,7 @@ class Mesh {
 
     setDrawable() {
         let flattenedFaces = Uint16Array.from(this.settings.faces.flat())
-        let faceNormals = getFaceNormals(this.settings.points, flattenedFaces)
+        let faceNormals = getFaceNormals(this.settings.points.flat(), flattenedFaces)
 
         this.drawable = {
             points: Float32Array.from(this.settings.points.flat()),
@@ -72,15 +72,15 @@ class Mesh {
 function getFaceNormals(vertices, indexList) {
     var faceNormals = [];
     for(var i=0; i < indexList.length/3; i++) {
-        var p0 = vec3(vertices[indexList[3*i]][0],
-                      vertices[indexList[3*i]][1],
-                      vertices[indexList[3*i]][2]);
-        var p1 = vec3(vertices[indexList[3*i+1]][0],
-                      vertices[indexList[3*i+1]][1],
-                      vertices[indexList[3*i+1]][2]);
-        var p2 = vec3(vertices[indexList[3*i+2]][0],
-                      vertices[indexList[3*i+2]][1],
-                      vertices[indexList[3*i+2]][2]);
+        var p0 = vec3(vertices[3*indexList[3*i] + 0],
+                      vertices[3*indexList[3*i] + 1],
+                      vertices[3*indexList[3*i] + 2]);
+        var p1 = vec3(vertices[3*indexList[3*i+1] + 0],
+                      vertices[3*indexList[3*i+1] + 1],
+                      vertices[3*indexList[3*i+1] + 2]);
+        var p2 = vec3(vertices[3*indexList[3*i+2] + 0],
+                      vertices[3*indexList[3*i+2] + 1],
+                      vertices[3*indexList[3*i+2] + 2]);
         var p1minusp0 = [p1[0]-p0[0], p1[1]-p0[1], p1[2]-p0[2]];
         var p2minusp0 = [p2[0]-p0[0], p2[1]-p0[1], p2[2]-p0[2]];
         var faceNormal = cross(p1minusp0, p2minusp0);
