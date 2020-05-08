@@ -12,7 +12,16 @@ class Mesh {
         if (!this.settings.hasOwnProperty('scale'))
             this.settings.scale = matrix.Identity(4)
         if (!this.settings.hasOwnProperty('rotation'))
-            this.settings.rotation = matrix.Identity(4)   
+            this.settings.rotation = matrix.Identity(4)
+        if (!this.settings.hasOwnProperty('material'))
+            this.settings.material = {
+                colors: {
+                    ambient: [0, 0, 0],
+                    diffuse: [1, 1, 1],
+                    specular: [0, 0, 0]
+                },
+                shininess: 1
+            }
     }
 
     setDrawable() {

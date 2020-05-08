@@ -66,6 +66,11 @@
           vec3 specular;
       };
 
+      struct Material {
+          Colors colors;
+          float shininess;
+      }; 
+      
       struct Directions {
           vec3 toLight;
           vec3 toCamera;
@@ -87,7 +92,6 @@
           Colors colors;
           Falloff falloff;
           vec3 position;
-          float shininess; //Should be in material properties
       };
       Colors pointLightColorsAtPosition(PointLight light, vec4 position) {
           float distance = length(light.position - position.xyz);
@@ -110,7 +114,6 @@
       struct DirectionalLight {
           Colors colors;
           vec3 direction;
-          float shininess;
       };
 
       struct Count {
@@ -126,7 +129,8 @@
 
       uniform Lights lights;
       uniform Camera camera;
-      uniform Count count;    
+      uniform Count count;
+      uniform Material material;
       
       varying vec4 transformedPosition;
       varying vec4 transformedNormal;
@@ -142,10 +146,12 @@
                   float lambertian = max(dot(directions.normal, directions.toLight), 0.0);
                   vec3 reflection = reflect(-directions.toLight, directions.normal);
                   float directivity = dot(directions.toCamera, reflection);
-                  float shine = pow(max(directivity, 0.0), lights.point[i].shininess);
-                  vec3 ambient = attenuated.ambient;
-                  vec3 diffuse = lambertian * attenuated.diffuse;
-                  vec3 specular = lambertian > 0.0 ? attenuated.specular * shine : vec3(0.0);
+                  float shine = pow(max(directivity, 0.0), material.shininess);
+                  vec3 ambient = attenuated.ambient * material.colors.ambient;
+                  vec3 diffuse = lambertian * attenuated.diffuse * material.colors.diffuse;
+                  vec3 specular = lambertian > 0.0 ?
+                      attenuated.specular * shine * material.colors.specular
+                      : vec3(0.0);
                   pointLightColors += ambient + diffuse + specular;
               }
           }
@@ -153,7 +159,6 @@
 
           for (int i = 0; i < lightMaxCount; ++i) {
               if (i < count.directional) {
-                  //Colors attenuated = pointLightColorsAtPosition(lights.point[i], transformedPosition);
                   Directions directions;
                   directions.toLight = normalize(vec3(-lights.directional[i].direction));
                   directions.normal = normalize(transformedNormal.xyz);
@@ -161,10 +166,12 @@
                   float lambertian = max(dot(directions.normal, directions.toLight), 0.0);
                   vec3 reflection = reflect(-directions.toLight, directions.normal);
                   float directivity = dot(directions.toCamera, reflection);
-                  float shine = pow(max(directivity, 0.0), lights.directional[i].shininess);
-                  vec3 ambient = lights.directional[i].colors.ambient;
-                  vec3 diffuse = lights.directional[i].colors.diffuse * lambertian;
-                  vec3 specular = lambertian > 0.0 ? lights.directional[i].colors.specular * shine : vec3(0.0);
+                  float shine = pow(max(directivity, 0.0), material.shininess);
+                  vec3 ambient = lights.directional[i].colors.ambient * material.colors.ambient;
+                  vec3 diffuse = lights.directional[i].colors.diffuse * lambertian * material.colors.diffuse;
+                  vec3 specular = lambertian > 0.0 ?
+                      lights.directional[i].colors.specular * shine * material.colors.specular
+                      : vec3(0.0);
                   pointLightColors += ambient + diffuse + specular;
               }
           }

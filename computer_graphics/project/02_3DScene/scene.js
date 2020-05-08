@@ -26,7 +26,6 @@ scene['lights'] = {
                 linear: 0.0009,
                 quadratic: 0.0001
             },
-            shininess: 30,
             position: [20, 10, 60]
         }        
     ],
@@ -38,7 +37,6 @@ scene['lights'] = {
                 diffuse: [0.5, 0.5, 0.4],
                 specular: [0.1, 0.1, 0.1]
             },
-            shininess: 30,
             direction: [0, -1, -1]
         }
     ]
@@ -50,30 +48,26 @@ scene['camera'] = camera.create({
     up: [0, 1, 0]
 })
 
-
 scene['meshes'] = {
     head: new Mesh({
         points: getVertices(),
         faces: getFaces(),
-        scale: form.scale.all(3)
+        scale: form.scale.all(3),
+        material: {
+            colors: {
+                ambient: [0, 0, 0],
+                diffuse: [0, 0, 1],
+                specular: [0.5, 0.5, 0.5]
+            },
+            shininess: 100
+        }
+                
     }),
     ground: new Mesh({
         points: radial.make3d(22, 50),
         faces: radial.make3dIndices(22, 50),
         scale: form.scale.all(200),
-        position: form.translate.each(0, -210, 50)
-    }),
-    // head: new Mesh({
-    //     points: radial.make3d(20, 20),
-    //     faces: radial.make3dIndices(20, 20),
-    //     scale: form.scale.all(3)
-    // }),
-    moon: new Mesh({
-        points: radial.make3d(20, 20),
-        faces: radial.make3dIndices(20, 20),
-        scale: form.scale.all(10),
-        position: form.translate.each(100, 100, 300)
-    })    
+        position: form.translate.each(0, -210, 50)})
 }
 
 scene['internal'] = {}

@@ -15,6 +15,7 @@ class SceneImporter {
     objectToShaderLocations(object, tag = "", returnables = []) {
         for (let [name, entity] of Object.entries(object)) {
             if (this.isObject(entity)) {
+                console.log(entity)
                 let entityTag = tag + name + '.'
                 if (name === 'meshes') {
                     for(let [name, mesh] of Object.entries(entity)) 
@@ -36,6 +37,7 @@ class SceneImporter {
             else if (Array.isArray(entity) && !this.isObject(entity[0])) {
                 let valuesTag = tag + `${name}`
                 let location = this.locationFromTag(valuesTag)
+                console.log(valuesTag, location)
                 if (location) {
                     if (entity.length == 3) {
                         //vec3
@@ -66,9 +68,17 @@ class SceneImporter {
         let transformationLocation = this.gl.getUniformLocation(this.shaderProgram, "transformation")
         let positionLocation = this.gl.getAttribLocation(this.shaderProgram, "position")
         let normalLocation = this.gl.getAttribLocation(this.shaderProgram, "normal")
+        console.log("MAT", mesh.settings.material)
+        let materialCallables = this.objectToShaderLocations(mesh.settings.material, 'material.')
+        console.log(materialCallables)
         
         return function(gl) {
             let drawable = mesh.update()
+
+            materialCallables.forEach((callable) => {
+                callable(gl)
+            })
+            
             gl.uniformMatrix4fv(transformationLocation, false, drawable.transformation)
             
             const pointBuffer = gl.createBuffer()
