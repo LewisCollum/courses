@@ -33,7 +33,7 @@
           mat4 viewInverse;          
       };
 
-      attribute vec4 position;
+      attribute vec3 position;
       attribute vec3 normal;
       uniform mat4 transformation;
 
@@ -45,7 +45,7 @@
       void main() {
           gl_PointSize = 1.0;
           
-          transformedPosition = camera.view * transformation * position;
+          transformedPosition = camera.view * transformation * vec4(position, 1.0);
           gl_Position = projection * transformedPosition;
 
           transformedNormal = camera.view * transformation * vec4(normal, 0.0);         

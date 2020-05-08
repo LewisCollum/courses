@@ -88,7 +88,7 @@ class SceneImporter {
             const indexBuffer = gl.createBuffer()
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, drawable.faces, gl.STATIC_DRAW)
-            gl.vertexAttribPointer(positionLocation, 4, gl.FLOAT, false, 0, 0)
+            gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 0, 0)
             gl.enableVertexAttribArray(positionLocation)
             
             const normalsbuffer = gl.createBuffer();

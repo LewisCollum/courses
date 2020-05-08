@@ -50,24 +50,24 @@ scene['camera'] = camera.create({
 
 scene['meshes'] = {
     head: new Mesh({
-        points: getVertices(),
-        faces: getFaces(),
+        points: radial.make3d(20, 20), //getVertices(),
+        faces: radial.make3dIndices(20, 20), //getFaces(),
         scale: form.scale.all(3),
         material: {
             colors: {
                 ambient: [0, 0, 0],
-                diffuse: [0, 0, 1],
+                diffuse: [0, 0.8, 1],
                 specular: [0.5, 0.5, 0.5]
             },
             shininess: 100
         }
-                
     }),
     ground: new Mesh({
         points: radial.make3d(22, 50),
         faces: radial.make3dIndices(22, 50),
         scale: form.scale.all(200),
-        position: form.translate.each(0, -210, 50)})
+        position: form.translate.each(0, -210, 50)
+    })
 }
 
 scene['internal'] = {}
