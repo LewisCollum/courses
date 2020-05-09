@@ -1,4 +1,4 @@
-const wall = PlyLoader.loadFromString(`ply
+ply
 format ascii 1.0
 comment Created by Blender 2.82 (sub 7) - www.blender.org, source file: 'wall.blend'
 element vertex 24
@@ -49,4 +49,3 @@ end_header
 3 9 21 10
 3 12 22 13
 3 15 23 16
-`)

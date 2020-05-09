@@ -2,7 +2,7 @@ const radial = {};
 (function(context) {
     context.make2d = function(pointCount) {
         const vectorAngle = 2 * Math.PI / pointCount
-        var points = [[0, 0, 0, 1]]
+        var points = [0, 0, 0]
         for (let i = 0; i < pointCount; ++i) {
             let x = Math.cos(vectorAngle * i)
             let y = Math.sin(vectorAngle * i)

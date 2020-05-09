@@ -5,7 +5,8 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
     <img id="texture_planet" hidden src="resource/planet.jpg"/>
     <img id="texture_brick" hidden src="resource/brick.jpg"/>
-    <img id="texture_concrete" hidden src="resource/concrete.jpg"/>            
+    <img id="texture_stone" hidden src="resource/stone.jpg"/>
+    <img id="texture_dirt" hidden src="resource/dirt.jpg"/>    
 
     <script type="text/javascript" src="./Common/webgl-utils.js"></script>
     <script type="text/javascript" src="./Common/initShaders.js"></script>
@@ -22,9 +23,11 @@
     <script type="text/javascript" src="lib/SceneImporter.js"></script>
     <script type="text/javascript" src="lib/projection.js"></script>
     <script type="text/javascript" src="lib/ObjLoader.js"></script>
+    <script type="text/javascript" src="lib/PlyLoader.js"></script>    
     <script type="text/javascript" src="lib/Mesh.js"></script>    
 
-    <!-- <script type="text/javascript" src="obj/sphere.js"></script>     -->
+    <script type="text/javascript" src="obj/plane.js"></script>
+    <script type="text/javascript" src="obj/cube.js"></script>
     <script type="text/javascript" src="obj/coin.js"></script>
     <script type="text/javascript" src="obj/wall.js"></script>    
     <script type="text/javascript" src="scene.js"></script>
@@ -142,6 +145,7 @@
       uniform Material material;
       uniform int isTextured;
       uniform sampler2D textureSampler;
+      uniform float textureScale;
 
       varying vec4 transformedPosition;
       varying vec4 transformedNormal;
@@ -150,9 +154,11 @@
           vec3 pointLightColors = vec3(0.0);
           for (int i = 0; i < lightMaxCount; ++i) {
               if (i < count.point) {
-                  Colors attenuated = pointLightColorsAtPosition(lights.point[i], transformedPosition);
+                  PointLight light = lights.point[i];
+                  light.position = (camera.view * vec4(lights.point[i].position, 1.0)).xyz;
+                  Colors attenuated = pointLightColorsAtPosition(light, transformedPosition);
                   Directions directions;
-                  directions.toLight = normalize(lights.point[i].position - transformedPosition.xyz);
+                  directions.toLight = normalize(light.position - transformedPosition.xyz);
                   directions.toCamera = normalize(-transformedPosition.xyz);
                   directions.normal = normalize(transformedNormal.xyz);
                   float lambertian = max(dot(directions.normal, directions.toLight), 0.0);
@@ -193,7 +199,7 @@
           vec4 colors = vec4(0.0);
           colors += vec4(pointLightColors, 1.0);
           if (isTextured != 0) {
-              colors *= texture2D(textureSampler, transformedTextureCoordinates);
+              colors *= texture2D(textureSampler, transformedTextureCoordinates*textureScale);
           }
           gl_FragColor = colors;
       }
@@ -207,9 +213,10 @@
         <ul id="lightChoices"></ul>
       </form>
       <button class="openbtn" id="cameraPanelButton">&#9776;</button>
-      <canvas id="gl-canvas" height="512" width="512"></canvas>
+      <canvas id="gl-canvas" height="512" width="768"></canvas>
       <div class="bottom-left">Score: <span id="score"></span></div>
     </div>
+    <p>Press W, A, S, D to move. Left/Right arrow keys to rotate.</p>
   </body>
 
   <script>

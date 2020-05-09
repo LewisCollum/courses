@@ -4,16 +4,15 @@ scene['lights'] = {
         {
             colors: {
                 ambient: [0.0, 0.0, 0],
-                diffuse: [0.5, 0.5, 0.4],
+                diffuse: [0.8, 0.8, 0.7],
                 specular: [.5, 0.1, 0.5]
             },
             falloff: {
                 constant: 0,
                 linear: 0.0009,
-                quadratic: 0.0001
+                quadratic: 0.005
             },
-            shininess: 30,
-            position: [-20, 10, 60]
+            position: [0, 10, -30]
         },
         {
             colors: {
@@ -24,9 +23,9 @@ scene['lights'] = {
             falloff: {
                 constant: 0,
                 linear: 0.0009,
-                quadratic: 0.0001
+                quadratic: 0.0008
             },
-            position: [20, 10, 60]
+            position: [20, 20, 60]
         }
     ],
 
@@ -34,18 +33,18 @@ scene['lights'] = {
         {
             colors: {
                 ambient: [0, 0, 0.0],
-                diffuse: [0.5, 0.5, 0.4],
+                diffuse: [0.1, 0.1, 0.1],
                 specular: [0.1, 0.1, 0.1]
             },
-            direction: [0, -1, -1]
+            direction: [0, -1, 0]
         }
     ]
 }
 
 
-scene['camera'] = camera.create({
-    origin: [0, 10, -60],
-    lookAt: [0, 0, 0],
+scene['camera'] = new Camera({
+    origin: [0, 16, -200],
+    lookAt: [0, 12, 0],
     up: [0, 1, 0]
 })
 
@@ -54,8 +53,10 @@ console.log(coin)
 scene['meshes'] = {
     coin: new Mesh({
         vertices: coin.vertices,
+        indices: coin.indices,
+        normals: coin.normals,
         scale: form.scale.all(10),
-        origin: form.translate.each(0, 0, -20),
+        origin: form.translate.each(0, 5, -20),
         material: {
             colors: {
                 ambient: [0, 0, 0],
@@ -67,28 +68,39 @@ scene['meshes'] = {
     }),
     wall: new Mesh({
         vertices: wall.vertices,
-        scale: form.scale.each(3, 5, 8),
+        indices: wall.indices,
+        normals: wall.normals,
+        scale: form.scale.all(10),
         origin: form.translate.each(0, 0, -10),
+        orientation: form.rotate.y(Math.PI/2),
+        material: {
+            colors: {
+                ambient: [0, 0, 0],
+                diffuse: [0.8, 0.7, 0.6],
+                specular: [0, 0, 0]
+            },
+            shininess: 0
+        },        
         texture: {
-            image: document.getElementById('texture_concrete'),
-            textureCoordinates: wall.textureCoordinates
+            image: document.getElementById('texture_stone'),
+            textureCoordinates: wall.textureCoordinates,
+            scale: 4
         }                    
     }),
     ground: new Mesh({
-        // vertices: sphere.vertices,
-        vertices: {
-            values: Float32Array.from(radial.make3d(22, 50)),
-            indices: Uint16Array.from(radial.make3dIndices(22, 50))
-        },
-        scale: form.scale.all(1),
-        origin: form.translate.each(0, 0, 0),
-        // texture: {
-        //     image: document.getElementById('texture_concrete'),
-        //     textureCoordinates: sphere.textureCoordinates
-        // }
+        vertices: plane.vertices,
+        indices: plane.indices,
+        normals: plane.normals,
+        scale: form.scale.all(1000),
+        origin: form.translate.each(0, 0, 0),     
+        texture: {
+            image: document.getElementById('texture_dirt'),
+            textureCoordinates: plane.textureCoordinates,
+            scale: 50
+        }
     })
 }
 
 scene['internal'] = {}
-scene.internal['viewBox'] = {left: -15, right: 15, top: 15, bottom: -15, near: 25, far: 1000}
+scene.internal['viewBox'] = {left: -1.5, right: 1.5, top: 1, bottom: -1, near: 5, far: 500}
 scene['projection'] = projection.perspective.create(scene.internal.viewBox)

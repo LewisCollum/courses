@@ -1,4 +1,4 @@
-const coin = PlyLoader.loadFromString(`ply
+ply
 format ascii 1.0
 comment Created by Blender 2.82 (sub 7) - www.blender.org, source file: 'coin.blend'
 element vertex 535
@@ -867,4 +867,4 @@ end_header
 3 531 532 529
 3 532 533 529
 3 533 534 529
-3 534 385 529`)
+3 534 385 529

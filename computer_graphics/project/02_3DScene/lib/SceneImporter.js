@@ -70,26 +70,29 @@ class SceneImporter {
         let positionLocation = this.gl.getAttribLocation(this.shaderProgram, "position")
         let normalLocation = this.gl.getAttribLocation(this.shaderProgram, "normal")
         let isTexturedLocation = this.gl.getUniformLocation(this.shaderProgram, "isTextured")
+        let textureScaleLocation = this.gl.getUniformLocation(this.shaderProgram, "textureScale")
+        let samplerLocation = this.gl.getUniformLocation(this.shaderProgram, "textureSampler")
         let materialCallables = this.objectToShaderLocations(mesh.settings.material, 'material.')
 
         console.log("MESHY", mesh)
         if (mesh.drawable.hasOwnProperty('texture')) {
             var textureCoordinatesLocation = this.gl.getAttribLocation(this.shaderProgram, "textureCoordinates")
-            console.log("IMAGE", mesh.drawable.texture.image)
             var texture = this.gl.createTexture()
             let image = mesh.drawable.texture.image
-            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
 
+            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
             this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGB, this.gl.RGB,
                                this.gl.UNSIGNED_BYTE, image)
+
+            var strategy = mesh.drawable.texture.isTile ?
+                this.gl.REPEAT :
+                this.gl.CLAMP_TO_EDGE
             
-            if (this.isPowerOf2(image.width) && this.isPowerOf2(image.height)) {
+            if (this.isPowerOf2(image.width) && this.isPowerOf2(image.height))
                 this.gl.generateMipmap(this.gl.TEXTURE_2D);
-            } else {
-                this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-                this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-                this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
-            }
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_LINEAR);
+            //this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+            //this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);            
         }        
         
         return function(gl) {
@@ -103,11 +106,7 @@ class SceneImporter {
             
             const pointBuffer = gl.createBuffer()
             gl.bindBuffer(gl.ARRAY_BUFFER, pointBuffer)
-            gl.bufferData(gl.ARRAY_BUFFER, drawable.vertices.values, gl.STATIC_DRAW)
-
-            const indexBuffer = gl.createBuffer()
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, drawable.vertices.indices, gl.STATIC_DRAW)
+            gl.bufferData(gl.ARRAY_BUFFER, drawable.vertices, gl.STATIC_DRAW)
             gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 0, 0)
             gl.enableVertexAttribArray(positionLocation)
             
@@ -118,25 +117,31 @@ class SceneImporter {
             gl.enableVertexAttribArray(normalLocation);
 
             
-            if (drawable.hasOwnProperty('texture')) {                
+            if (drawable.hasOwnProperty('texture')) {
                 gl.uniform1i(isTexturedLocation, 1)
+                gl.uniform1f(textureScaleLocation, drawable.texture.scale)
 
-                //Why don't we need indices for texture?
-                // var textureIndicesBuffer = gl.createBuffer();
-                // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, textureIndicesBuffer);
-                // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, drawable.texture.textureCoordinates.indices, gl.STATIC_DRAW);
-                
                 const textureBuffer = gl.createBuffer();
                 gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
-                gl.bufferData(gl.ARRAY_BUFFER, drawable.texture.textureCoordinates.values, gl.STATIC_DRAW);
+                gl.bufferData(gl.ARRAY_BUFFER, drawable.texture.textureCoordinates, gl.STATIC_DRAW);
                 gl.vertexAttribPointer(textureCoordinatesLocation, 2, gl.FLOAT, false, 0, 0);
-                gl.enableVertexAttribArray(textureCoordinatesLocation);                
+                gl.enableVertexAttribArray(textureCoordinatesLocation);
+
+                
+                //https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_2D, texture)
+                gl.uniform1i(samplerLocation, 0)                
             }
             else {
                 gl.uniform1i(isTexturedLocation, 0)
             }
+
+            const indexBuffer = gl.createBuffer()
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, drawable.indices, gl.STATIC_DRAW)
             
-            gl.drawElements(gl.TRIANGLES, drawable.vertices.indices.length, gl.UNSIGNED_SHORT,0)            
+            gl.drawElements(gl.TRIANGLES, drawable.indices.length, gl.UNSIGNED_SHORT,0)            
         }
     }
 

@@ -20,6 +20,14 @@ const vector = {};
         return vector.map(x => x**2).reduce((sum, element) => sum + element)**(1/2)
     }
 
+    context.multiply = function(first, second) {
+        return first.map((x, i) => x * second[i])
+    }
+
+    context.multiplyByScalar = function(vector, scalar) {
+        return vector.map(x => x * scalar)
+    }
+    
     context.divide = function(first, second) {
         return first.map((x, i) => x / second[i])
     }

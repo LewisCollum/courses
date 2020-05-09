@@ -1,20 +1,13 @@
 class Mesh {
     constructor(settings) {
         this.settings = settings
+        this.setDefaultMatrixProperties(['origin', 'orientation', 'position', 'scale', 'rotation'])
         this.setDefaults()
         this.setDrawable()
     }
 
     setDefaults() {
         this.settings.transformation = matrix.Identity(4)
-        if (!this.settings.hasOwnProperty('origin'))
-            this.settings.origin = matrix.Identity(4)        
-        if (!this.settings.hasOwnProperty('position'))
-            this.settings.position = matrix.Identity(4)
-        if (!this.settings.hasOwnProperty('scale'))
-            this.settings.scale = matrix.Identity(4)
-        if (!this.settings.hasOwnProperty('rotation'))
-            this.settings.rotation = matrix.Identity(4)
         if (!this.settings.hasOwnProperty('material'))
             this.settings.material = {
                 colors: {
@@ -26,22 +19,33 @@ class Mesh {
             }
     }
 
+    setDefaultMatrixProperties(properties) {
+        properties.forEach((property) => {
+            this.settings[property] = this.settings.hasOwnProperty(property) ?
+                this.settings[property] :
+                matrix.Identity(4)            
+        })
+    }
+
     setDrawable() {
-        let faceNormals = getFaceNormals(this.settings.vertices.values, this.settings.vertices.indices)
-        let vertexNormals = getVertexNormals(
-                this.settings.vertices.values,
-                this.settings.vertices.indices,
-                faceNormals)
+        // let faceNormals = getFaceNormals(this.settings.vertices, this.settings.indices)
+        // let vertexNormals = getVertexNormals(
+        //         this.settings.vertices,
+        //         this.settings.indices,
+        //         faceNormals)
 
         this.drawable = {
             vertices: this.settings.vertices,
-            normals: Float32Array.from(vertexNormals.flat()),
+            indices: this.settings.indices,
+            normals: this.settings.normals, //Float32Array.from(vertexNormals.flat()),
             transformation: Float32Array.from(matrix.transpose(this.settings.transformation).flat())
         }
 
-        if (this.settings.hasOwnProperty('texture'))
+        if (this.settings.hasOwnProperty('texture')) {
             this.drawable['texture'] = this.settings.texture
-
+            if (!this.drawable.texture.hasOwnProperty('scale'))
+                this.drawable.texture.scale = 1.0
+        }
         console.log("DRAWABLE", this.drawable)
     }
 
@@ -66,7 +70,10 @@ class Mesh {
     }
 
     update() {
-        this.settings.transformation = matrix.multiplyAll([this.settings.origin, this.settings.position, this.settings.scale, this.settings.rotation])
+        this.settings.transformation = matrix.multiplyAll([
+            this.settings.position, this.settings.origin,
+            this.settings.scale,
+            this.settings.rotation, this.settings.orientation])
         this.drawable.transformation = Float32Array.from(matrix.transpose(this.settings.transformation).flat())
         return this.drawable
     }

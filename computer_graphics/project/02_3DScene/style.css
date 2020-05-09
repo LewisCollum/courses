@@ -2,7 +2,7 @@
 .sidepanel {
     width: 0;
     position: absolute;
-    top: 10px;
+    top: 50px;
     left: 0;
     background-color: black;
     overflow-x: hidden;
@@ -56,8 +56,6 @@
 /* Style the button that is used to open the sidepanel */
 .openbtn {
     position: absolute;
-    top: 0;
-    right: 0;
     font-size: 15px;
     cursor: pointer;
     background-color: #111;
@@ -90,36 +88,6 @@ p {
     margin: 0;
 }
 
-img {
-    max-width: 100%;
-    max-height: 100%;
-}
-
-.across {
-    margin: 0;
-    display: grid;
-    grid-gap: 0.25rem;
-}
-
-@media (min-width: 300px) {
-  .across { grid-template-columns: repeat(3, 1fr); }
-}
-
-@media (min-width: 600px) {
-  .across { grid-template-columns: repeat(4, 1fr); }
-}
-
-@media (min-width: 900px) {
-  .across { grid-template-columns: repeat(5, 1fr); }
-}
-
-.across li {
-    background-color: #D0D0FF;
-    text-align: center;
-    display: inline-block;
-    padding: 0.1rem;    
-}
-
 .across:after {
   content: '';
   width: 100%; /* Ensures justification for single lines */
@@ -141,41 +109,8 @@ h2 {
 .container {
     position: relative;
 	margin: auto;
-	max-width: 500px;
 }
 
-
-.sticky {
-    position: -webkit-sticky;
-    position: sticky;
-    top: 0px;
-}
-    
-#topNavigation {
-  overflow: hidden;
-  background-color: #333;
-  z-index: 1;
-}
-
-/* Navbar links */
-#topNavigation a {
-  float: left;
-  display: block;
-  color: #f2f2f2;
-  text-align: center;
-  padding: 10px;
-  text-decoration: none;
-}
-
-#topNavigation a:hover {
-  background-color: #ddd;
-  color: black;
-}
-
-#topNavigation a.active {
-  background-color: #8080F0;
-  color: white;
-}
 
 .bottom-left {
   position: absolute;
