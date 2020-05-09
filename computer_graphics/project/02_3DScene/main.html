@@ -28,7 +28,6 @@
     <script type="text/javascript" src="lib/Mesh.js"></script>
 
     <script type="text/javascript" src="obj/plane.js"></script>
-    <!-- <script type="text/javascript" src="obj/cube.js"></script> -->
     <script type="text/javascript" src="obj/coin.js"></script>
     <script type="text/javascript" src="obj/wall.js"></script>
     <script type="text/javascript" src="obj/grass.js"></script>
@@ -216,9 +215,12 @@
       </form>
       <button class="openbtn" id="cameraPanelButton">&#9776;</button>
       <canvas id="gl-canvas" height="512" width="768"></canvas>
-      <div class="bottom-left">Score: <span id="score"></span></div>
+      <div class="bottom-left">FPS: <span id="score"></span></div>
     </div>
-    <p>Press W, A, S, D to move. Left/Right arrow keys to rotate.</p>
+    <p>Press W, A, S, D to move. Left/Right arrow keys to
+      rotate. Press R to spin the coin faster.</p>
+    <p> There is a waffle button in top left of canvas, that opens a
+    panel for turning some lights on or off.</p>
   </body>
 
   <script>

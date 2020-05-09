@@ -25,7 +25,7 @@ scene['lights'] = {
                 linear: 0.0009,
                 quadratic: 0.0008
             },
-            position: [20, 20, 60]
+            position: [20, 20, 20]
         }
     ],
 
@@ -33,7 +33,7 @@ scene['lights'] = {
         {
             colors: {
                 ambient: [0, 0, 0.0],
-                diffuse: [0.8, 0.8, 0.8],
+                diffuse: [0.1, 0.1, 0.1],
                 specular: [0.1, 0.1, 0.1]
             },
             direction: [0, -1, 0]
@@ -92,8 +92,7 @@ scene['meshes'] = {
         indices: grass.indices,
         normals: grass.normals,
         scale: form.scale.all(30),
-        origin: form.translate.each(-25, 0, -10),
-        //orientation: form.rotate.y(Math.PI/2),
+        origin: form.translate.each(-14, 0, -18),
         material: {
             colors: {
                 ambient: [0, 0, 0],
@@ -102,19 +101,13 @@ scene['meshes'] = {
             },
             shininess: 1
         }
-        // texture: {
-        //     image: document.getElementById('texture_leaf'),
-        //     textureCoordinates: grass.textureCoordinates,
-        //     scale: 4
-        // }
     }),
     grass2: new Mesh({
         vertices: grass.vertices,
         indices: grass.indices,
         normals: grass.normals,
         scale: form.scale.all(30),
-        origin: form.translate.each(25, 0, -10),
-        //orientation: form.rotate.y(Math.PI/2),
+        origin: form.translate.each(14, 0, -18),
         material: {
             colors: {
                 ambient: [0, 0, 0],
@@ -123,11 +116,6 @@ scene['meshes'] = {
             },
             shininess: 1
         }
-        // texture: {
-        //     image: document.getElementById('texture_leaf'),
-        //     textureCoordinates: grass.textureCoordinates,
-        //     scale: 4
-        // }
     }),
     ground: new Mesh({
         vertices: plane.vertices,

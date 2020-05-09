@@ -48,6 +48,8 @@ function init(){
     var spin = 0
     var velocity = 0
     var lateralVelocity = 0
+    var isCrazyCoin = false
+    
     var keyLog = new Set() 
     var keyUpHandler = {
         get: function(target, name) {
@@ -61,6 +63,7 @@ function init(){
         }
     }
     var keyUpMap = new Proxy({
+        ['R']: function() {isCrazyCoin = false},        
         ['A']: function() {lateralVelocity = 0},
         ['D']: function() {lateralVelocity = 0},
         ['S']: function() {velocity = 0},
@@ -79,6 +82,7 @@ function init(){
         }
     }
     var keyDownMap = new Proxy({
+        ['R']: function() {isCrazyCoin = true},        
         ['A']: function() {lateralVelocity = -100},
         ['D']: function() {lateralVelocity = 100},
         ['S']: function() {velocity = -100},
@@ -108,11 +112,16 @@ function init(){
         var t = FrameDispatcher.millis()/1000
 
         scoreTextNode.nodeValue = Math.round(1/dt/5)*5 //round to nearest multiple of 5
-        if (scene.meshes.coin) {
+        if (isCrazyCoin) {
+            scene.meshes.coin.rotation = form.rotate.y(21*t)
+            scene.meshes.coin.position = form.translate.y(2.5*Math.cos(2*t))
+        }
+        else {
             scene.meshes.coin.rotation = form.rotate.y(3*t)
             scene.meshes.coin.position = form.translate.y(2.5*Math.cos(2*t))
         }
 
+        scene.lights.point[1].position[0] = 60*Math.cos(t)
         scene.camera.forward(velocity*dt)
         scene.camera.lateral(lateralVelocity*dt)
         scene.camera.turn(spin*dt)        

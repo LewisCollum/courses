@@ -37,8 +37,6 @@ PlyLoader = new function() {
             }          
         })
 
-        console.log(vertices, textureCoordinates, normals, indices)
-        console.log(Math.max(...indices))
         return {
             indices: Uint16Array.from(indices),
             vertices: Float32Array.from(vertices),
