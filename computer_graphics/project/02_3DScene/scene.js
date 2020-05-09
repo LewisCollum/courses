@@ -33,7 +33,7 @@ scene['lights'] = {
         {
             colors: {
                 ambient: [0, 0, 0.0],
-                diffuse: [0.1, 0.1, 0.1],
+                diffuse: [0.8, 0.8, 0.8],
                 specular: [0.1, 0.1, 0.1]
             },
             direction: [0, -1, 0]
@@ -80,19 +80,61 @@ scene['meshes'] = {
                 specular: [0, 0, 0]
             },
             shininess: 0
-        },        
+        },
         texture: {
             image: document.getElementById('texture_stone'),
             textureCoordinates: wall.textureCoordinates,
             scale: 4
-        }                    
+        }
+    }),
+    grass: new Mesh({
+        vertices: grass.vertices,
+        indices: grass.indices,
+        normals: grass.normals,
+        scale: form.scale.all(30),
+        origin: form.translate.each(-25, 0, -10),
+        //orientation: form.rotate.y(Math.PI/2),
+        material: {
+            colors: {
+                ambient: [0, 0, 0],
+                diffuse: [0.8, 1.0, 0.8],
+                specular: [0, 0, 0]
+            },
+            shininess: 1
+        }
+        // texture: {
+        //     image: document.getElementById('texture_leaf'),
+        //     textureCoordinates: grass.textureCoordinates,
+        //     scale: 4
+        // }
+    }),
+    grass2: new Mesh({
+        vertices: grass.vertices,
+        indices: grass.indices,
+        normals: grass.normals,
+        scale: form.scale.all(30),
+        origin: form.translate.each(25, 0, -10),
+        //orientation: form.rotate.y(Math.PI/2),
+        material: {
+            colors: {
+                ambient: [0, 0, 0],
+                diffuse: [0.8, 1.0, 0.8],
+                specular: [0, 0, 0]
+            },
+            shininess: 1
+        }
+        // texture: {
+        //     image: document.getElementById('texture_leaf'),
+        //     textureCoordinates: grass.textureCoordinates,
+        //     scale: 4
+        // }
     }),
     ground: new Mesh({
         vertices: plane.vertices,
         indices: plane.indices,
         normals: plane.normals,
         scale: form.scale.all(1000),
-        origin: form.translate.each(0, 0, 0),     
+        origin: form.translate.each(0, 0, 0),
         texture: {
             image: document.getElementById('texture_dirt'),
             textureCoordinates: plane.textureCoordinates,

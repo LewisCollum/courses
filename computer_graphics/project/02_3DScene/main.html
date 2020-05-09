@@ -6,7 +6,8 @@
     <img id="texture_planet" hidden src="resource/planet.jpg"/>
     <img id="texture_brick" hidden src="resource/brick.jpg"/>
     <img id="texture_stone" hidden src="resource/stone.jpg"/>
-    <img id="texture_dirt" hidden src="resource/dirt.jpg"/>    
+    <img id="texture_dirt" hidden src="resource/dirt.jpg"/>
+    <img id="texture_leaf" hidden src="resource/leaf.jpg"/>
 
     <script type="text/javascript" src="./Common/webgl-utils.js"></script>
     <script type="text/javascript" src="./Common/initShaders.js"></script>
@@ -23,16 +24,17 @@
     <script type="text/javascript" src="lib/SceneImporter.js"></script>
     <script type="text/javascript" src="lib/projection.js"></script>
     <script type="text/javascript" src="lib/ObjLoader.js"></script>
-    <script type="text/javascript" src="lib/PlyLoader.js"></script>    
-    <script type="text/javascript" src="lib/Mesh.js"></script>    
+    <script type="text/javascript" src="lib/PlyLoader.js"></script>
+    <script type="text/javascript" src="lib/Mesh.js"></script>
 
     <script type="text/javascript" src="obj/plane.js"></script>
-    <script type="text/javascript" src="obj/cube.js"></script>
+    <!-- <script type="text/javascript" src="obj/cube.js"></script> -->
     <script type="text/javascript" src="obj/coin.js"></script>
-    <script type="text/javascript" src="obj/wall.js"></script>    
+    <script type="text/javascript" src="obj/wall.js"></script>
+    <script type="text/javascript" src="obj/grass.js"></script>
     <script type="text/javascript" src="scene.js"></script>
     <script type="text/javascript" src="main.js"></script>
-    
+
     <link rel="stylesheet" href="style.css">
 
     <script id="vertex-shader" type="x-shader/x-vertex">
@@ -165,7 +167,7 @@
                   vec3 reflection = reflect(-directions.toLight, directions.normal);
                   float directivity = dot(directions.toCamera, reflection);
                   float shine = pow(max(directivity, 0.0), material.shininess);
-                  
+
                   vec3 ambient = attenuated.ambient * material.colors.ambient;
                   vec3 diffuse = lambertian * attenuated.diffuse * material.colors.diffuse;
                   vec3 specular = lambertian > 0.0 ?
