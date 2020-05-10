@@ -2,14 +2,19 @@
 #+property: header-args:python :results silent :eval no-export :exports none
 #+property: header-args:bash :results drawer :eval no-export :exports none
 #+options: num:t toc:t
+#+bind: org-latex-image-default-width ".8\\linewidth"
 
 #+title: Microstrip Antenna Arrays
 #+author: Lewis Collum
 
+#+begin_abstract
+Hello
+#+end_abstract
+
 * Library :noexport:
 ** call_test
    #+name: test
-   #+begin_src bash :var name="" :dir source
+   #+begin_src bash :var name="" :dir source :async
 python -m unittest $name.py 2>&1
 echo
    #+end_src
@@ -34,7 +39,7 @@ def waveNumber(wavelength):
 SphericalCoordinates = namedtuple('SphericalCoordinates', ['r', 'pitch', 'yaw'])
 CartesianCoordinates = namedtuple('CartesianCoordinates', ['x', 'y', 'z'])
 
-def sphericalToCartesian(r, pitch, yaw):
+def sphericalToCartesian(r, yaw, pitch):
     x = r * cos(yaw) * sin(pitch)
     y = r * sin(yaw) * sin(pitch)
     z = r * cos(pitch)
@@ -108,18 +113,109 @@ if __name__ == '__main__':
    :end:
 
 ** patch
-   | Relative Dielectric Constant | [[cite:ulaby][p. 62]] |
-   |                              |                       |
-
    #+begin_src python :tangle source/patch.py
 import numpy
-from numpy import pi, sqrt
+from numpy import pi, sin, cos, sqrt
 from collections import namedtuple
 import conversion as conv
+from matplotlib import pyplot
+from mpl_toolkits.mplot3d import Axes3D
 
-Patch = namedtuple('Patch', ['effective', 'actual'])
-Dimensions = namedtuple('Dimensions', ['width', 'length', 'height'])
+Patch = namedtuple('Patch', ['width', 'height', 'length', 'effectiveLength', 'waveNumber'])
 Material = namedtuple('Material', ['relativePermittivity', 'height'])
+
+class RadiationPlotter:
+    def __init__(self, patchRadiation):
+        self.radiation = patchRadiation
+
+    def plotHPlane(self, fileName = None):
+        hPlane = self.radiation.hPlane()
+        figure = pyplot.figure(figsize=(4,3))
+        axes = figure.add_subplot(111, projection='polar')
+        axes.plot(hPlane.pitch, hPlane.r)
+        axes.set_thetamax(180)
+        axes.set_xlabel(r'$\theta$')
+        figure.tight_layout()
+        self.showOrSave(fileName)
+
+    def plotEPlane(self, fileName = None):
+        ePlane = self.radiation.ePlane()
+        figure = pyplot.figure(figsize=(4,3))
+        axes = figure.add_subplot(111, projection='polar')
+        axes.plot(ePlane.yaw, ePlane.r)
+        axes.set_thetamin(-90)
+        axes.set_thetamax(90)
+        axes.set_xlabel(r'$\phi$')        
+        figure.tight_layout()
+        self.showOrSave(fileName)
+
+    def plotTotal(self, fileName = None):
+        total = self.radiation.totalAsCartesian()
+        figure = pyplot.figure(figsize=(5,4))
+        axes = figure.add_subplot(111, projection='3d')        
+        axes.plot_surface(total.z, total.y, total.x)
+        axes.set_xlabel('z (along width)')
+        axes.set_ylabel('y (along length)')
+        axes.set_zlabel('x (along height)')
+        figure.tight_layout()
+        self.showOrSave(fileName)
+        
+    def showOrSave(self, fileName):
+        if fileName:
+            pyplot.savefig(fileName)
+            pyplot.clf()
+        else:
+            pyplot.show()        
+        
+        
+class PatchRadiation:
+    def __init__(self, patch, resolution):
+        self.patch = patch
+        self.resolution = resolution        
+        self.pitch = numpy.linspace(0, pi, resolution)
+        self.yaw = numpy.linspace(-pi/2, pi/2, resolution)
+ 
+    def hPlane(self):
+        x = self.patch.waveNumber*self.patch.height/2 * sin(self.pitch)
+        z = self.patch.waveNumber*self.patch.width/2 * cos(self.pitch)
+        magnitudes = sin(self.pitch) * sin(x)/x * sin(z)/z
+        return conv.SphericalCoordinates(
+            r = magnitudes,
+            yaw = 0,
+            pitch = self.pitch)
+
+    def ePlane(self):
+        x = self.patch.waveNumber*self.patch.height/2 * cos(self.yaw)
+        y = self.patch.waveNumber*self.patch.effectiveLength/2 * sin(self.yaw)
+        magnitudes = cos(y) * sin(x)/x
+        return conv.SphericalCoordinates(
+            r = magnitudes,
+            yaw = self.yaw,
+            pitch = 90)
+    
+    def totalAsSpherical(self):
+        ePlane, hPlane = numpy.meshgrid(self.ePlane().r, self.hPlane().r)
+        yaw, pitch = numpy.meshgrid(self.yaw, self.pitch)
+        radiation = ePlane * hPlane * self.rolloff(self.yaw, 0.5)
+        return conv.SphericalCoordinates(
+            r = numpy.nan_to_num(radiation),
+            yaw = yaw,
+            pitch = pitch)
+
+    def totalAsCartesian(self):
+        total = self.totalAsSpherical()
+        x, y, z = conv.sphericalToCartesian(
+            r = total.r,
+            yaw = total.yaw,
+            pitch = total.pitch)
+        return conv.CartesianCoordinates(x, y, z)
+        
+    def rolloff(self, radians, factor):
+        degrees = numpy.rad2deg(radians)
+        F1 = 1 / (((factor*(abs(degrees) - 90))**2) + 0.001)
+        return 1 / (F1 + 1)
+       
+
 
 class PatchBuilder:
     def __init__(self, material):
@@ -129,16 +225,13 @@ class PatchBuilder:
     def buildForFrequency(self, frequency):
         self.setDimensionsFromFrequency(frequency)
         return Patch(
-            effective = Dimensions(
-                width = self.width,
-                length = self.lengthWithFringe,
-                height = self.heightEffective),
-            actual = Dimensions(
-                width = self.width,
-                length = self.lengthWithoutFringe,
-                height = self.height))
+            width = self.width,
+            length = self.lengthWithoutFringe,
+            height = self.height,
+            effectiveLength = self.lengthWithFringe,            
+            waveNumber = conv.waveNumber(self.wavelength))
 
-    
+
     def setDimensionsFromFrequency(self, frequency):
         self.wavelength = conv.frequencyToWavelength(frequency)
         self.width = self.widthFromWavelength(self.wavelength)
@@ -175,6 +268,7 @@ class PatchBuilder:
     @property
     def heightEffective(self):
         return self.height*sqrt(self.eR)
+
   #+end_src  
 ** test_patch
    #+begin_src python :tangle source/test_patch.py
@@ -182,16 +276,38 @@ import unittest
 import patch as pt
 import numpy
 from numpy import pi, sqrt
+import conversion as conv
 
 class TestPatchBuilder(unittest.TestCase):
-    def test_buildPatch(self):
-        material = pt.Material(
-            relativePermittivity = 3.4,
-            height = 0.11E-3)
-        patchBuilder = pt.PatchBuilder(material)
+    def setUp(self):
+        rtDuroid5880 = pt.Material(
+            relativePermittivity = 2.2,
+            height = 0.1588E-2)
+        patchBuilder = pt.PatchBuilder(rtDuroid5880)
+        
+        self.patch = patchBuilder.buildForFrequency(10E9)
+        self.radiation = pt.PatchRadiation(self.patch, resolution = 501)
+        self.plotter = pt.RadiationPlotter(self.radiation)
+        
+    def test_rtDuroid5880Build_matchesBalanisTextbook(self):
+        actual = self.patch
+        expected = pt.Patch(
+            width = 1.186E-2,
+            height = 0.1588E-2,
+            length = 0.906E-2,
+            effectiveLength = 1.068E-2,
+            waveNumber = conv.waveNumber(conv.frequencyToWavelength(10E9)))
+            
+        numpy.testing.assert_array_almost_equal(actual, expected, 3)
 
-        patch = patchBuilder.buildForFrequency(14E9)
-        print(patch)
+    def test_plotHPlane(self):
+        self.plotter.plotHPlane('../figure/patch_hPlane.png')
+
+    def test_plotEPlane(self):
+        self.plotter.plotEPlane('../figure/patch_ePlane.png')
+
+    def test_plotTotal(self):
+        self.plotter.plotTotal('../figure/patch_total.png')
 
 if __name__ == '__main__':
     unittest.main()
@@ -200,18 +316,22 @@ if __name__ == '__main__':
 
    #+RESULTS:
    :results:
-   .
+   ./home/charon/course/fields_and_waves/final/source/patch.py:65: RuntimeWarning: invalid value encountered in true_divide
+     magnitudes = sin(self.pitch) * sin(x)/x * sin(z)/z
+   /usr/lib/python3.8/site-packages/matplotlib/projections/polar.py:55: RuntimeWarning: invalid value encountered in greater_equal
+     r = np.where(r >= 0, r, np.nan)
+   ...
    ----------------------------------------------------------------------
-   Ran 1 test in 0.000s
+   Ran 4 tests in 0.666s
 
    OK
-   Patch(effective=Dimensions(width=0.007218572641111331, length=0.00589094833004424, height=0.00020282997806044353), actual=Dimensions(width=0.007218572641111331, length=0.005784565792663788, height=0.00011))
 
    :end:
 
-   
-* Patch Dimensions at a Given Resonance Frequency
-** Fringing Effects  
+
+* Single Patch Antenna: Physical Design
+** Design Context
+** Fringing Effects
    Fringing fields at the lengths of the patch makes the patch appear
    to have a greater length than it actually does. This is important
    since the effective dimensions of the patch affect the resonant
@@ -233,7 +353,7 @@ if __name__ == '__main__':
    #+end_latex
 
 ** Effective Relative Permittivity
-   To find the effective relative permittivity, we use cite:rdEeff
+   To find the effective relative permittivity, we use
    
    #+begin_latex
    \begin{equation} \label{eq-eEff}
@@ -244,162 +364,46 @@ if __name__ == '__main__':
    #+end_latex 
 
    
+** Effective Length
+** Physical Design Length
+** Summary
+* Single Patch Antenna: Radiation Pattern
+** E-Plane
+   [[./figure/patch_ePlane.png]]
+** H-Plane
+   [[./figure/patch_hPlane.png]]
+** Far-Zone Total Electric Field
+   [[./figure/patch_total.png]]
+** Directivity
+** Efficiency
+** Summary
+* N-Element Patch Array
+** Coordinates
+** Relative Phase
+** Array Factor from Summed Elements
+** Directivity
+** Efficiency
+** Summary
+* Impedance Matching by Insetting the Feed-Point
+** Input Impedance
+** Inset Position
+* Conclusion
 
-* Directivity
-** Source
-   #+begin_src python directivity.py
-"""
-Function to calculate peak directivity.
-Also includes some examples that are used to check result.
-"""
-from math import sin, sqrt, pi, log10, radians
-import numpy as np
-import patch
-
-
-def SqrtSinPattern(Theta, Phi, *args):
-    """
-    See Fig1 @ http://www.antenna-theory.com/basics/directivity.php
-    Expect Directivity to be 1.05dB.
-    """
-    return sqrt(sin(radians(Theta)))
-
-
-def SinPowerPattern(Theta, Phi, *args):
-    """
-    See Fig1 @ http://www.antenna-theory.com/basics/directivity.php
-    Expect Directivity to be 2.707dB.
-    """
-    return sin(radians(Theta)) ** 5
-
-
-def IsotropicPattern(Theta, Phi, *args):
-    """
-    Isotropic directional pattern. i.e. radiation is same in all directions.
-    Expect directivity to be 0dB.
-    """
-    return 1
-
-
-def xfrange(start, stop, step):
-    """
-    Creates range of float values.
-    """
-    i = 0
-    while start + i * step < stop:
-        yield start + i * step
-        i += 1
-
-
-def CalcDirectivity(Efficiency, RadPatternFunction, *args):
-    """
-    Based on calc_directivity.m from ArrayCalc.
-    Calculates peak directivity in dBi value using numerical integration.
-    If the array efficiency is set to below 100% then the returned value is referred to as Gain (dB).
-
-    Usage: ThetaMax, PhiMax = CalcDirectivity(RadPatternFunction, Efficiency)
-
-    RadPatternFunction - antennas radiation pattern function. F(Theta, Phi)
-    Efficiency - Efficiency of antenna in %. Default 100%.
-
-    Returned values:
-    ThetaMax - Theta value for direction of maximum directivity (Deg)
-    PhiMax - Phi value for direction of maximum directivity (Deg)
-
-    Integration is of the form :
-    %
-    %       360   180
-    %     Int{  Int{  (E(theta,phi)*conj(E(theta,phi))*sin(theta) d(theta) d(phi)
-    %        0     0
-    %
-    %         z
-    %         |-theta   (theta 0-180 measured from z-axis)
-    %         |/
-    %         |_____ y
-    %        /\
-    %       /-phi       (phi 0-360 measured from x-axis)
-    %      x
-    %
-    """
-    print("Calculating Directivity for " + RadPatternFunction.__name__)
-
-    deltheta = 2                                                                # Step value of theta (Deg)
-    delphi = 2                                                                  # Step value for phi (Deg)
-
-    dth = radians(deltheta)
-    dph = radians(delphi)
-
-    Psum = 0
-    Pmax = 0
-    Thmax = 0
-    Phmax = 0
-
-    for phi in xfrange(0, 360, delphi):                                                                     # Phi Integration Loop 0-360 degrees
-        for theta in xfrange(0, 180, deltheta):                                                             # Theta Integration Loop 0-180 degrees
-            eField = RadPatternFunction(theta, phi, *args)                                       # Total E-field at point
-            Pthph = eField * np.conjugate(eField)                                                                             # Convert to power
-
-            if Pthph > Pmax:
-                Pmax = Pthph                                                                                # Store peak value
-                Thmax = theta                                                                               # Store theta value for the maximum
-                Phmax = phi                                                                                 # Store phi value for the maximum
-
-            # print(str(theta) + "," + str(phi) + ": " + str(Pthph))
-            Psum = Psum + Pthph * sin(radians(theta)) * dth * dph                                           # Summation
-
-    Pmax = Pmax * (Efficiency / 100)                                                                        # Apply antenna efficiency
-
-    directivity_lin = Pmax / (Psum / (4 * pi))                                                              # Directivity (linear ratio)
-    directivity_dBi = 10 * log10(directivity_lin)                                                           # Directivity (dB wrt isotropic)
-
-    if Efficiency < 100:                                                                                    # Gain case
-        dBdiff = 10 * log10(abs(100 / Efficiency))                                                          # Difference between gain and directivity
-        print("Directivity = " + str(directivity_dBi + dBdiff) + "dBi")                                     # Display what directivity would be for ref.
-        print("Efficiency = " + str(Efficiency) + "%")
-        print("Gain = " + str(directivity_dBi) + "dB")
-    else:                                                                                                   # Directivity case
-        print("Directivity = " + str(directivity_dBi) + "dBi")
-
-    print("At Theta = " + str(Thmax) + ", Phi = " + str(Phmax))
-
-    return Thmax, Phmax
-
-if __name__ == "__main__":
-    CalcDirectivity(100, SqrtSinPattern)
-    print("\n\n")
-    CalcDirectivity(90, SinPowerPattern)
-    print("\n\n")
-    CalcDirectivity(100, IsotropicPattern)
-
-    print("\n\n")
-
-    freq = 14e9
-    Er = 3.66                                                           # RO4350B
-
-    h = 0.101e-3
-    W, L, h, Er = patch.DesignPatch(Er, h, freq)
-    CalcDirectivity(100, patch.PatchFunction, freq, W, L, h, Er)
-    fields = patch.PatchEHPlanePlot(freq, W, L, h, Er)
-    patch.SurfacePlot(fields, freq, W, L, h, Er)
-
-    W = 10.7e-3
-    L = 10.47e-3
-    h = 3e-3
-    Er = 2.5
-
-    print("\n\n")
-    CalcDirectivity(100, patch.PatchFunction, freq, W, L, h, Er)
-    fields = patch.PatchEHPlanePlot(freq, W, L, h, Er)
-    patch.SurfacePlot(fields, freq, W, L, h, Er)
-   #+end_src
-
-   #+RESULTS:
 * References :ignore:
   bibliographystyle:ieeetr
   bibliography:README.bib
   
-* Source 
+
+* Source :noexport:
 
 https://empossible.net/wp-content/uploads/2018/03/Topic-5-Microstrip-Patch-Antenna.pdf
 
+http://www.elcom-hu.com/Electrical/Antennas%20/Antenna%20Theory%20Analysis%20and%20Design%20Cropped%20fixed%20Constantine%20A%20Balanis%202nd%20Ed%20John%20Will.pdf
 
+* Talkables :noexport:
+  - cavity model pg 746
+
+*** TODO Make part 1 patch in inkscape (in Design Context)
+*** TODO Math work-through 1hr
+*** TODO Figure Captions 1hr
+*** TODO Site book

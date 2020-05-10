@@ -16,7 +16,7 @@ def waveNumber(wavelength):
 SphericalCoordinates = namedtuple('SphericalCoordinates', ['r', 'pitch', 'yaw'])
 CartesianCoordinates = namedtuple('CartesianCoordinates', ['x', 'y', 'z'])
 
-def sphericalToCartesian(r, pitch, yaw):
+def sphericalToCartesian(r, yaw, pitch):
     x = r * cos(yaw) * sin(pitch)
     y = r * sin(yaw) * sin(pitch)
     z = r * cos(pitch)
