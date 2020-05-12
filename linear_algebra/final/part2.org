@@ -1,0 +1,16 @@
+#+latex_class_options: [twocolumn, fleqn]
+#+latex_header: \usepackage{homework}
+#+bind: org-latex-minted-options (("bgcolor" "codeBackground") ("fontsize" "\\scriptsize"))
+#+bind: org-latex-image-default-width "\\linewidth"
+#+options: num:t tags:nil
+
+#+title: MA339 Final
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* 1
+  [[./figure/2-1.png]]
+* 4
+  [[./figure/2-4.png]]
+* 7
+  [[./figure/2-7.png]]

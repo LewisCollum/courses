@@ -1,0 +1,30 @@
+#+latex_class_options: [twocolumn, fleqn]
+#+latex_header: \usepackage{homework}
+#+bind: org-latex-minted-options (("bgcolor" "codeBackground") ("fontsize" "\\scriptsize"))
+#+bind: org-latex-image-default-width "\\linewidth"
+#+options: num:t tags:nil
+
+#+title: MA339 Final
+#+author: Lewis Collum
+#+date: Updated: \today
+
+* Notes :noexport:
+  The quadratic form is positive definite if the eigenvalues are all​
+  positive, positive semidefinite if they are all​ nonnegative,
+  negative semidefinite if they are all​ nonpositive, negative definite
+  if they are all​ negative, and indefinite if there are both positive
+  and negative eigenvalues.
+
+
+* 1
+  [[./figure/1.png]]
+* 2
+  [[./figure/2.png]]
+* 5
+  [[./figure/5.png]]
+* 6
+  [[./figure/6.png]]
+* 10
+  [[./figure/10.png]]
+* 11
+  [[./figure/11.png]]
