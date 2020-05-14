@@ -1,64 +1,25 @@
 import numpy
 from numpy import pi, sin, cos, sqrt
 from collections import namedtuple
-import conversion as conv
-from matplotlib import pyplot
-from mpl_toolkits.mplot3d import Axes3D
+from . import conversion as conv
+from scipy.integrate import simps
 
 Patch = namedtuple('Patch', ['width', 'height', 'length', 'effectiveLength', 'waveNumber'])
 Material = namedtuple('Material', ['relativePermittivity', 'height'])
-
-class RadiationPlotter:
-    def __init__(self, patchRadiation):
-        self.radiation = patchRadiation
-
-    def plotHPlane(self, fileName = None):
-        hPlane = self.radiation.hPlane()
-        figure = pyplot.figure(figsize=(4,3))
-        axes = figure.add_subplot(111, projection='polar')
-        axes.plot(hPlane.pitch, hPlane.r)
-        axes.set_thetamax(180)
-        axes.set_xlabel(r'$\theta$')
-        figure.tight_layout()
-        self.showOrSave(fileName)
-
-    def plotEPlane(self, fileName = None):
-        ePlane = self.radiation.ePlane()
-        figure = pyplot.figure(figsize=(4,3))
-        axes = figure.add_subplot(111, projection='polar')
-        axes.plot(ePlane.yaw, ePlane.r)
-        axes.set_thetamin(-90)
-        axes.set_thetamax(90)
-        axes.set_xlabel(r'$\phi$')        
-        figure.tight_layout()
-        self.showOrSave(fileName)
-
-    def plotTotal(self, fileName = None):
-        total = self.radiation.totalAsCartesian()
-        figure = pyplot.figure(figsize=(5,4))
-        axes = figure.add_subplot(111, projection='3d')        
-        axes.plot_surface(total.z, total.y, total.x)
-        axes.set_xlabel('z (along width)')
-        axes.set_ylabel('y (along length)')
-        axes.set_zlabel('x (along height)')
-        figure.tight_layout()
-        self.showOrSave(fileName)
-        
-    def showOrSave(self, fileName):
-        if fileName:
-            pyplot.savefig(fileName)
-            pyplot.clf()
-        else:
-            pyplot.show()        
-        
-        
+ 
+def rolloff(radians, factor):
+    degrees = numpy.rad2deg(radians)
+    F1 = 1 / (((factor*(abs(degrees) - 90))**2) + 0.001)
+    return 1 / (F1 + 1)
+    
 class PatchRadiation:
     def __init__(self, patch, resolution):
         self.patch = patch
-        self.resolution = resolution        
-        self.pitch = numpy.linspace(0, pi, resolution)
-        self.yaw = numpy.linspace(-pi/2, pi/2, resolution)
- 
+        self.resolution = resolution
+        offset = pi/resolution
+        self.pitch = numpy.linspace(offset, pi, resolution, endpoint=False)
+        self.yaw = numpy.linspace(-pi/2, pi/2, resolution, endpoint=False)
+
     def hPlane(self):
         x = self.patch.waveNumber*self.patch.height/2 * sin(self.pitch)
         z = self.patch.waveNumber*self.patch.width/2 * cos(self.pitch)
@@ -80,25 +41,18 @@ class PatchRadiation:
     def totalAsSpherical(self):
         ePlane, hPlane = numpy.meshgrid(self.ePlane().r, self.hPlane().r)
         yaw, pitch = numpy.meshgrid(self.yaw, self.pitch)
-        radiation = ePlane * hPlane * self.rolloff(self.yaw, 0.5)
+        radiation = ePlane * hPlane * rolloff(self.yaw, 0.3)
         return conv.SphericalCoordinates(
             r = numpy.nan_to_num(radiation),
             yaw = yaw,
             pitch = pitch)
 
-    def totalAsCartesian(self):
-        total = self.totalAsSpherical()
-        x, y, z = conv.sphericalToCartesian(
-            r = total.r,
-            yaw = total.yaw,
-            pitch = total.pitch)
-        return conv.CartesianCoordinates(x, y, z)
-        
-    def rolloff(self, radians, factor):
-        degrees = numpy.rad2deg(radians)
-        F1 = 1 / (((factor*(abs(degrees) - 90))**2) + 0.001)
-        return 1 / (F1 + 1)
-       
+    def directivity(self):
+        total, pitch, yaw = self.totalAsSpherical()
+        total = total/total.max()
+        average = simps(simps(total, pitch[:, 0]), yaw[0])
+        directivity = 4*numpy.pi/average
+        return directivity
 
 
 class PatchBuilder:

@@ -1,21 +1,24 @@
 #+latex_class: IEEEtran
-#+property: header-args:python :results silent :eval no-export :exports none
-#+property: header-args:bash :results drawer :eval no-export :exports none
-#+options: num:t toc:t
-#+bind: org-latex-image-default-width ".8\\linewidth"
+#+latex_class_options: [journal, 11pt]
+#+bind: org-latex-default-figure-position "H"
+#+bind: org-latex-minted-options (("rulecolor" "gray") ("frame" "leftline") ("fontsize" "\\scriptsize") ("xleftmargin" "20pt") ("baselinestretch" "0.9"))
+#+latex_header: \usepackage{siunitx}
+#+property: header-args:python :eval no-export :exports results
+#+property: header-args:bash :results drawer :eval no-export :exports code
+#+options: num:t toc:t tags:nil
 
-#+title: Microstrip Antenna Arrays
 #+author: Lewis Collum
+#+title: Rectangular Patch Antenna Array Design
+# #+title: Rectangular Patch Antenna Array Design Supplement
+#+bind: org-latex-image-default-width ".8\\linewidth"
+# #+latex_class_options: [onecolumn]
+#+exclude_tags: noexport supplement
 
-#+begin_abstract
-Hello
-#+end_abstract
-
-* Library :noexport:
-** call_test
+* Library                                                        :supplement:
+** Unit Test Runner
    #+name: test
-   #+begin_src bash :var name="" :dir source :async
-python -m unittest $name.py 2>&1
+   #+begin_src bash :var name="" :async
+python -m unittest source/$name.py 2>&1
 echo
    #+end_src
 
@@ -43,6 +46,12 @@ def sphericalToCartesian(r, yaw, pitch):
     x = r * cos(yaw) * sin(pitch)
     y = r * sin(yaw) * sin(pitch)
     z = r * cos(pitch)
+    return CartesianCoordinates(x, y, z)
+
+def sphericalVectorToCartesian(r, yaw, pitch):
+    x = r[0] * cos(yaw) * sin(pitch)
+    y = r[1] * sin(yaw) * sin(pitch)
+    z = r[2] * cos(pitch)
     return CartesianCoordinates(x, y, z)
 
 def cartesianToSpherical(x, y, z):
@@ -117,64 +126,25 @@ if __name__ == '__main__':
 import numpy
 from numpy import pi, sin, cos, sqrt
 from collections import namedtuple
-import conversion as conv
-from matplotlib import pyplot
-from mpl_toolkits.mplot3d import Axes3D
+from . import conversion as conv
+from scipy.integrate import simps
 
 Patch = namedtuple('Patch', ['width', 'height', 'length', 'effectiveLength', 'waveNumber'])
 Material = namedtuple('Material', ['relativePermittivity', 'height'])
-
-class RadiationPlotter:
-    def __init__(self, patchRadiation):
-        self.radiation = patchRadiation
-
-    def plotHPlane(self, fileName = None):
-        hPlane = self.radiation.hPlane()
-        figure = pyplot.figure(figsize=(4,3))
-        axes = figure.add_subplot(111, projection='polar')
-        axes.plot(hPlane.pitch, hPlane.r)
-        axes.set_thetamax(180)
-        axes.set_xlabel(r'$\theta$')
-        figure.tight_layout()
-        self.showOrSave(fileName)
-
-    def plotEPlane(self, fileName = None):
-        ePlane = self.radiation.ePlane()
-        figure = pyplot.figure(figsize=(4,3))
-        axes = figure.add_subplot(111, projection='polar')
-        axes.plot(ePlane.yaw, ePlane.r)
-        axes.set_thetamin(-90)
-        axes.set_thetamax(90)
-        axes.set_xlabel(r'$\phi$')        
-        figure.tight_layout()
-        self.showOrSave(fileName)
-
-    def plotTotal(self, fileName = None):
-        total = self.radiation.totalAsCartesian()
-        figure = pyplot.figure(figsize=(5,4))
-        axes = figure.add_subplot(111, projection='3d')        
-        axes.plot_surface(total.z, total.y, total.x)
-        axes.set_xlabel('z (along width)')
-        axes.set_ylabel('y (along length)')
-        axes.set_zlabel('x (along height)')
-        figure.tight_layout()
-        self.showOrSave(fileName)
-        
-    def showOrSave(self, fileName):
-        if fileName:
-            pyplot.savefig(fileName)
-            pyplot.clf()
-        else:
-            pyplot.show()        
-        
-        
+ 
+def rolloff(radians, factor):
+    degrees = numpy.rad2deg(radians)
+    F1 = 1 / (((factor*(abs(degrees) - 90))**2) + 0.001)
+    return 1 / (F1 + 1)
+    
 class PatchRadiation:
     def __init__(self, patch, resolution):
         self.patch = patch
-        self.resolution = resolution        
-        self.pitch = numpy.linspace(0, pi, resolution)
-        self.yaw = numpy.linspace(-pi/2, pi/2, resolution)
- 
+        self.resolution = resolution
+        offset = pi/resolution
+        self.pitch = numpy.linspace(offset, pi, resolution, endpoint=False)
+        self.yaw = numpy.linspace(-pi/2, pi/2, resolution, endpoint=False)
+
     def hPlane(self):
         x = self.patch.waveNumber*self.patch.height/2 * sin(self.pitch)
         z = self.patch.waveNumber*self.patch.width/2 * cos(self.pitch)
@@ -196,25 +166,18 @@ class PatchRadiation:
     def totalAsSpherical(self):
         ePlane, hPlane = numpy.meshgrid(self.ePlane().r, self.hPlane().r)
         yaw, pitch = numpy.meshgrid(self.yaw, self.pitch)
-        radiation = ePlane * hPlane * self.rolloff(self.yaw, 0.5)
+        radiation = ePlane * hPlane * rolloff(self.yaw, 0.3)
         return conv.SphericalCoordinates(
             r = numpy.nan_to_num(radiation),
             yaw = yaw,
             pitch = pitch)
 
-    def totalAsCartesian(self):
-        total = self.totalAsSpherical()
-        x, y, z = conv.sphericalToCartesian(
-            r = total.r,
-            yaw = total.yaw,
-            pitch = total.pitch)
-        return conv.CartesianCoordinates(x, y, z)
-        
-    def rolloff(self, radians, factor):
-        degrees = numpy.rad2deg(radians)
-        F1 = 1 / (((factor*(abs(degrees) - 90))**2) + 0.001)
-        return 1 / (F1 + 1)
-       
+    def directivity(self):
+        total, pitch, yaw = self.totalAsSpherical()
+        total = total/total.max()
+        average = simps(simps(total, pitch[:, 0]), yaw[0])
+        directivity = 4*numpy.pi/average
+        return directivity
 
 
 class PatchBuilder:
@@ -273,10 +236,10 @@ class PatchBuilder:
 ** test_patch
    #+begin_src python :tangle source/test_patch.py
 import unittest
-import patch as pt
+from . import patch as pt
 import numpy
 from numpy import pi, sqrt
-import conversion as conv
+from . import conversion as conv
 
 class TestPatchBuilder(unittest.TestCase):
     def setUp(self):
@@ -285,7 +248,8 @@ class TestPatchBuilder(unittest.TestCase):
             height = 0.1588E-2)
         patchBuilder = pt.PatchBuilder(rtDuroid5880)
         
-        self.patch = patchBuilder.buildForFrequency(10E9)
+        self.frequency = 10E9
+        self.patch = patchBuilder.buildForFrequency(self.frequency)
         self.radiation = pt.PatchRadiation(self.patch, resolution = 501)
         self.plotter = pt.RadiationPlotter(self.radiation)
         
@@ -297,113 +261,627 @@ class TestPatchBuilder(unittest.TestCase):
             length = 0.906E-2,
             effectiveLength = 1.068E-2,
             waveNumber = conv.waveNumber(conv.frequencyToWavelength(10E9)))
-            
+
         numpy.testing.assert_array_almost_equal(actual, expected, 3)
-
-    def test_plotHPlane(self):
-        self.plotter.plotHPlane('../figure/patch_hPlane.png')
-
-    def test_plotEPlane(self):
-        self.plotter.plotEPlane('../figure/patch_ePlane.png')
-
-    def test_plotTotal(self):
-        self.plotter.plotTotal('../figure/patch_total.png')
 
 if __name__ == '__main__':
     unittest.main()
    #+end_src
+
    #+call: test(name="test_patch")
 
    #+RESULTS:
    :results:
-   ./home/charon/course/fields_and_waves/final/source/patch.py:65: RuntimeWarning: invalid value encountered in true_divide
-     magnitudes = sin(self.pitch) * sin(x)/x * sin(z)/z
-   /usr/lib/python3.8/site-packages/matplotlib/projections/polar.py:55: RuntimeWarning: invalid value encountered in greater_equal
-     r = np.where(r >= 0, r, np.nan)
-   ...
+   ....
    ----------------------------------------------------------------------
-   Ran 4 tests in 0.666s
+   Ran 4 tests in 4.564s
 
    OK
 
    :end:
 
+** radiation_plotter
+   #+begin_src python :tangle source/plotter.py 
+from matplotlib import pyplot
+from mpl_toolkits.mplot3d import Axes3D
+import numpy
+from numpy import pi
+
+from . import conversion as conv
+
+class RadiationPlotter:
+    def __init__(self, patchRadiation):
+        self.radiation = patchRadiation
+
+    def plotHPlane(self, fileName = None):
+        hPlane = self.radiation.hPlane()
+        radius = self.dB(hPlane.r)
+        nanMask = ~numpy.isnan(radius)
+        figure = pyplot.figure(figsize=(4,3))
+        axes = figure.add_subplot(111, projection='polar')
+        axes.plot(hPlane.pitch[nanMask], radius[nanMask])
+        axes.set_thetamax(180)
+        axes.set_xticks([0, pi/2, pi])
+        axes.set_yticks(numpy.linspace(numpy.round(numpy.min(radius[nanMask])), 0, 3))
+        axes.set_xlabel(r'$\theta$')
+        axes.set_ylabel('dB')
+        figure.tight_layout()
+        self.showOrSave(fileName)
+
+    def plotEPlane(self, fileName = None):
+        ePlane = self.radiation.ePlane()
+        figure = pyplot.figure(figsize=(4,3))
+        axes = figure.add_subplot(111, projection='polar')
+        axes.plot(ePlane.yaw, self.dB(ePlane.r))
+        axes.set_thetamin(-90)
+        axes.set_thetamax(90)
+        axes.set_xlabel(r'$\phi$')
+        axes.set_ylabel('dB')        
+        figure.tight_layout()
+        self.showOrSave(fileName)
+
+    def plotTotal(self, fileName = None):
+        total = self.radiation.totalAsSpherical()
+        normalized = total.r/total.r.max()
+        x, y, z = conv.sphericalToCartesian(
+            r = normalized,
+            yaw = total.yaw,
+            pitch = total.pitch)        
+        figure = pyplot.figure(figsize=(5,4))
+        axes = figure.add_subplot(111, projection='3d')        
+        axes.plot_surface(z, y, x, rcount=100, ccount=100)
+        axes.set_xlabel('z (along width)')
+        axes.set_ylabel('y (along length)')
+        axes.set_zlabel('x (along height)')
+        axes.set_zlim(0, 1)
+        axes.set_ylim(-0.5, 0.5)
+        axes.set_xlim(-0.5, 0.5)
+
+        figure.tight_layout()
+        self.showOrSave(fileName)
+
+    def dB(self, value):
+        return 10 * numpy.log10(value)
+        
+    def showOrSave(self, fileName):
+        if fileName:
+            pyplot.savefig(fileName)
+            pyplot.clf()
+        else:
+            pyplot.show()        
+   #+end_src
+** test_radiation_plotter
+   #+begin_src python :async :results silent
+from source import patch as pt
+from source import plotter
+
+rtDuroid5880 = pt.Material(
+    relativePermittivity = 2.2,
+    height = 0.1588E-2)
+patchBuilder = pt.PatchBuilder(rtDuroid5880)
+        
+frequency = 10E9
+patch = patchBuilder.buildForFrequency(frequency)
+radiation = pt.PatchRadiation(patch, resolution = 501)
+plotter = plotter.RadiationPlotter(radiation)
+        
+plotter.plotHPlane()#'figure/patch_hPlane.png')
+plotter.plotEPlane()#'figure/patch_ePlane.png')
+plotter.plotTotal()#'figure/patch_total.png')
+   #+end_src
+
+** array
+   #+begin_src python :tangle source/array.py :results output
+from collections import namedtuple
+import numpy
+from numpy import sin, cos
+from scipy.integrate import simps
+
+from . import conversion as conv
+from . import patch as pt
+
+class ArrayRadiation:
+    def __init__(self, radiation, wavelength, elements):
+        self.radiation, self.pitch, self.yaw = radiation
+        self.elements = elements
+        self.wavelength = wavelength
+        self.waveNumber = conv.waveNumber(wavelength = self.wavelength)
+        
+    def totalAsSpherical(self):
+        return conv.SphericalCoordinates(
+            r = numpy.abs(self.arrayFactor()) * self.radiation,
+            yaw = self.yaw,
+            pitch = self.pitch)
+        
+    def arrayFactor(self):
+        elementSum = 0
+        for element in self.elements:
+            relativePhase = self.relativePhase(element)
+            elementSum += numpy.exp(1j*relativePhase)
+        return elementSum.real
+        
+    def relativePhase(self, element):
+        z, y, x = conv.sphericalVectorToCartesian(
+            r = element,
+            yaw = self.yaw,
+            pitch = self.pitch)
+
+        return self.waveNumber * (x + y + z)
+
+    def directivity(self):
+        total, pitch, yaw = self.totalAsSpherical()
+        total = total/total.max()
+        average = simps(simps(total, pitch[:, 0]), yaw[0])
+        directivity = 4*numpy.pi/average
+        return directivity
+
+    
+Element = namedtuple('Element', ['x', 'y', 'z'])
+def spacedPositions(shape, spacing):
+    offsets = -spacing*(numpy.asarray(shape)-1)/2
+    positions = []
+    for x in range(shape[0]):
+        for y in range(shape[1]):
+            for z in range(shape[2]):
+                positions.append(Element(
+                    x = x*spacing + offsets[0],
+                    y = y*spacing + offsets[1],
+                    z = z*spacing + offsets[2]))
+    return positions
+    
+   #+end_src
+
+   #+RESULTS:
+
+* Abstract :ignore:
+#+begin_abstract
+We re-create an example design for a patch antenna, given by Balanis
+cite:balanis, to simulate an array of patches using an RT/duroid 5880
+substrate. We also include illustrations for the far-zone radiation
+pattern of both a single patch and array of patches.
+#+end_abstract
 
 * Single Patch Antenna: Physical Design
 ** Design Context
+   We start by designing a single patch, which we will use to create
+   an antenna array (in section [[sec:n-element]]).
+
+   #+name: fig:model
+   #+caption: Patch Model with spherical (\(\theta\) and \(\phi\)) and cartesian coordinates.
+   #+attr_latex: :width 0.6\linewidth
+   [[./figure/patch.eps]]
+
+   For the patch substrate, we are using RT/duroid 5880,
+   which has a relative permittivty of \(\epsilon_r = 2.2\). The
+   height of the material is designed to be \(h =
+   \SI{0.1588}{cm}\). Our patch is intended to resonate at \(f_r =
+   \SI{10}{GHz}\).
+   
+   With these three parameters, we can find the patch width and
+   height. Then, we can illustrate the radiation pattern for the patch.
 ** Fringing Effects
+   <<sec:fringing>>
    Fringing fields at the lengths of the patch makes the patch appear
    to have a greater length than it actually does. This is important
    since the effective dimensions of the patch affect the resonant
    frequency. If the physical length of the patch is \(L\), then the
-   effective length, \(L_{\texttt{eff}}\), can be written as
-   \[L_{\texttt{eff}} = L + \Delta L,\] where \(\Delta L\) is the
-   additional length on one end of the patch.
+   effective length, \(L_{eff}\), can be written as
+   #+begin_latex
+   \begin{equation} \label{eq-lEff}
+     L_{eff} = L + 2\cdot\Delta L,
+   \end{equation}
+   #+end_latex
+   where \(\Delta L\) is the additional length on one end of the
+   patch.
 
    The additional length can be related to the width of the patch, \(W\) and
    the effective relative permittivity of the dieletric substrate,
-   \(\epsilon_{\texttt{eff}}\), as
+   \(\epsilon_{eff}\), as cite:balanis
 
    #+begin_latex
    \begin{equation} \label{eq-dL}
      \dfrac{\Delta L}{h} = 0.412 \dfrac{
-       (\epsilon_{\texttt{eff}}+0.3)\left(\dfrac{W}{h} + 0.264\right)}{
-       (\epsilon_{\texttt{eff}}-0.258)\left(\dfrac{W}{h} + 0.8\right)}.
+       (\epsilon_{eff}+0.3)\left(\dfrac{W}{h} + 0.264\right)}{
+       (\epsilon_{eff}-0.258)\left(\dfrac{W}{h} + 0.8\right)}.
    \end{equation}
    #+end_latex
 
-** Effective Relative Permittivity
-   To find the effective relative permittivity, we use
+   The effective relative permittivity, \(\epsilon_{eff}\),
+   is given as cite:balanis
    
    #+begin_latex
    \begin{equation} \label{eq-eEff}
-     \epsilon_{\texttt{eff}} = \dfrac{\epsilon_{r}+1}{2}
+     \epsilon_{eff} = \dfrac{\epsilon_{r}+1}{2}
      + \dfrac{\epsilon_r-1}{2}
      \left(1 + 12\cdot \frac{h}{W}\right)^{-1/2}.
    \end{equation}
    #+end_latex 
-
    
-** Effective Length
-** Physical Design Length
-** Summary
-* Single Patch Antenna: Radiation Pattern
-** E-Plane
-   [[./figure/patch_ePlane.png]]
-** H-Plane
-   [[./figure/patch_hPlane.png]]
-** Far-Zone Total Electric Field
-   [[./figure/patch_total.png]]
-** Directivity
-** Efficiency
-** Summary
-* N-Element Patch Array
-** Coordinates
-** Relative Phase
-** Array Factor from Summed Elements
-** Directivity
-** Efficiency
-** Summary
-* Impedance Matching by Insetting the Feed-Point
-** Input Impedance
-** Inset Position
-* Conclusion
+** Physical Width
+   <<sec-width>>
+   A model for patch width is cite:balanis
+   #+begin_latex 
+   \begin{equation} \label{eq-width}
+     W = \dfrac{\lambda_r}{2} \sqrt{\dfrac{2}{\epsilon_r + 1}}
+   \end{equation}
+   #+end_latex
 
+   where \(\lambda\) is the wavelength at the resonance frequency,
+   \(f_r\).
+
+   \[\lambda = \dfrac{c}{\SI{10}{\giga Hz}} = \SI{3.00}{cm}\]
+   
+   The patch's physical width, from eq. [[ref:eq-width]], is
+   \[\boxed{W = \SI{1.185}{cm}}\]
+** Effective Length
+   A model for patch length (without accounting for fringing effects)
+   is, cite:balanis
+   #+begin_latex
+   \begin{equation}
+     L_{eff} = \dfrac{\lambda}{2\sqrt{\epsilon_{eff}}}
+   \end{equation}
+   #+end_latex
+
+   Using eq. ref:eq-eEff, we find the effective relative permittivity
+   to be
+   #+begin_latex
+   \begin{align*}
+     \epsilon_{eff} &= \dfrac{2.2+1}{2}+\dfrac{2.2-1}{2} \left(1 + 12 \cdot
+                      \dfrac{\SI{0.1588}{cm}}{\SI{1.185}{cm}}\right) \\
+                    &= 1.97.
+   \end{align*}
+   #+end_latex
+
+   Thus, 
+   \[\boxed{L_{eff} = \SI{1.07}{cm}}\]
+      
+** Physical Length
+   The physical length is the effective length minus the extensions
+   lengths caused by fringing fields, as per eq. ref:eq-lEff.
+   
+   By eq. ref:eq-dL, the extension length on one side, \(\Delta L\), is
+   \[\Delta L = \SI{0.0825}{cm}\]
+
+   So,
+   #+begin_latex 
+      \begin{align*} 
+        L &= L_{eff} - 2\Delta L \\
+          &= \SI{1.07}{cm} - 2 \cdot \SI{0.0825}{cm} \\
+          &= \boxed{\SI{0.905}{cm}}
+      \end{align*}
+   #+end_latex
+   
+** Summary
+   The width, height, and effective length, are used in following
+   calculations as the effective dimensions of the patch. The actual
+   length of the patch is used for building the antenna and impedance
+   matching, but it is not used to analyze the radiation pattern of the
+   patch.
+   
+* Single Patch Antenna: Analysis
+** E-Plane (\(\theta = 90^{\circ}, -90^{\circ} \le \phi \le 90^{\circ}\))
+   <<sec-eplane>>
+   The radiation intensity in the E-plane can be modeled as
+   cite:balanis
+   
+   #+begin_latex
+   \begin{subequations} \label{eq-ePlane}
+     \begin{align}
+     F_{\phi} &= \cos(y_{\phi}) \cdot \dfrac{\sin(x_{\phi})}{x_{\phi}} \\
+       x_{\phi} &= \dfrac{k_0 h}{2} \cos(\phi) \\
+       y_{\phi} &= \dfrac{k_0 L_{eff}}{2} \sin(\phi),
+     \end{align}
+   \end{subequations}
+   #+end_latex
+
+   where \(k_0\) is the wave-number,
+
+   \[k_0 = \dfrac{2\pi}{\lambda} = 209.6.\]
+
+   #+begin_src python :results silent :async
+from source import patch as pt
+from source import plotter as pl
+from source import conversion as conv
+
+rtDuroid5880 = pt.Material(
+    relativePermittivity = 2.2,
+    height = 0.1588E-2)
+patchBuilder = pt.PatchBuilder(rtDuroid5880)
+        
+frequency = 10E9
+wavelength = conv.frequencyToWavelength(frequency)
+patch = patchBuilder.buildForFrequency(frequency)
+radiation = pt.PatchRadiation(patch, resolution = 100)
+
+plotter = pl.RadiationPlotter(radiation)
+plotter.plotEPlane(f'figure/patch_ePlane.png')
+   #+end_src
+
+   #+name: fig-ePlane
+   #+caption: E-Plane radiation pattern of the patch under design.
+   [[./figure/patch_ePlane.png]]
+** H-Plane (\(\phi = 0^{\circ}, 0^{\circ} \le \theta \le 180^{\circ}\))
+   The radiation intensity in the H-plane can be modeled as
+   cite:balanis
+   
+   #+begin_latex
+   \begin{subequations} \label{eq-hPlane}
+     \begin{align}
+       F_{\theta} &= \sin(\theta) \cdot
+                    \dfrac{\sin(x_{\theta})}{x_{\theta}} \cdot
+                    \dfrac{\sin(z_{\theta})}{z_{\theta}} \\
+       x_{\theta} &= \dfrac{k_0 h}{2} \sin(\theta) \\
+       z_{\theta} &= \dfrac{k_0 W}{2} \cos(\theta),
+     \end{align}
+   \end{subequations}
+   #+end_latex
+
+   using wave-number, \(k_0\), from section [[sec-eplane]].
+
+   #+begin_src python :results silent :async
+from source import patch as pt
+from source import plotter as pl
+from source import conversion as conv
+
+rtDuroid5880 = pt.Material(
+    relativePermittivity = 2.2,
+    height = 0.1588E-2)
+patchBuilder = pt.PatchBuilder(rtDuroid5880)
+        
+frequency = 10E9
+wavelength = conv.frequencyToWavelength(frequency)
+patch = patchBuilder.buildForFrequency(frequency)
+radiation = pt.PatchRadiation(patch, resolution = 100)
+
+plotter = pl.RadiationPlotter(radiation)
+plotter.plotHPlane(f'figure/patch_hPlane.png')
+   #+end_src
+
+   #+name: fig-hPlane
+   #+caption: H-Plane radiation pattern of the patch under design.
+   [[./figure/patch_hPlane.png]]
+** Far-Zone Total Radiation Intensity
+   Since the two plane models are normalized, and since the planes are
+   orthogonal, the total radiation intensity is approximately the product
+   of the two plane models.
+
+   That is,
+   #+begin_latex
+   \begin{equation} \label{eq-totalE}
+     F(\phi, \theta) = F_{\phi} \cdot F_{\theta}.
+   \end{equation}
+   #+end_latex
+
+   #+begin_src python :results silent :async
+from source import patch as pt
+from source import plotter as pl
+from source import conversion as conv
+
+rtDuroid5880 = pt.Material(
+    relativePermittivity = 2.2,
+    height = 0.1588E-2)
+patchBuilder = pt.PatchBuilder(rtDuroid5880)
+        
+frequency = 10E9
+wavelength = conv.frequencyToWavelength(frequency)
+patch = patchBuilder.buildForFrequency(frequency)
+radiation = pt.PatchRadiation(patch, resolution = 100)
+
+plotter = pl.RadiationPlotter(radiation)
+plotter.plotTotal(f'figure/patch_total.png')
+   #+end_src
+
+   #+name: fig-patchTotalRadiation
+   #+caption: Normalized radiation pattern of the patch under design using eq. ref:eq-totalE.
+  [[./figure/patch_total.png]]
+
+** Directivity
+   <<sec-directivity-single>>
+   Directivity of the main lobe (in figure [[fig-patchTotalRadiation]])
+   is the maximum radiation intensity over the average intensity,
+   cite:ulaby
+   #+begin_latex
+   \begin{equation} \label{eq-dir}
+     D = \dfrac{F_{max}}{F_{average}} = \dfrac{1}{\dfrac{1}{4\pi} \Omega_p}
+   \end{equation}
+   #+end_latex
+
+   where \(\Omega_p\) is the pattern solid angle. Note that for a
+   /normalized/ radiation intensity, the maximum, \(F_{max}\), will be
+   equal to 1, by definition.
+   
+   The pattern solid angle is defined as cite:ulaby
+   #+begin_latex
+   \begin{equation} \label{eq-solidAngle} 
+     \Omega_p = \iint_{4\pi} F(\phi, \theta) \,d\theta \,d\phi.
+   \end{equation}
+   #+end_latex
+   
+   Since we have the electric field intensity stored as a 2-dimensional
+   array, we use simpson's rule to calculate the double integral.
+
+   This yields a directivity of,
+   #+begin_src python :results output latex
+import numpy
+from source import patch as pt
+from scipy.integrate import simps
+
+rtDuroid5880 = pt.Material(
+    relativePermittivity = 2.2,
+    height = 0.1588E-2)
+patchBuilder = pt.PatchBuilder(rtDuroid5880)
+
+patch = patchBuilder.buildForFrequency(10E9)
+radiation = pt.PatchRadiation(patch, resolution = 100)
+directivity = radiation.directivity()
+
+print((f'\[D = {directivity:.2f}\]'))
+   #+end_src
+
+   #+RESULTS:
+   #+begin_export latex
+   \[D = 3.17\]
+   #+end_export
+      
+* Patch Grid
+  <<sec:n-element>>
+** Array Factor
+   The array factor is a function that incorporates the positions of
+   the patches in the array. It optionally includes weights and phase
+   offsets. We use a simplified model which only accounts for position
+   of elements, and assumes no element phase offset, a uniform element
+   amplitude of one, and a uniform wave number, written as
+   #+begin_latex
+   \begin{equation} \label{eq-af}
+     AF = \sum_{i=1}^{N}e^{-j k_0 |r_i|} 
+   \end{equation}
+   #+end_latex
+
+   where \(k_0 |r_i|\) is the relative phase at patch =i= located at \(r
+   = (x_i, y_i, z_i)\).
+   
+   The relative phase at each patch, \(k_0 |r_i|\), describes the
+   phase variation for the position of the element, as
+   #+begin_latex
+   \begin{equation} \label{eq-af}
+     k_0 |r_i| = \sin\theta \cos\phi z + \sin\theta \sin\phi y +
+     \cos\theta x.
+   \end{equation}
+   #+end_latex   
+   
+   Importantly, \(z\) and \(x\) would be flipped in eq. ref:eq-af, if
+   we used \(z\) to represent the "up" axis.
+
+   We can plot the array factor for a 3x3 patch array, to visualize
+   the characteristics of the pattern.
+   #+begin_src python :results silent :async
+import numpy
+from numpy import pi
+from source import plotter as pl
+from source import conversion as conv
+from source import array as pa
+
+frequency = 10E9
+wavelength = conv.frequencyToWavelength(frequency)
+
+yaw, pitch = numpy.meshgrid(numpy.linspace(-pi/2, pi/2), numpy.linspace(0, pi))
+radiation = conv.SphericalCoordinates(r = 1, yaw = yaw, pitch = pitch)
+    
+elements = pa.spacedPositions((1,3,3), wavelength/2)
+array = pa.ArrayRadiation(radiation, wavelength, elements)
+plotter = pl.RadiationPlotter(array)
+plotter.plotTotal('figure/patchArray_3x3_af.png')
+   #+end_src
+   
+   #+caption: 3x3 Array Factor
+   [[./figure/patchArray_3x3_af.png]]
+
+** Radiation Pattern
+   For an array, the total radiation intensity is the normalized
+   product of the array factor and the radiation intensity for a
+   single patch cite:balanis. That is,
+   #+begin_latex
+   \begin{equation} \label{eq-array-rad}
+     F(\phi, \theta) = AF \cdot F(\phi, \theta)_0
+   \end{equation}
+   #+end_latex
+
+   We use this relationship to illustrate a 2x2, 3x3, and 4x4 patch array.
+   
+   #+begin_src python :results silent :async
+from source import patch as pt
+from source import plotter as pl
+from source import conversion as conv
+from source import array as pa
+
+rtDuroid5880 = pt.Material(
+    relativePermittivity = 2.2,
+    height = 0.1588E-2)
+patchBuilder = pt.PatchBuilder(rtDuroid5880)
+        
+frequency = 10E9
+wavelength = conv.frequencyToWavelength(frequency)
+patch = patchBuilder.buildForFrequency(frequency)
+radiation = pt.PatchRadiation(patch, resolution = 100)
+for i in range(1,5):
+    elements = pa.spacedPositions((1,i,i), wavelength/2)
+    array = pa.ArrayRadiation(radiation.totalAsSpherical(), wavelength, elements)
+    plotter = pl.RadiationPlotter(array)
+    plotter.plotTotal(f'figure/patchArray_{i}x{i}.png')
+   #+end_src
+
+   #+caption: 2x2 Patch Array
+   [[./figure/patchArray_2x2.png]]
+   #+caption: 3x3 Patch Array
+   [[./figure/patchArray_3x3.png]]
+   #+caption: 4x4 Patch Array
+   [[./figure/patchArray_4x4.png]]
+** Directivity
+   Using eq. ref:eq-array-rad for total array radiation and plugging
+   the result into the solid angle equation (eq. ref:eq-solidAngle),
+   we find the directivity (eq. ref:eq-dir) for each patch array.
+
+   This yields patch array directivities of,
+   #+begin_src python :results output latex :async
+import numpy
+from source import patch as pt
+from source import plotter as pl
+from source import conversion as conv
+from source import array as pa
+
+rtDuroid5880 = pt.Material(
+    relativePermittivity = 2.2,
+    height = 0.1588E-2)
+patchBuilder = pt.PatchBuilder(rtDuroid5880)
+        
+frequency = 10E9
+wavelength = conv.frequencyToWavelength(frequency)
+patch = patchBuilder.buildForFrequency(frequency)
+radiation = pt.PatchRadiation(patch, resolution = 100)
+
+x = numpy.arange(2,5)
+for i in x:
+    elements = pa.spacedPositions((1,i,i), wavelength/2)
+    array = pa.ArrayRadiation(radiation.totalAsSpherical(), wavelength, elements)
+    endPunctuation = '.' if i == x[-1] else ','
+    print(f'\[D_{{{i}x{i}}} = {array.directivity():.2f}{endPunctuation}\]')
+   #+end_src
+
+   #+RESULTS:
+   #+begin_export latex
+   \[D_{2x2} = 7.30,\]
+   \[D_{3x3} = 12.53,\]
+   \[D_{4x4} = 19.61.\]
+   #+end_export
+
+   In theory, the more patches we add to the array, the higher the
+   directivity (and gain) becomes. As a note, gain is \[G = \epsilon
+   D,\] where \epsilon is the antenna efficiency. We assume an
+   efficiency of 100% for this analysis, so we obtain no additional
+   by calculating gain.
+* Conclusion
+  We extended the theory for designing a single patch, to begin
+  designing an antenna array. While there are still many design
+  factors not considered, such as efficiency and impedance matching,
+  this design acts as a first step towards including those factors.
 * References :ignore:
   bibliographystyle:ieeetr
   bibliography:README.bib
   
-
 * Source :noexport:
 
 https://empossible.net/wp-content/uploads/2018/03/Topic-5-Microstrip-Patch-Antenna.pdf
 
 http://www.elcom-hu.com/Electrical/Antennas%20/Antenna%20Theory%20Analysis%20and%20Design%20Cropped%20fixed%20Constantine%20A%20Balanis%202nd%20Ed%20John%20Will.pdf
 
+RT/duroid 5880 - https://rogerscorp.com/-/media/project/rogerscorp/documents/advanced-connectivity-solutions/english/data-sheets/rt-duroid-5870---5880-data-sheet.pdf
+
 * Talkables :noexport:
   - cavity model pg 746
 
-*** TODO Make part 1 patch in inkscape (in Design Context)
+*** DONE Make part 1 patch in inkscape (in Design Context)
+    CLOSED: [2020-05-14 Thu 04:07]
 *** TODO Math work-through 1hr
 *** TODO Figure Captions 1hr
-*** TODO Site book
+*** DONE Site book
+    CLOSED: [2020-05-14 Thu 04:07]

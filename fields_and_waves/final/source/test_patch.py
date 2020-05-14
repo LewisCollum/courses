@@ -1,8 +1,8 @@
 import unittest
-import patch as pt
+from . import patch as pt
 import numpy
 from numpy import pi, sqrt
-import conversion as conv
+from . import conversion as conv
 
 class TestPatchBuilder(unittest.TestCase):
     def setUp(self):
@@ -11,7 +11,8 @@ class TestPatchBuilder(unittest.TestCase):
             height = 0.1588E-2)
         patchBuilder = pt.PatchBuilder(rtDuroid5880)
         
-        self.patch = patchBuilder.buildForFrequency(10E9)
+        self.frequency = 10E9
+        self.patch = patchBuilder.buildForFrequency(self.frequency)
         self.radiation = pt.PatchRadiation(self.patch, resolution = 501)
         self.plotter = pt.RadiationPlotter(self.radiation)
         
@@ -23,17 +24,19 @@ class TestPatchBuilder(unittest.TestCase):
             length = 0.906E-2,
             effectiveLength = 1.068E-2,
             waveNumber = conv.waveNumber(conv.frequencyToWavelength(10E9)))
-            
+
+        # print(f"Patch = {actual}")
+        # print(f"wavelength = {conv.frequencyToWavelength(self.frequency)}")
         numpy.testing.assert_array_almost_equal(actual, expected, 3)
 
     def test_plotHPlane(self):
-        self.plotter.plotHPlane('../figure/patch_hPlane.png')
+        self.plotter.plotHPlane()#'figure/patch_hPlane.png')
 
     def test_plotEPlane(self):
-        self.plotter.plotEPlane('../figure/patch_ePlane.png')
+        self.plotter.plotEPlane()#'figure/patch_ePlane.png')
 
     def test_plotTotal(self):
-        self.plotter.plotTotal('../figure/patch_total.png')
+        self.plotter.plotTotal()#'figure/patch_total.png')
 
 if __name__ == '__main__':
     unittest.main()
