@@ -1,0 +1,6 @@
+../../src/ieee/numeric_std-body.v93:1710:7:@0ms:(assertion warning): NUMERIC_STD."=": metavalue detected, returning FALSE
+../../src/ieee/numeric_std-body.v93:1710:7:@0ms:(assertion warning): NUMERIC_STD."=": metavalue detected, returning FALSE
+../../src/ieee/numeric_std-body.v93:1710:7:@5ns:(assertion warning): NUMERIC_STD."=": metavalue detected, returning FALSE
+/usr/lib/python3.7/site-packages/vunit/vhdl/core/src/stop_body_93-2002.vhd:10:5:@70ns:(report failure): Stopping simulation with status 0
+/home/charon/lab/03_ZyboZ7_Analog/ZyboZ7_Analog/source/vunit_out/test_output/counter.testbinarycounter.test_resetAtMaxAddress_369bc8d4d12112c80edf7e279475629504511403/ghdl/testbinarycounter-test:error: report failed
+/home/charon/lab/03_ZyboZ7_Analog/ZyboZ7_Analog/source/vunit_out/test_output/counter.testbinarycounter.test_resetAtMaxAddress_369bc8d4d12112c80edf7e279475629504511403/ghdl/testbinarycounter-test:error: simulation failed

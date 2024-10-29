@@ -1,0 +1,92 @@
+* Arduino Wii Nunchuk
+** Nunchuk Library
+** Send to STDOUT
+
+* Netcat TCP piping
+** Setting up netcat
+   This is in a linux environment. The setup may be different for
+   Windows.
+   1. Open two terminals. One terminal will be the server, the other
+      is the client.
+
+   2. The server listens for incoming messages. So on the server
+      terminal, enter the command:
+	  #+BEGIN_SRC bash
+		netcat --listen --local-port=1234
+	  #+END_SRC
+
+   3. On the client terminal, connect to the server via:
+	  #+BEGIN_SRC bash
+		netcat localhost 1234
+	  #+END_SRC
+	  localhost is 127.0.1.1 and indicates that I am connecting the
+      client to my own computer. In later sections, once the client is
+      the esp8266 module, the esp8266 will use the public ip of my
+      computer instead.
+
+   4. You should now be able to write a message from the client to the
+      server, and vice versa. \\
+	  Client Terminal: \\
+	  [[file:figure/netcatTcpPiping_messageFromClient.png]] \\
+	  Server Terminal: \\
+	  [[file:figure/netcatTcpPiping_messageFromClientAtServer.png]] \\
+
+	  The port you choose is almost trivial. Generally, it should be
+      above 1024, because 0-1024 contain well-known ports (e.g. HTTP,
+      FTP, SSH, DHCP...). Other ports may be taken too. In my case,
+      for example, port 12344 worked, but port 12345 did not. \\
+	  [[file:figure/netcatTcpPiping_portError.png]] \\
+
+** Piping Nunchuk Data to a Local TCP Client
+   Now that we have tested a local TCP server and client connection,
+   we can send nunchuk data from the local server to the local client.
+   We will be doing this in Bash. 
+
+   The baud rate (9600) is set in the Nunchuk Arduino sketch. 
+   #+BEGIN_SRC bash
+	 baud=9600
+	 port=1234
+	 device=/dev/ttyACM0
+   #+END_SRC
+
+   We will be using picocom as a serial communications program to get
+   data from the Arduino.
+
+   #+BEGIN_SRC bash
+	 picocom --imap lfcrlf --baud $baud $device
+   #+END_SRC
+
+   The netcat command will be used to send picocom data from the
+   server to the client.
+   
+   #+BEGIN_SRC bash
+	 netcat --listen --local-port=$port
+   #+END_SRC
+
+   The data from picocom is piped to the client and to the STDOUT
+   (with the tee command). The final script is:
+
+   #+BEGIN_SRC bash
+	 baud=9600
+	 port=1234
+	 device=/dev/ttyACM0
+
+	 main() {
+		 getNunchukData | tee >(sendToClient)
+	 }
+
+	 getNunchukData() {
+		 picocom --imap lfcrlf --baud $baud $device
+	 }
+
+	 sendToClient() {
+		 netcat --listen --local-port=$port
+	 }
+
+	 main
+   #+END_SRC
+
+** Piping Nunchuk Data to the ESP8266
+   To set up the esp8266, I am using an Arduino Mega. Eventually, the
+   ZyboZ7 will replace the Arduino Mega.
+   

@@ -1,0 +1,7 @@
+v 4
+file / "/home/charon/lab/00_Reference/uart/src/uart_rx.vhd" "e23e79bb039c11f679e9ad9c62933d2767e9b85c" "20190129204930.639":
+  entity uart_rx at 7( 277) + 0 on 17;
+  architecture a of uart_rx at 47( 1530) + 0 on 18;
+file / "/home/charon/lab/00_Reference/uart/src/uart_tx.vhd" "c62483600251476ab8def365bc83532c0bc6a0b7" "20190129204930.559":
+  entity uart_tx at 7( 277) + 0 on 15;
+  architecture a of uart_tx at 45( 1499) + 0 on 16;

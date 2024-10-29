@@ -1,0 +1,9 @@
+v 4
+file / "/home/charon/lab/03_ZyboZ7_Analog/ZyboZ7_Analog/source/binary_counter/TestBinaryCounter.vhd" "7a121228993184422b4444713d09b4bae3e056cd" "20190221031714.271":
+  entity testbinarycounter at 1( 0) + 0 on 18;
+  architecture test of testbinarycounter at 12( 210) + 0 on 19;
+file / "/home/charon/lab/03_ZyboZ7_Analog/ZyboZ7_Analog/source/binary_counter/test_config.vhd" "8a89a93a57b7df3d8e4fecc28922b8273f15befb" "20190221024610.560":
+  package test_config at 1( 0) + 0 on 11;
+file / "/home/charon/lab/03_ZyboZ7_Analog/ZyboZ7_Analog/source/binary_counter/BinaryCounter.vhd" "c5e76d569a0f66079a52b76b87535d671dbb5597" "20190221031714.241":
+  entity binarycounter at 1( 0) + 0 on 16;
+  architecture behavioral of binarycounter at 15( 319) + 0 on 17;

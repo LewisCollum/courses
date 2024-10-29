@@ -1,0 +1,2 @@
+/home/charon/courses/L1_CE/00_Reference/user_guide/tb_example.vhd:19:5:@0ms:(report note): Hello world!
+simulation stopped @0ms with status 0

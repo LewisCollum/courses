@@ -1,0 +1,5 @@
+\contentsline {figure}{\numberline {1}{\ignorespaces A state-controlled top-level. Each block represents an entity in VHDL. Most blocks consist of sub-entities (See \hyperref [orgc4c3e72]{Keypad Controller}). The state-control design approach allows for a loosely coupled system.}}{3}{figure.1}
+\contentsline {figure}{\numberline {2}{\ignorespaces System States}}{4}{figure.2}
+\contentsline {figure}{\numberline {3}{\ignorespaces Full State Diagram. Depicts elaborated run and edit states. The run state allows data to be cycled up or down. The edit state allows the data value at a specified address to be sent (to the SRAM from the Keypad Controller).}}{5}{figure.3}
+\contentsline {figure}{\numberline {4}{\ignorespaces Keypad Controller}}{6}{figure.4}
+\contentsline {figure}{\numberline {5}{\ignorespaces Keypad matrix circuitry.}}{6}{figure.5}

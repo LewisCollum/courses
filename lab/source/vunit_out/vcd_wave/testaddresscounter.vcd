@@ -1,0 +1,59 @@
+$date
+  Thu Feb 21 00:50:47 2019
+$end
+$version
+  GHDL v0
+$end
+$timescale
+  1 fs
+$end
+$var reg 3 ! runner[0:2] $end
+$var reg 1 " clock $end
+$comment addresscounter is not handled $end
+$scope module unit $end
+$var reg 1 # clock $end
+$var reg 1 $ reset $end
+$var reg 1 % load $end
+$var reg 16 & loadable[15:0] $end
+$var reg 16 ' address[15:0] $end
+$comment synchronized is not handled $end
+$scope module counter $end
+$var reg 1 ( increment $end
+$var reg 1 ) reset $end
+$var reg 1 * load $end
+$var reg 16 + loadable[15:0] $end
+$var reg 16 , count[15:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+bZZZ !
+0"
+0#
+0$
+0%
+bUUUUUUUUUUUUUUUU &
+bUUUUUUUUUUUUUUUU '
+0(
+U)
+U*
+bUUUUUUUUUUUUUUUU +
+bUUUUUUUUUUUUUUUU ,
+#5000000
+1%
+b1010101010101010 &
+b1010101010101010 +
+#10000000
+1"
+1#
+b1010101010101010 '
+1(
+0)
+1*
+b1010101010101010 ,
+#15000000
+0%
+#20000000
+0"
+0#
+0(

@@ -1,0 +1,2 @@
+/home/charon/courses/L1_CE/00_Reference/user_guide/tb_example_many.vhd:23:9:@0ms:(report note): This will pass
+simulation stopped @0ms with status 0

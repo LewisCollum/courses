@@ -1,0 +1,7 @@
+v 4
+file / "/home/charon/lab/00_Reference/uart/src/test/tb_uart_rx.vhd" "98d20bfec25bad16f832e9578da68d599bd6aa28" "20190129204930.888":
+  entity tb_uart_rx at 7( 277) + 0 on 17;
+  architecture tb of tb_uart_rx at 22( 521) + 0 on 18;
+file / "/home/charon/lab/00_Reference/uart/src/test/tb_uart_tx.vhd" "f4ecf5a212c742ea2f31933f806f587cbedf7a8e" "20190129204930.766":
+  entity tb_uart_tx at 7( 277) + 0 on 15;
+  architecture tb of tb_uart_tx at 25( 562) + 0 on 16;

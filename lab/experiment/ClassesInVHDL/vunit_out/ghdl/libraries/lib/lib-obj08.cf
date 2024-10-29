@@ -1,0 +1,7 @@
+v 4
+file / "/home/charon/repos/ClassesInVHDL/MyClass.vhd" "f9447367da8d46d26cf12a865c6657b2d76bb72c" "20190127015229.192":
+  package myclass at 1( 0) + 0 on 120 body;
+  package body myclass at 45( 1434) + 0 on 121;
+file / "/home/charon/repos/ClassesInVHDL/TestMyClass.vhd" "4243cd5cee0c15d506a1fa2cde5b2bdc885a4646" "20190127015329.782":
+  entity testmyclass at 1( 0) + 0 on 122;
+  architecture test of testmyclass at 14( 382) + 0 on 123;

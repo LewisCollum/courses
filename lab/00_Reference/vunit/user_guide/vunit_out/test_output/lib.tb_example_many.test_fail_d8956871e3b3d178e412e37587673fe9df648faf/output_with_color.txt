@@ -1,0 +1,3 @@
+/home/charon/courses/L1_CE/00_Reference/user_guide/tb_example_many.vhd:26:9:@0ms:(assertion error): It fails
+/home/charon/courses/L1_CE/00_Reference/user_guide/vunit_out/test_output/lib.tb_example_many.test_fail_d8956871e3b3d178e412e37587673fe9df648faf/ghdl/tb_example_many-tb:error: assertion failed
+/home/charon/courses/L1_CE/00_Reference/user_guide/vunit_out/test_output/lib.tb_example_many.test_fail_d8956871e3b3d178e412e37587673fe9df648faf/ghdl/tb_example_many-tb:error: simulation failed

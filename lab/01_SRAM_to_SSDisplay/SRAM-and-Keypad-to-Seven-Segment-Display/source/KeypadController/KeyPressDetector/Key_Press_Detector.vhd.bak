@@ -1,0 +1,24 @@
+Library ieee;
+use ieee.std_logic_1164.all;
+
+entity Key_Press_Detector is 
+		port(
+			Rows				:in std_logic_vector(4 downto 0);
+			isKeyPressed	:out std_logic := 0
+		);
+end Key_Press_Detector;
+
+architecture behavior of Key_Press_Detector is
+
+begin
+
+process(Rows)
+begin
+	if Rows /= "1111" then
+		isKeyPressed <= '1';
+	else
+		isKeyPressed <='0';
+	end if;
+end process;
+
+end behavior;

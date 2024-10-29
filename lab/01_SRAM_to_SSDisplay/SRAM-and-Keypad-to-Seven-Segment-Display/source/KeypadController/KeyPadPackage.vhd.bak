@@ -1,0 +1,27 @@
+package KeyPadPackage is
+	type keyPadArray is array(0 to 4, 0 to 3) of unsigned range 0 to 4;
+	--constant A: unsigned(3 downto 0) := "1010";
+	constant keypad : keyPadArray := (
+	("1010", "1011", "1100", "1101"),
+	("0001", "0010", "0011", "1110"),
+	("0100", "0101", "0110", "1111"),
+	("0111", "1000", "1001"),
+	("0000"));	
+	--keypad(0,0) <= "1010"; -- A
+	--keypad(0,1) <= "1011"; -- B
+	--keypad(0,2) <= "1100"; -- C
+	--keypad(0,3) <= "1101"; -- D
+	--keypad(1,0) <= "0001"; -- 1
+	--keypad(1,1) <= "0010"; -- 2
+	--keypad(1,2) <= "0011"; -- 3
+	--keypad(1,3) <= "1110"; -- E
+	--keypad(2,0) <= "0100"; -- 4
+	--keypad(2,1) <= "0101"; -- 5
+	--keypad(2,2) <= "0110"; -- 6
+	--keypad(2,3) <= "1111"; -- F
+	--keypad(3,0) <= "0111"; -- 7
+	--keypad(3,1) <= "1000"; -- 8
+	--keypad(3,2) <= "1001"; -- 9
+	--keypad(4,0) <= "0000"; -- 0
+	
+end KeyPadPackage;

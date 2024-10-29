@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+baud=115200
+port=$3
+portServer=$4
+device=$1 #/dev/ttyACM0
+ip=$2
+
+
+main() {
+	getNunchukData | ./a.out | tee >(startClient) | startServer
+}
+
+getNunchukData() {
+	picocom --quiet --baud $baud $device
+}
+
+startServer() {
+	netcat --listen --local-port=$portServer
+}
+
+startClient() {
+	netcat $ip $port
+}
+
+main 
+#--imap lfcrlf

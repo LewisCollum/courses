@@ -1,0 +1,152 @@
+#+title: FrostAV: Distributed System
+#+author: Lewis Collum
+#+exclude_tags: noexport
+
+Keywords:  Distributed System, Sensor Network
+
+* Daily Tasks                                                      :noexport:
+*** 6/24 [0/4]
+	- [ ] Org website
+	- [ ] OpenCV
+	- [ ] PS3Eye -> OpenCV
+	- [ ] PS3Eye -> UDP
+
+*** 6/25 [0/1]
+	- [ ] Read Kalman Filter research paper
+
+	
+* Unsorted References                                              :noexport:
+** Embedded Distributed Systems
+   - https://www.kth.se/social/upload/745/IS_GuestLecture_DistributedSystems_201009020.pdf
+
+** Qt
+   - [[https://doc.qt.io/qt-5/qtgui-openglwindow-example.html]]
+
+** Communication
+   - https://en.wikipedia.org/wiki/I%C2%B2C
+** AVR
+   - https://www.avrfreaks.net/sites/default/files/Reduced.pdf
+** Dependency Injection
+   - https://en.wikipedia.org/wiki/Dependency_injection#UML_class_and_sequence_diagram
+   - https://stackoverflow.com/questions/557742/dependency-injection-vs-factory-pattern
+   - https://adam.younglogic.com/2008/07/dependency-injection-in-c/
+
+
+* Level 1 
+** MVP Specifications
+   1) 1
+   2) 2
+
+** Development
+*** TODO Networked OpenCV [0/6]                                      :CV:E:L1.1:
+	- [ ] OpenCV
+	- [ ] PS3Eye -> OpenCV
+	- [ ] PS3Eye -> UDP
+	- [ ] PS3Eye -> OpenCV -> UDP
+	  - Pipe toString to ffmpeg
+	  - C++ socket (client: ffmpeg to view stream)
+		- OpenCV Publisher -> CVSocket Subscriber, CVState Subscriber [do not implement in this development level]
+	- [ ] PS3Eye -> OpenCV -> UDP -> OpenGL
+	- [ ] PS3Eye -> OpenCV -> UDP -> Qt -> OpenGL
+	- References:
+	  - [[https://lembergsolutions.com/blog/how-process-live-video-stream-using-ffmpeg-and-opencv]]
+	  - https://amin-ahmadi.com/2018/03/29/how-to-read-process-and-display-videos-using-qt-and-opencv/
+	  - [[https://stackoverflow.com/questions/20314524/c-opencv-image-sending-through-socket]]
+	  - [[https://stackoverflow.com/questions/43440915/what-ways-do-i-have-to-stream-opencv-output-to-my-own-remote-c-gui?rq=1]]
+	  - [[https://docs.opencv.org/2.4/doc/tutorials/introduction/load_save_image/load_save_image.html]]
+	  - [[https://stackoverflow.com/questions/38585504/displaying-a-stream-of-images-with-qt]]
+	  - [[https://stackoverflow.com/questions/47600680/qt5-multiple-opengl-widgets-in-the-same-window]]
+	  - [[https://www.raspberrypi.org/forums/viewtopic.php?p=91076][Playstation PS3 Eye Streaming (Pi)]]
+	  - [[http://htonoyan.blogspot.com/2015/05/using-ps3-eye-toy-with-opencv.html?m=1]]
+	  - [[https://answers.opencv.org/question/72546/cant-use-ps3-eye-with-opencv/]]
+	  - [[https://subscription.packtpub.com/book/application_development/9781784399757/1/ch01lvl1sec12/supercharging-the-playstation-eye][Linux OpenCV with Eye]]
+	  - [[http://lakm.us/logit/2012/11/simple-ffmpeg-udp-video-streaming-from-beagleboard-running-ubuntu/]]
+	  - [[https://stackoverflow.com/questions/50916903/how-to-process-vlc-udp-stream-over-opencv]]
+	  - [[https://www.raspberrypi.org/forums/viewtopic.php?t=193033][PS3eye from 100fps to 187fps with Pi ZeroW]]
+	  - [[https://stackoverflow.com/questions/7669240/webcam-streaming-using-gstreamer-over-udp]]
+	  - [[https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_gui/py_video_display/py_video_display.html]]
+	  - [[https://stackoverflow.com/questions/5825173/pipe-raw-opencv-images-to-ffmpeg]]
+	  - https://doc.qt.io/qt-5/qtopengl-cube-example.html
+
+
+
+
+
+
+* plan
+** August 31
+	- frostE: Simulation Engine
+	  - Upload video to server, from which the vehicle will practice.
+	- frostCV: OpenCV object detection
+	- frostAVR: Metaprogramming AVR Libraries
+	- frostCAD: CAD Models
+	- List of required devices
+	  - RPi3 B+ [camera vision] w/ Arch Linux Arm
+	  - AVR's [control]
+	  - RPi0W [networking] [remove if RPi3 B+ is capable]
+	  - peripherals
+		- memory
+		- h-bridge
+		- encoder
+** December 13
+   - Chassis 
+
+* Communication's Level of Abstraction
+  - Low
+	- Measurement: raw sensor data (no interpretation)
+	- Control: direct peripheral commands (e.g. 0-255 pwm for ESC)
+  - Medium
+	- Measurement: interpreted (e.g. encoder module would give velocity in m/s)
+	- Control: interpreted peripheral command (e.g. drive at 1 m/s)
+  - High
+	- Measurement: state, measurement [stores relevant portion of previous state]
+	- Control: state, control
+
+  - State Mediator, each slave provides relevant portion of the state
+
+* Mechanical System
+
+* Power System
+** Motor Supply (Dirty)
+** Logic Supply (Clean)
+
+* Robotic System
+** Drive System (Control)
+   - What does a request from the global system look like?
+	 - Should navigation be handled or not?
+	   No. A potential "Navigation System" would handle navigation and
+       interface with the Drive System. If we wanted to switch the
+       robot to fully manual control (essentially, an RC car) then we
+       would want to bypass navigational control. 
+	 - Otherwise, would this system take a speed and an angle as an input parameter?
+   - How should calibration be administered?
+	 - Should calibration be manual?
+	   No. Each system within the Global System should have the
+       ability to learn, such that there is no need for manual
+       calibration. This encourages a self-reliant Global System. For
+       example, the Steer Controller can learn from the analog value
+       of the steering servo's potentiometer and from a gyroscope.
+	   - How can we preserve loose coupling if the Drive System needs
+         other system to learn?
+   - Does a gyroscope give sufficient feedback to steer the vehicle straight?
+	 - Should the Drive System use a global gyroscope or its own?
+	   Using a global gyroscope would make the Drive System dependent
+       on another system. This increases coupling, thereby reducing
+       the ability to reuse the Drive System. While our vehicle may
+       contain a global gyroscope, other robotic systems may not.
+   - How can the vehicle learn its speed?
+	 - A Bayes filter would be needed since we cannot directly measure speed.
+	 - A motor encoder can provide a rotational velocity that is
+       proportional to the wheels velocity.
+	 - An accelerometer and gyroscope can provide global acceleration.
+   - How can the vehicle learn its steering angle?
+	 - The analog value from the steering servo's potentiometer is the
+       variable to be tuned.
+	 - A gyroscope can provide a rate of rotation.
+	 - Limit switches can be used to find the angle limits.
+*** Drive Manager
+*** Speed Controller
+*** Steer Controller
+**** Gyroscope
+*** Quadrature Encoder
+

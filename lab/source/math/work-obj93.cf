@@ -1,0 +1,4 @@
+v 4
+file . "sizing.vhd" "b16d7ed091f5abd7b0a286371e336c0257eec2a8" "20190219211652.530":
+  package sizing at 1( 0) + 0 on 11 body;
+  package body sizing at 8( 137) + 0 on 12;

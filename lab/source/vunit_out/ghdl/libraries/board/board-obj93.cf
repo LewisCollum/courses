@@ -1,0 +1,5 @@
+v 4
+file / "/home/charon/lab/03_ZyboZ7_Analog/ZyboZ7_Analog/source/board/ZyboZ7.vhd" "9ace8d70b36715df3c3031030ee0be01d8f54bc9" "20190220021931.597":
+  package zyboz7 at 1( 0) + 0 on 12;
+file / "/home/charon/lab/03_ZyboZ7_Analog/ZyboZ7_Analog/source/board/Board.vhd" "c86d630a9062ed3cf4749df25b5fd276a44fb7a9" "20190220021931.582":
+  package board at 1( 0) + 0 on 11;

@@ -1,0 +1,3 @@
+/usr/lib/python3.7/site-packages/vunit/vhdl/core/src/stop_body_93-2002.vhd:10:5:@210ns:(report failure): Stopping simulation with status 0
+/home/charon/lab/03_ZyboZ7_Analog/ZyboZ7_Analog/source/vunit_out/test_output/state.test_statecontroller.test_SystemInitializeToPause_fa5b2288caeeb9dbd4d722b62676fc84fdec646f/ghdl/test_statecontroller-test:error: report failed
+/home/charon/lab/03_ZyboZ7_Analog/ZyboZ7_Analog/source/vunit_out/test_output/state.test_statecontroller.test_SystemInitializeToPause_fa5b2288caeeb9dbd4d722b62676fc84fdec646f/ghdl/test_statecontroller-test:error: simulation failed

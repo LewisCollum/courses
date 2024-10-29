@@ -1,0 +1,94 @@
+Given:
+Code Review	
+	draw state diagram
+	write a test bench
+	improve code -^
+Implement SPI master controller. Display any 16-bit Hex number on the Sparkfun’s 7-segment display. 
+	draw state diagram (explain)
+	write a test bench
+
+Report:
+	1. Introduction
+	2. SPI controller
+		a. Testing Existing SPI Controller (DESIGN A)
+			iData should be 16 bit length not 8 bit
+			CntMax should be used, not cnt. This is commented but not implemented
+			MOSI is sending MSB first (which is correct)
+			(*1)
+		b. Improving the SPI Controller (DESIGN B)
+			i. Case for Design B
+				Problem:
+					What is the problem?
+					Why is that a problem?
+				Solution: 
+					What is the solution?
+					How does that solve the problem?
+
+				(Reuseability, readability, SRP, Manatanability)
+			ii. Extracting clock divider
+			iii. Extracting clock_enable
+			iv. Unit Testing Design B Components
+			v. Integration Test for Design B
+		c. Design Comparison and Conclusion
+			i. Tradeoffs?
+	3. Implementation (DESIGN B): Sparkfun Seven-Segment Display
+		a. Design Perspective: State Machine
+		b*. Unit Testing Implementation Components
+		c. Integration Testing
+	4. Conclusion 
+		i. Reiteration of case for Design B
+		ii. Is this the correct way of doing it
+		iii. Further Steps?
+
+
+
+TODO
+(Design A) state diagram 
+(Design A) testbench procedure [further testing]
+(Design B) finish 
+-------------------------------------------------------------
+
+QUESTIONS:
+procedures without out parameters?
+Why doesn't chip select go high right after last clock pulse?
+
+
+SOURCES
+
+https://github.com/sparkfun/Serial7SegmentDisplay/wiki/Serial-7-Segment-Display-Datasheet (*1)
+- The maximum speed of the SPI clock input is 250kHz.
+- The display is configured to work with SPI mode 0 (CPOL = 0, CPHA = 0); the clock line should idle low, and data is sampled on the rising edge of the clock.
+
+https://en.wikipedia.org/wiki/Serial_Peripheral_Interface
+- (2) figures
+
+
+General System Analysis
+1. Unit Testing
+1*. Functional Testing
+2. Integration Testing
+3. Validation (Are we building the right product?)
+4. Verification (Are we building the product right?)
+
+Learned
+split functionality into multiple concurrent processes.
+	- Encapsulates individual functionalities
+	- Allows for assert/report to be concurrent with functionality
+	- Increases readability
+
+No more than 1 process in an architecture
+
+
+
+------------------------------------------------------
+packages:
+SPIStateControl
+StateMachineUtil
+SparkfunSevenSegment
+
+enitities
+SPIMaster
+--SPIAddressCounter
+--SPISlaveClock 
+
+

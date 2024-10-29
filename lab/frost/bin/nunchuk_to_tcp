@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+baud=115200
+port=$2
+device=$1 #/dev/ttyACM0
+ip="128.153.176.108"
+
+
+main() {
+	getNunchukData | ./a.out | tee >(startClient)
+}
+
+getNunchukData() {
+	echo "Starting Picocom"
+	picocom --quiet --baud $baud $device
+}
+
+startClient() {
+	echo "Starting Client"
+	netcat $ip $port
+}
+
+main 

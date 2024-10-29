@@ -1,0 +1,1533 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2019-04-03 Wed 23:22 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hangman</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Lewis Collum" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2018 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Hangman</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org7e8bdd8">1. Specifications</a></li>
+<li><a href="#orgc8a3e5d">2. Top-Level Design</a></li>
+<li><a href="#org1578c90">3. PS2 Keyboard Controller</a>
+<ul>
+<li><a href="#org73fea90">3.1. State Machine</a></li>
+<li><a href="#org93775e7">3.2. State Controller</a>
+<ul>
+<li><a href="#orgae82c14">3.2.1. Motivation for a State Controller</a></li>
+<li><a href="#orga71863b">3.2.2. State Changes</a></li>
+</ul>
+</li>
+<li><a href="#org55f5b07">3.3. Clock Edge Detector</a></li>
+<li><a href="#org510fc3c">3.4. Data Reader</a></li>
+<li><a href="#org994ab96">3.5. Bit Counter</a></li>
+</ul>
+</li>
+<li><a href="#org2eda1e1">4. Appendix: Code</a>
+<ul>
+<li><a href="#org9e40014">4.1. PS2 Controller</a>
+<ul>
+<li><a href="#orgf85a38a">4.1.1. Top-level</a></li>
+<li><a href="#org8aade05">4.1.2. State Controller</a></li>
+<li><a href="#org4f8b4f8">4.1.3. Bit Counter</a></li>
+<li><a href="#org4c06c1a">4.1.4. Peripheral Clock Edge Detector</a></li>
+<li><a href="#orgc10c629">4.1.5. Peripheral Data Reader</a></li>
+<li><a href="#org26f63d3">4.1.6. PS2 Package</a></li>
+</ul>
+</li>
+<li><a href="#org734a9e0">4.2. LCD Controller</a>
+<ul>
+<li><a href="#org1656a1b">4.2.1. Top-Level</a></li>
+<li><a href="#orgfcfbe78">4.2.2. User-Logic</a></li>
+</ul>
+</li>
+<li><a href="#org48a11e5">4.3. Hangman Software</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org7e8bdd8" class="outline-2">
+<h2 id="org7e8bdd8"><span class="section-number-2">1</span> Specifications</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+You are to design an electronic system that allows a person to
+play hangman using a USB keyboard and an LCD display panel
+connected to Xilinx’s Zybo Z7-10 board. The board should
+communicate with a remote personal computer (PC) using a USB to
+UART adapter. The LCD display is connected to the Zybo board using
+a single PMOD port JE. When the hardware is powered, the LCD
+should have a display nothing except for a single cursor
+(underline located at the left side of the LCD Screen).  For the
+USB-UART serial port you may use: minimum Baud rate: 9600; parity:
+none; data bits: 8; stop bits: 1. <br />
+</p>
+
+<p>
+The software on the PC should have a graphical user interface
+(GUI) to display the status of the game. A picture with hangman’s
+noose, etc., should be shown on the GUI. The Software may be
+written in C++, C# or JAVA. It should read a text file that
+contains a set of 5-10 words. The word puzzles should be of
+variable lengths, not exceeding 20 letters per word. <br />
+</p>
+
+<p>
+The text file is to be loaded at the beginning of the game. The
+software should display the message: “New Game?” on the GUI and on
+the LCD module. The player must reply in the affirmative by
+pressing the “Y”-key on the USB keyboard connected to the
+hardware. Pressing any other key should do nothing. Note that this
+keyboard is not the one connected to the PC. The keyboard’s
+hardware should be able recognize, at the minimum, the English
+alphabets from A through Z. The software should then randomly pick
+one of the puzzle words from the text file and display the
+positions of every letter in the word with an underscore
+“_”symbol. On the LCD display module the word would be left
+justified. <br />
+</p>
+
+<p>
+After the puzzle is displayed, the player should be allowed to
+guess a letter using the external PS/2 keyboard. A maximum of 6
+guesses are allowed per puzzle. If a letter was guessed correctly,
+the system should display every instance of the letter in the
+word. For a wrong guess, the “picture” on the GUI should
+change. On the hardware, a 7-segment display should be used to
+indicate the number of guesses that remain. <br />
+</p>
+
+<p>
+If the player successfully picks every letter, the PC should
+then send a congratulatory message to the LCD display saying
+“Well done! You have solved N puzzles out of M”. If the player
+fails, the message should be “Sorry! The correct word was
+XXXXX. You have solved N puzzles out of M”. Since these
+messages have more than 20 letters and spaces, it should appear
+at the right edge of the LCD display and scroll across the
+screen at a rate appropriate for reading of the message. The
+system should then display: “New Game?” The player can always
+request a new puzzle by typing “Y”, unless all of the words
+from the text-file have been used up.  At this point, the
+player should be able to end the game by typing the letter
+“N”. When the game ends, the LCD should display the final
+points (“4 correct out of 10”) and after a short duration, the
+message: “GAME OVER”. <br />
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc8a3e5d" class="outline-2">
+<h2 id="orgc8a3e5d"><span class="section-number-2">2</span> Top-Level Design</h2>
+</div>
+
+<div id="outline-container-org1578c90" class="outline-2">
+<h2 id="org1578c90"><span class="section-number-2">3</span> PS2 Keyboard Controller</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+<a href="./PS2_BlockDiagram.eps">./PS2_BlockDiagram.eps</a>
+</p>
+</div>
+
+<div id="outline-container-org73fea90" class="outline-3">
+<h3 id="org73fea90"><span class="section-number-3">3.1</span> State Machine</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Insert State Machine Diagram
+</p>
+</div>
+</div>
+
+<div id="outline-container-org93775e7" class="outline-3">
+<h3 id="org93775e7"><span class="section-number-3">3.2</span> State Controller</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+Complete code is in the appendix section <a href="#org708e655">4.1.2</a>.
+</p>
+</div>
+<div id="outline-container-orgae82c14" class="outline-4">
+<h4 id="orgae82c14"><span class="section-number-4">3.2.1</span> Motivation for a State Controller</h4>
+<div class="outline-text-4" id="text-3-2-1">
+<p>
+The State Controller encapsulates state changes. As such, the Bit
+Counter, Data Reader, and Clock Edge Detector react to these
+states, but never set them. In a similar manner, any flag that is
+generated by the Bit Counter, Data Reader, or Clock Edge Detected,
+is sent only to the State Controller. These flags act
+as conditions for state changes. This design ensures that each
+component of a state-controlled system has a matching port
+interface.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga71863b" class="outline-4">
+<h4 id="orga71863b"><span class="section-number-4">3.2.2</span> State Changes</h4>
+<div class="outline-text-4" id="text-3-2-2">
+<p>
+The system starts in the Initializing state. This state exists for
+one clock cycle to reset flip-flops. When the State Controller is
+reset, the state is also set to Initializing.
+</p>
+<div class="org-src-container">
+<pre class="src src-vhdl"><span style="color: #b58900; font-weight: bold;">if</span> reset = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+  state &lt;= initializing;
+  ...
+</pre>
+</div>
+
+<p>
+The Ready state is loaded unconditionally after the Initializing
+state.
+</p>
+<div class="org-src-container">
+<pre class="src src-vhdl">...
+<span style="color: #b58900; font-weight: bold;">case</span> state <span style="color: #b58900; font-weight: bold;">is</span>
+  <span style="color: #b58900; font-weight: bold;">when</span> initializing =&gt;
+    state &lt;= ready;
+...
+</pre>
+</div>
+
+<p>
+The State Controller will stay in the Ready state until new data is
+detected by the Data Reader, at which point, the Starting state is
+loaded. This is illustrated in figure <a href="#orgdf898c6">1</a>.
+</p>
+<div class="org-src-container">
+<pre class="src src-vhdl">...
+<span style="color: #b58900; font-weight: bold;">when</span> ready =&gt;
+  <span style="color: #b58900; font-weight: bold;">if</span> flag.isNewData = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+    state &lt;= starting;
+  <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+...
+</pre>
+</div>
+
+
+<div id="orgdf898c6" class="figure">
+<p><img src="./PS2_WaveFigures/state_controller/01_newDataToStartState.png" alt="01_newDataToStartState.png" />
+</p>
+<p><span class="figure-number">Figure 1: </span>State Controller sets state to "Starting" when the "isNewData" flag is set.</p>
+</div>
+
+<p>
+Once in the Starting state, the State Controller will cycle through
+the Storing and Fetching states until the Bit Counter is done
+counting.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-vhdl">...
+  <span style="color: #b58900; font-weight: bold;">when</span> starting =&gt;
+    <span style="color: #b58900; font-weight: bold;">if</span> flag.isReadyToStore = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+      state &lt;= storing;
+    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+
+  <span style="color: #b58900; font-weight: bold;">when</span> storing =&gt;
+    <span style="color: #b58900; font-weight: bold;">if</span> flag.isBitCounterDone = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+      state &lt;= ready;
+    <span style="color: #b58900; font-weight: bold;">elsif</span> flag.isReadyToFetch = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+      state &lt;= fetching;
+    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+
+  <span style="color: #b58900; font-weight: bold;">when</span> fetching =&gt;
+    <span style="color: #b58900; font-weight: bold;">if</span> flag.isReadyToStore = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+      state &lt;= storing;
+    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">case</span>;
+</pre>
+</div>
+
+
+<div id="org5488dc0" class="figure">
+<p><img src="./PS2_WaveFigures/state_controller/02_storeFetchCycle.png" alt="02_storeFetchCycle.png" />
+</p>
+<p><span class="figure-number">Figure 2: </span>isReadyToFetch and isReadyToStore flags are triggering state changes.</p>
+</div>
+
+
+
+
+<div class="org-src-container">
+<pre class="src src-vhdl"><span style="color: #b58900; font-weight: bold;">if</span> reset = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+    state &lt;= initializing;
+  <span style="color: #b58900; font-weight: bold;">else</span>
+    <span style="color: #b58900; font-weight: bold;">case</span> state <span style="color: #b58900; font-weight: bold;">is</span>
+      <span style="color: #b58900; font-weight: bold;">when</span> initializing =&gt;
+        state &lt;= ready;
+
+      <span style="color: #b58900; font-weight: bold;">when</span> ready =&gt;
+        <span style="color: #b58900; font-weight: bold;">if</span> flag.isNewData = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+          state &lt;= starting;
+        <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+
+      <span style="color: #b58900; font-weight: bold;">when</span> starting =&gt;
+        <span style="color: #b58900; font-weight: bold;">if</span> flag.isReadyToStore = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+          state &lt;= storing;
+        <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+
+      <span style="color: #b58900; font-weight: bold;">when</span> storing =&gt;
+        <span style="color: #b58900; font-weight: bold;">if</span> flag.isBitCounterDone = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+          state &lt;= ready;
+        <span style="color: #b58900; font-weight: bold;">elsif</span> flag.isReadyToFetch = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+          state &lt;= fetching;
+        <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+
+      <span style="color: #b58900; font-weight: bold;">when</span> fetching =&gt;
+        <span style="color: #b58900; font-weight: bold;">if</span> flag.isReadyToStore = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+          state &lt;= storing;
+        <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">case</span>;
+</pre>
+</div>
+
+
+
+
+<div id="org8f7daa2" class="figure">
+<p><img src="./PS2_WaveFigures/state_controller/03_bitCounterDone.png" alt="03_bitCounterDone.png" />
+</p>
+<p><span class="figure-number">Figure 3: </span>PS2 Controller Block Diagram.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org55f5b07" class="outline-3">
+<h3 id="org55f5b07"><span class="section-number-3">3.3</span> Clock Edge Detector</h3>
+<div class="outline-text-3" id="text-3-3">
+
+<div id="org24a6b1f" class="figure">
+<p><img src="./PS2_WaveFigures/clock_edge_detector/01_outputFlags.png" alt="01_outputFlags.png" />
+</p>
+<p><span class="figure-number">Figure 4: </span>PS2 Controller Block Diagram.</p>
+</div>
+
+
+<div id="org363e163" class="figure">
+<p><img src="./PS2_WaveFigures/clock_edge_detector/02_noFlagsWhenReadyState.png" alt="02_noFlagsWhenReadyState.png" />
+</p>
+<p><span class="figure-number">Figure 5: </span>PS2 Controller Block Diagram.</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org510fc3c" class="outline-3">
+<h3 id="org510fc3c"><span class="section-number-3">3.4</span> Data Reader</h3>
+<div class="outline-text-3" id="text-3-4">
+
+<div id="orgf7de44d" class="figure">
+<p><img src="./PS2_WaveFigures/data_reader/01_startBit.png" alt="01_startBit.png" />
+</p>
+<p><span class="figure-number">Figure 6: </span>PS2 Controller Block Diagram.</p>
+</div>
+
+
+<div id="org49009ce" class="figure">
+<p><img src="./PS2_WaveFigures/data_reader/02_shiftRegister.png" alt="02_shiftRegister.png" />
+</p>
+<p><span class="figure-number">Figure 7: </span>PS2 Controller Block Diagram.</p>
+</div>
+
+
+<div id="org4b2887c" class="figure">
+<p><img src="./PS2_WaveFigures/data_reader/03_outputDataUpdatesWhenReadyState.png" alt="03_outputDataUpdatesWhenReadyState.png" />
+</p>
+<p><span class="figure-number">Figure 8: </span>PS2 Controller Block Diagram.</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org994ab96" class="outline-3">
+<h3 id="org994ab96"><span class="section-number-3">3.5</span> Bit Counter</h3>
+<div class="outline-text-3" id="text-3-5">
+
+<div id="org11f77b4" class="figure">
+<p><img src="./PS2_WaveFigures/bit_counter/01_resetAtStart.png" alt="01_resetAtStart.png" />
+</p>
+<p><span class="figure-number">Figure 9: </span>PS2 Controller Block Diagram.</p>
+</div>
+
+
+<div id="org655c8de" class="figure">
+<p><img src="./PS2_WaveFigures/bit_counter/02_counting.png" alt="02_counting.png" />
+</p>
+<p><span class="figure-number">Figure 10: </span>PS2 Controller Block Diagram.</p>
+</div>
+
+
+<div id="org42f4056" class="figure">
+<p><img src="./PS2_WaveFigures/bit_counter/03_resetAtEnd.png" alt="03_resetAtEnd.png" />
+</p>
+<p><span class="figure-number">Figure 11: </span>PS2 Controller Block Diagram.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org2eda1e1" class="outline-2">
+<h2 id="org2eda1e1"><span class="section-number-2">4</span> Appendix: Code</h2>
+<div class="outline-text-2" id="text-4">
+</div>
+<div id="outline-container-org9e40014" class="outline-3">
+<h3 id="org9e40014"><span class="section-number-3">4.1</span> PS2 Controller</h3>
+<div class="outline-text-3" id="text-4-1">
+</div>
+<div id="outline-container-orgf85a38a" class="outline-4">
+<h4 id="orgf85a38a"><span class="section-number-4">4.1.1</span> Top-level</h4>
+<div class="outline-text-4" id="text-4-1-1">
+<div class="org-src-container">
+<pre class="src src-vhdl"><span style="color: #b58900; font-weight: bold;">library</span> <span style="color: #ff83fa;">ieee</span>, <span style="color: #2aa198;">timer_counter</span>, <span style="color: #2aa198;">flip_flop</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">work</span>.<span style="color: #2aa198;">ps2_pkg</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">ieee</span>.<span style="color: #ff83fa;">std_logic_1164</span>.<span style="color: #b58900; font-weight: bold;">all</span>;
+
+<span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #2aa198;">PS2Controller</span> <span style="color: #b58900; font-weight: bold;">is</span>
+  <span style="color: #b58900; font-weight: bold;">port</span>(
+    <span style="color: #dc322f;">clock</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">reset</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">peripheral</span>: <span style="color: #b58900; font-weight: bold;">in</span> ps2_pkg.Peripheral;
+    <span style="color: #dc322f;">flag</span>: <span style="color: #b58900; font-weight: bold;">buffer</span> ps2_pkg.FlagExternal;
+    <span style="color: #dc322f;">data</span>: <span style="color: #b58900; font-weight: bold;">out</span> ps2_pkg.Byte);
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">entity</span>;
+
+<span style="color: #b58900; font-weight: bold;">architecture</span> <span style="color: #2aa198;">structural</span> <span style="color: #b58900; font-weight: bold;">of</span> <span style="color: #2aa198;">PS2Controller</span> <span style="color: #b58900; font-weight: bold;">is</span>
+  <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">state</span>: ps2_pkg.State;
+  <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">flagInternal</span>: ps2_pkg.FlagInternal;
+<span style="color: #b58900; font-weight: bold;">begin</span>
+
+  <span style="color: #2aa198;">flagDelay</span>: <span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #2aa198;">flip_flop</span>.<span style="color: #2aa198;">DFlipFlop</span>
+    <span style="color: #b58900; font-weight: bold;">port</span> <span style="color: #b58900; font-weight: bold;">map</span>(
+      <span style="color: #dc322f;">clock</span> =&gt; clock,
+      <span style="color: #dc322f;">data</span> =&gt; flagInternal.isBitCounterDone,
+      <span style="color: #dc322f;">output</span> =&gt; flag.isNewData);
+
+  <span style="color: #2aa198;">stateController</span>: <span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #ff83fa;">work</span>.<span style="color: #2aa198;">StateController</span>
+    <span style="color: #b58900; font-weight: bold;">port</span> <span style="color: #b58900; font-weight: bold;">map</span>(
+      <span style="color: #dc322f;">clock</span> =&gt; clock,
+      <span style="color: #dc322f;">reset</span> =&gt; reset,
+      <span style="color: #dc322f;">flag</span> =&gt; flagInternal,
+      <span style="color: #dc322f;">state</span> =&gt; state);
+
+  <span style="color: #2aa198;">bitCounter</span>: <span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #ff83fa;">work</span>.<span style="color: #2aa198;">BitCounter</span>
+    <span style="color: #b58900; font-weight: bold;">port</span> <span style="color: #b58900; font-weight: bold;">map</span>(
+      <span style="color: #dc322f;">state</span> =&gt; state,
+      <span style="color: #dc322f;">isDone</span> =&gt; flagInternal.isBitCounterDone);
+
+  <span style="color: #2aa198;">peripheralClockEdgeDetector</span>: <span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #ff83fa;">work</span>.<span style="color: #2aa198;">PeripheralClockEdgeDetector</span>
+    <span style="color: #b58900; font-weight: bold;">port</span> <span style="color: #b58900; font-weight: bold;">map</span>(
+      <span style="color: #dc322f;">clock</span> =&gt; clock,
+      <span style="color: #dc322f;">clockPeripheral</span> =&gt; peripheral.clock,
+      <span style="color: #dc322f;">state</span> =&gt; state,
+      flag.<span style="color: #dc322f;">isRising</span> =&gt; flagInternal.isReadyToFetch,
+      flag.<span style="color: #dc322f;">isFalling</span> =&gt; flagInternal.isReadyToStore);
+
+  <span style="color: #2aa198;">peripheralDataReader</span>: <span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #ff83fa;">work</span>.<span style="color: #2aa198;">PeripheralDataReader</span>
+    <span style="color: #b58900; font-weight: bold;">port</span> <span style="color: #b58900; font-weight: bold;">map</span>(
+      <span style="color: #dc322f;">clock</span> =&gt; clock,
+      <span style="color: #dc322f;">dataPeripheral</span> =&gt; peripheral.data,
+      <span style="color: #dc322f;">state</span> =&gt; state,
+      flag.<span style="color: #dc322f;">isNewData</span> =&gt; flagInternal.isNewData,
+      <span style="color: #dc322f;">data</span> =&gt; data);
+
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">architecture</span>;
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org8aade05" class="outline-4">
+<h4 id="org8aade05"><span class="section-number-4">4.1.2</span> State Controller</h4>
+<div class="outline-text-4" id="text-4-1-2">
+<p>
+<a id="org708e655"></a>
+</p>
+<div class="org-src-container">
+<pre class="src src-vhdl"><span style="color: #b58900; font-weight: bold;">library</span> <span style="color: #ff83fa;">ieee</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">ieee</span>.<span style="color: #ff83fa;">std_logic_1164</span>.<span style="color: #b58900; font-weight: bold;">all</span>, <span style="color: #ff83fa;">ieee</span>.<span style="color: #ff83fa;">numeric_std</span>.<span style="color: #b58900; font-weight: bold;">all</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">work</span>.<span style="color: #2aa198;">ps2_pkg</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">work</span>.<span style="color: #2aa198;">ps2_pkg</span>.initializing,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.ready,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.starting,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.fetching,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.storing;
+
+<span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #2aa198;">StateController</span> <span style="color: #b58900; font-weight: bold;">is</span>
+  <span style="color: #b58900; font-weight: bold;">port</span>(
+    <span style="color: #dc322f;">clock</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">reset</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">flag</span>: <span style="color: #b58900; font-weight: bold;">in</span> ps2_pkg.FlagInternal;
+    <span style="color: #dc322f;">state</span>: <span style="color: #b58900; font-weight: bold;">buffer</span> ps2_pkg.State);
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">entity</span>;
+
+<span style="color: #b58900; font-weight: bold;">architecture</span> <span style="color: #2aa198;">behavioral</span> <span style="color: #b58900; font-weight: bold;">of</span> <span style="color: #2aa198;">StateController</span> <span style="color: #b58900; font-weight: bold;">is</span>
+<span style="color: #b58900; font-weight: bold;">begin</span>
+
+  <span style="color: #2aa198;">updateState</span>: <span style="color: #b58900; font-weight: bold;">process</span>(clock, reset, flag)
+  <span style="color: #b58900; font-weight: bold;">begin</span>
+    <span style="color: #b58900; font-weight: bold;">if</span> <span style="color: #ff83fa;">rising_edge</span>(clock) <span style="color: #b58900; font-weight: bold;">then</span>
+      <span style="color: #b58900; font-weight: bold;">if</span> reset = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+        state &lt;= initializing;
+      <span style="color: #b58900; font-weight: bold;">else</span>
+        <span style="color: #b58900; font-weight: bold;">case</span> state <span style="color: #b58900; font-weight: bold;">is</span>
+          <span style="color: #b58900; font-weight: bold;">when</span> initializing =&gt;
+            state &lt;= ready;
+
+          <span style="color: #b58900; font-weight: bold;">when</span> ready =&gt;
+            <span style="color: #b58900; font-weight: bold;">if</span> flag.isNewData = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+              state &lt;= starting;
+            <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+
+          <span style="color: #b58900; font-weight: bold;">when</span> starting =&gt;
+            <span style="color: #b58900; font-weight: bold;">if</span> flag.isReadyToStore = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+              state &lt;= storing;
+            <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+
+          <span style="color: #b58900; font-weight: bold;">when</span> storing =&gt;
+            <span style="color: #b58900; font-weight: bold;">if</span> flag.isBitCounterDone = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+              state &lt;= ready;
+            <span style="color: #b58900; font-weight: bold;">elsif</span> flag.isReadyToFetch = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+              state &lt;= fetching;
+            <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+
+          <span style="color: #b58900; font-weight: bold;">when</span> fetching =&gt;
+            <span style="color: #b58900; font-weight: bold;">if</span> flag.isReadyToStore = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+              state &lt;= storing;
+            <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+        <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">case</span>;
+      <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+  <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">process</span>;
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">architecture</span>;
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4f8b4f8" class="outline-4">
+<h4 id="org4f8b4f8"><span class="section-number-4">4.1.3</span> Bit Counter</h4>
+<div class="outline-text-4" id="text-4-1-3">
+<div class="org-src-container">
+<pre class="src src-vhdl"><span style="color: #b58900; font-weight: bold;">library</span> <span style="color: #ff83fa;">ieee</span>, <span style="color: #2aa198;">timer_counter</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">ieee</span>.<span style="color: #ff83fa;">std_logic_1164</span>.<span style="color: #b58900; font-weight: bold;">all</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">work</span>.<span style="color: #2aa198;">ps2_pkg</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #2aa198;">timer_counter</span>.<span style="color: #2aa198;">timer_pkg</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">work</span>.<span style="color: #2aa198;">ps2_pkg</span>.initializing,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.ready,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.starting,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.fetching,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.storing;
+
+<span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #2aa198;">BitCounter</span> <span style="color: #b58900; font-weight: bold;">is</span>
+  <span style="color: #b58900; font-weight: bold;">port</span>(
+    <span style="color: #dc322f;">state</span>: <span style="color: #b58900; font-weight: bold;">in</span> ps2_pkg.State;
+    <span style="color: #dc322f;">isDone</span>: <span style="color: #b58900; font-weight: bold;">out</span> <span style="color: #268bd2;">std_logic</span>);
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">entity</span>;
+
+<span style="color: #b58900; font-weight: bold;">architecture</span> <span style="color: #2aa198;">behavioral</span> <span style="color: #b58900; font-weight: bold;">of</span> <span style="color: #2aa198;">BitCounter</span> <span style="color: #b58900; font-weight: bold;">is</span>
+  <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">timer</span>: timer_pkg.TimerCounter;
+<span style="color: #b58900; font-weight: bold;">begin</span>
+
+  <span style="color: #2aa198;">stateMachine</span>: <span style="color: #b58900; font-weight: bold;">process</span>(state, timer.isDone)
+  <span style="color: #b58900; font-weight: bold;">begin</span>
+    <span style="color: #b58900; font-weight: bold;">case</span> state <span style="color: #b58900; font-weight: bold;">is</span>
+      <span style="color: #b58900; font-weight: bold;">when</span> initializing | ready =&gt;
+        timer.reset &lt;= <span style="color: #dc322f;">'1'</span>;
+        timer.clock &lt;= <span style="color: #dc322f;">'0'</span>;
+        isDone &lt;= <span style="color: #dc322f;">'0'</span>;
+
+      <span style="color: #b58900; font-weight: bold;">when</span> starting =&gt;
+        timer.reset &lt;= <span style="color: #dc322f;">'0'</span>;
+
+      <span style="color: #b58900; font-weight: bold;">when</span> storing =&gt;
+        timer.clock &lt;= <span style="color: #dc322f;">'1'</span>;
+        <span style="color: #b58900; font-weight: bold;">if</span> timer.isDone = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+          isDone &lt;= <span style="color: #dc322f;">'1'</span>;
+        <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+
+      <span style="color: #b58900; font-weight: bold;">when</span> fetching =&gt;
+        timer.clock &lt;= <span style="color: #dc322f;">'0'</span>;
+
+    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">case</span>;
+  <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">process</span>;
+
+  <span style="color: #2aa198;">timerCounterInstance</span>: <span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #2aa198;">timer_counter</span>.<span style="color: #2aa198;">TimerCounter</span>
+    <span style="color: #b58900; font-weight: bold;">generic</span> <span style="color: #b58900; font-weight: bold;">map</span>(<span style="color: #dc322f;">countMax</span> =&gt; ps2_pkg.totalTransmitLength)
+    <span style="color: #b58900; font-weight: bold;">port</span> <span style="color: #b58900; font-weight: bold;">map</span>(timer.clock, timer.reset, timer.isDone);
+
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">architecture</span>;
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4c06c1a" class="outline-4">
+<h4 id="org4c06c1a"><span class="section-number-4">4.1.4</span> Peripheral Clock Edge Detector</h4>
+<div class="outline-text-4" id="text-4-1-4">
+<div class="org-src-container">
+<pre class="src src-vhdl"><span style="color: #b58900; font-weight: bold;">library</span> <span style="color: #ff83fa;">ieee</span>, <span style="color: #2aa198;">synchronizer</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">ieee</span>.<span style="color: #ff83fa;">std_logic_1164</span>.<span style="color: #b58900; font-weight: bold;">all</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">work</span>.<span style="color: #2aa198;">ps2_pkg</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #2aa198;">synchronizer</span>.<span style="color: #2aa198;">sync_pkg</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">work</span>.<span style="color: #2aa198;">ps2_pkg</span>.initializing,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.ready,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.starting,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.fetching,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.storing;
+
+<span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #2aa198;">PeripheralClockEdgeDetector</span> <span style="color: #b58900; font-weight: bold;">is</span>
+  <span style="color: #b58900; font-weight: bold;">port</span>(
+    <span style="color: #dc322f;">clock</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">clockPeripheral</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">state</span>: <span style="color: #b58900; font-weight: bold;">in</span> ps2_pkg.State;
+    <span style="color: #dc322f;">flag</span>: <span style="color: #b58900; font-weight: bold;">out</span> ps2_pkg.FlagPeripheralClock);
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">entity</span>;
+
+<span style="color: #b58900; font-weight: bold;">architecture</span> <span style="color: #2aa198;">behavioral</span> <span style="color: #b58900; font-weight: bold;">of</span> <span style="color: #2aa198;">PeripheralClockEdgeDetector</span> <span style="color: #b58900; font-weight: bold;">is</span>
+  <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">clockSynced</span>: <span style="color: #268bd2;">std_logic</span>;
+<span style="color: #b58900; font-weight: bold;">begin</span>
+
+  <span style="color: #2aa198;">stateMachine</span>: <span style="color: #b58900; font-weight: bold;">process</span>(state, clockSynced)
+  <span style="color: #b58900; font-weight: bold;">begin</span>
+    <span style="color: #b58900; font-weight: bold;">case</span> state <span style="color: #b58900; font-weight: bold;">is</span>
+      <span style="color: #b58900; font-weight: bold;">when</span> initializing | ready =&gt;
+        flag &lt;= (<span style="color: #b58900; font-weight: bold;">others</span> =&gt; <span style="color: #dc322f;">'0'</span>);
+
+      <span style="color: #b58900; font-weight: bold;">when</span> starting | fetching =&gt;
+        flag.isFalling &lt;= <span style="color: #b58900; font-weight: bold;">not</span> clockSynced;
+        flag.isRising &lt;= <span style="color: #dc322f;">'0'</span>;
+
+      <span style="color: #b58900; font-weight: bold;">when</span> storing =&gt;
+        flag.isRising &lt;= clockSynced;
+        flag.isFalling &lt;= <span style="color: #dc322f;">'0'</span>;
+
+    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">case</span>;  
+  <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">process</span>;
+
+  <span style="color: #2aa198;">clockSynchronizer</span>: <span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #2aa198;">synchronizer</span>.<span style="color: #2aa198;">Synchronizer</span>
+    <span style="color: #b58900; font-weight: bold;">port</span> <span style="color: #b58900; font-weight: bold;">map</span>(
+      <span style="color: #dc322f;">clock</span> =&gt; clock,
+      <span style="color: #dc322f;">input</span> =&gt; clockPeripheral,
+      <span style="color: #dc322f;">output</span> =&gt; clockSynced);
+
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">architecture</span>;
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc10c629" class="outline-4">
+<h4 id="orgc10c629"><span class="section-number-4">4.1.5</span> Peripheral Data Reader</h4>
+<div class="outline-text-4" id="text-4-1-5">
+<div class="org-src-container">
+<pre class="src src-vhdl"><span style="color: #b58900; font-weight: bold;">library</span> <span style="color: #ff83fa;">ieee</span>, <span style="color: #2aa198;">shift_register</span>, <span style="color: #2aa198;">synchronizer</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">ieee</span>.<span style="color: #ff83fa;">std_logic_1164</span>.<span style="color: #b58900; font-weight: bold;">all</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #2aa198;">shift_register</span>.<span style="color: #2aa198;">shift_pkg</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #2aa198;">synchronizer</span>.<span style="color: #2aa198;">sync_pkg</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">work</span>.<span style="color: #2aa198;">ps2_pkg</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">work</span>.<span style="color: #2aa198;">ps2_pkg</span>.initializing,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.ready,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.starting,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.fetching,
+  <span style="color: #ff83fa;">work</span>.ps2_pkg.storing;
+
+
+<span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #2aa198;">PeripheralDataReader</span> <span style="color: #b58900; font-weight: bold;">is</span>
+  <span style="color: #b58900; font-weight: bold;">port</span>(
+    <span style="color: #dc322f;">clock</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">dataPeripheral</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">state</span>: <span style="color: #b58900; font-weight: bold;">in</span> ps2_pkg.State;
+    <span style="color: #dc322f;">flag</span>: <span style="color: #b58900; font-weight: bold;">out</span> ps2_pkg.FlagPeripheralData;
+    <span style="color: #dc322f;">data</span>: <span style="color: #b58900; font-weight: bold;">out</span> ps2_pkg.Byte);
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">entity</span>;
+
+<span style="color: #b58900; font-weight: bold;">architecture</span> <span style="color: #2aa198;">behavioral</span> <span style="color: #b58900; font-weight: bold;">of</span> <span style="color: #2aa198;">PeripheralDataReader</span> <span style="color: #b58900; font-weight: bold;">is</span>
+  <span style="color: #b58900; font-weight: bold;">constant</span> <span style="color: #dc322f;">memoryWidth</span>: <span style="color: #268bd2;">positive</span> := ps2_pkg.totalTransmitLength;
+  <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">memory</span>: shift_pkg.SIPOShiftRegister(output(memoryWidth-1 <span style="color: #b58900; font-weight: bold;">downto</span> 0));
+  <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">dataSynced</span>: <span style="color: #268bd2;">std_logic</span>; 
+<span style="color: #b58900; font-weight: bold;">begin</span>
+
+  <span style="color: #2aa198;">stateMachine</span>: <span style="color: #b58900; font-weight: bold;">process</span>(state, dataSynced, memory) <span style="color: #b58900; font-weight: bold;">is</span>
+  <span style="color: #b58900; font-weight: bold;">begin</span>
+    <span style="color: #b58900; font-weight: bold;">case</span> state <span style="color: #b58900; font-weight: bold;">is</span>
+      <span style="color: #b58900; font-weight: bold;">when</span> initializing =&gt;
+        memory.reset &lt;= <span style="color: #dc322f;">'1'</span>;
+        memory.clock &lt;= <span style="color: #dc322f;">'0'</span>;
+        data &lt;= (<span style="color: #b58900; font-weight: bold;">others</span> =&gt; <span style="color: #dc322f;">'0'</span>);
+        flag.isNewData &lt;= <span style="color: #dc322f;">'0'</span>;
+
+      <span style="color: #b58900; font-weight: bold;">when</span> ready =&gt;
+        data &lt;= shift_pkg.flipBitOrder(memory.output(ps2_pkg.CodeByteRange));
+        flag.isNewData &lt;= <span style="color: #b58900; font-weight: bold;">not</span> dataSynced;
+
+      <span style="color: #b58900; font-weight: bold;">when</span> starting =&gt;
+        flag.isNewData &lt;= <span style="color: #dc322f;">'0'</span>;
+        memory.reset &lt;= <span style="color: #dc322f;">'0'</span>;
+
+      <span style="color: #b58900; font-weight: bold;">when</span> storing =&gt;
+        memory.input &lt;= dataSynced;
+        memory.clock &lt;= <span style="color: #dc322f;">'0'</span>;
+
+      <span style="color: #b58900; font-weight: bold;">when</span> fetching =&gt;
+        memory.clock &lt;= <span style="color: #dc322f;">'1'</span>;
+
+    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">case</span>;
+  <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">process</span>;
+
+  <span style="color: #2aa198;">dataSynchronizer</span>: <span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #2aa198;">synchronizer</span>.<span style="color: #2aa198;">Synchronizer</span>
+    <span style="color: #b58900; font-weight: bold;">port</span> <span style="color: #b58900; font-weight: bold;">map</span>(
+      <span style="color: #dc322f;">clock</span> =&gt; clock,
+      <span style="color: #dc322f;">input</span> =&gt; dataPeripheral,
+      <span style="color: #dc322f;">output</span> =&gt; dataSynced);
+
+  <span style="color: #2aa198;">sipoShiftRegister</span>: <span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #2aa198;">shift_register</span>.<span style="color: #2aa198;">SIPOShiftRegister</span>
+    <span style="color: #b58900; font-weight: bold;">generic</span> <span style="color: #b58900; font-weight: bold;">map</span>(<span style="color: #dc322f;">width</span> =&gt; memoryWidth)
+    <span style="color: #b58900; font-weight: bold;">port</span> <span style="color: #b58900; font-weight: bold;">map</span>(
+      <span style="color: #dc322f;">clock</span> =&gt; memory.clock,
+      <span style="color: #dc322f;">reset</span> =&gt; memory.reset,
+      <span style="color: #dc322f;">input</span> =&gt; memory.input,
+      <span style="color: #dc322f;">output</span> =&gt; memory.output);
+
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">architecture</span>;
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org26f63d3" class="outline-4">
+<h4 id="org26f63d3"><span class="section-number-4">4.1.6</span> PS2 Package</h4>
+<div class="outline-text-4" id="text-4-1-6">
+<div class="org-src-container">
+<pre class="src src-vhdl"><span style="color: #b58900; font-weight: bold;">library</span> <span style="color: #ff83fa;">ieee</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">ieee</span>.<span style="color: #ff83fa;">std_logic_1164</span>.<span style="color: #b58900; font-weight: bold;">all</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">ieee</span>.<span style="color: #ff83fa;">numeric_std</span>.<span style="color: #b58900; font-weight: bold;">all</span>;
+
+<span style="color: #b58900; font-weight: bold;">package</span> <span style="color: #2aa198;">ps2_pkg</span> <span style="color: #b58900; font-weight: bold;">is</span>
+  <span style="color: #b58900; font-weight: bold;">subtype</span> <span style="color: #268bd2;">Byte</span> <span style="color: #b58900; font-weight: bold;">is</span> <span style="color: #268bd2;">unsigned</span>(7 <span style="color: #b58900; font-weight: bold;">downto</span> 0);
+  <span style="color: #b58900; font-weight: bold;">constant</span> <span style="color: #dc322f;">break</span>: Byte := x<span style="color: #dc322f;">"F0"</span>;
+  <span style="color: #b58900; font-weight: bold;">constant</span> <span style="color: #dc322f;">multi</span>: Byte := x<span style="color: #dc322f;">"E0"</span>;
+
+  <span style="color: #b58900; font-weight: bold;">constant</span> <span style="color: #dc322f;">startLength</span>: <span style="color: #268bd2;">positive</span> := 1;
+  <span style="color: #b58900; font-weight: bold;">constant</span> <span style="color: #dc322f;">stopLength</span>: <span style="color: #268bd2;">positive</span> := 1;
+  <span style="color: #b58900; font-weight: bold;">constant</span> <span style="color: #dc322f;">parityLength</span>: <span style="color: #268bd2;">positive</span> := 1;
+  <span style="color: #b58900; font-weight: bold;">constant</span> <span style="color: #dc322f;">totalTransmitLength</span>: <span style="color: #268bd2;">positive</span> := startLength + Byte'<span style="color: #b0c4de;">length</span> + parityLength + stopLength;
+  <span style="color: #b58900; font-weight: bold;">subtype</span> <span style="color: #268bd2;">Code</span> <span style="color: #b58900; font-weight: bold;">is</span> <span style="color: #268bd2;">unsigned</span>(totalTransmitLength-1 <span style="color: #b58900; font-weight: bold;">downto</span> 0);
+  <span style="color: #b58900; font-weight: bold;">subtype</span> <span style="color: #268bd2;">CodeByteRange</span> <span style="color: #b58900; font-weight: bold;">is</span> <span style="color: #268bd2;">natural</span> <span style="color: #b58900; font-weight: bold;">range</span> totalTransmitLength-1 - startLength
+    <span style="color: #b58900; font-weight: bold;">downto</span> totalTransmitLength-1 - Byte'<span style="color: #b0c4de;">length</span>;
+
+  <span style="color: #b58900; font-weight: bold;">type</span> <span style="color: #268bd2;">FlagInternal</span> <span style="color: #b58900; font-weight: bold;">is</span> <span style="color: #b58900; font-weight: bold;">record</span>
+    <span style="color: #dc322f;">isNewData</span>: <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">isBitCounterDone</span>: <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">isReadyToFetch</span>: <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">isReadyToStore</span>: <span style="color: #268bd2;">std_logic</span>;
+  <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">record</span>;
+
+  <span style="color: #b58900; font-weight: bold;">type</span> <span style="color: #268bd2;">FlagExternal</span> <span style="color: #b58900; font-weight: bold;">is</span> <span style="color: #b58900; font-weight: bold;">record</span>
+    <span style="color: #dc322f;">isNewData</span>: <span style="color: #268bd2;">std_logic</span>;
+  <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">record</span>;
+
+  <span style="color: #b58900; font-weight: bold;">type</span> <span style="color: #268bd2;">FlagPeripheralClock</span> <span style="color: #b58900; font-weight: bold;">is</span> <span style="color: #b58900; font-weight: bold;">record</span>
+    <span style="color: #dc322f;">isRising</span>: <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">isFalling</span>: <span style="color: #268bd2;">std_logic</span>;
+  <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">record</span>;
+
+  <span style="color: #b58900; font-weight: bold;">type</span> <span style="color: #268bd2;">FlagPeripheralData</span> <span style="color: #b58900; font-weight: bold;">is</span> <span style="color: #b58900; font-weight: bold;">record</span>
+    <span style="color: #dc322f;">isNewData</span>: <span style="color: #268bd2;">std_logic</span>;
+  <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">record</span>;
+
+  <span style="color: #b58900; font-weight: bold;">type</span> <span style="color: #268bd2;">Peripheral</span> <span style="color: #b58900; font-weight: bold;">is</span> <span style="color: #b58900; font-weight: bold;">record</span>
+    <span style="color: #dc322f;">clock</span>: <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">data</span>: <span style="color: #268bd2;">std_logic</span>;
+  <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">record</span>;
+
+  <span style="color: #b58900; font-weight: bold;">type</span> <span style="color: #268bd2;">PS2Controller</span> <span style="color: #b58900; font-weight: bold;">is</span> <span style="color: #b58900; font-weight: bold;">record</span>
+    <span style="color: #dc322f;">clock</span>: <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">reset</span>: <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #dc322f;">peripheral</span>: Peripheral;
+    <span style="color: #dc322f;">flag</span>: FlagExternal;
+    <span style="color: #dc322f;">data</span>: Byte;
+  <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">record</span>;
+
+  <span style="color: #b58900; font-weight: bold;">type</span> <span style="color: #268bd2;">State</span> <span style="color: #b58900; font-weight: bold;">is</span> (initializing, starting, ready, fetching, storing);
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">package</span>;
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org734a9e0" class="outline-3">
+<h3 id="org734a9e0"><span class="section-number-3">4.2</span> LCD Controller</h3>
+<div class="outline-text-3" id="text-4-2">
+</div>
+<div id="outline-container-org1656a1b" class="outline-4">
+<h4 id="org1656a1b"><span class="section-number-4">4.2.1</span> Top-Level</h4>
+<div class="outline-text-4" id="text-4-2-1">
+<div class="org-src-container">
+<pre class="src src-vhdl"><span style="color: #b58900; font-weight: bold;">library</span> <span style="color: #ff83fa;">IEEE</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">IEEE</span>.<span style="color: #ff83fa;">std_logic_1164</span>.<span style="color: #b58900; font-weight: bold;">all</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">ieee</span>.<span style="color: #ff83fa;">numeric_std</span>.<span style="color: #b58900; font-weight: bold;">all</span>;
+
+<span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #2aa198;">LCD_Controller</span> <span style="color: #b58900; font-weight: bold;">is</span> 
+    <span style="color: #b58900; font-weight: bold;">port</span>(
+        <span style="color: #dc322f;">clk</span>, <span style="color: #dc322f;">clk_en</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+        <span style="color: #dc322f;">en</span>, <span style="color: #dc322f;">reset</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+        <span style="color: #dc322f;">RS</span>, <span style="color: #dc322f;">RW</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+        <span style="color: #dc322f;">data</span>:<span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic_vector</span>(7 <span style="color: #b58900; font-weight: bold;">downto</span> 0);
+        <span style="color: #dc322f;">LCD_RW</span>, <span style="color: #dc322f;">LCD_EN</span>, <span style="color: #dc322f;">LCD_RS</span>: <span style="color: #b58900; font-weight: bold;">out</span> <span style="color: #268bd2;">std_logic</span>;
+        <span style="color: #dc322f;">LCD_Data</span>: <span style="color: #b58900; font-weight: bold;">out</span> <span style="color: #268bd2;">std_logic_vector</span>(7 <span style="color: #b58900; font-weight: bold;">downto</span> 0);
+        <span style="color: #dc322f;">busy</span>: <span style="color: #b58900; font-weight: bold;">out</span> <span style="color: #268bd2;">std_logic</span>
+    );
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #2aa198;">LCD_Controller</span>;
+
+<span style="color: #b58900; font-weight: bold;">architecture</span> <span style="color: #2aa198;">behavioral</span> <span style="color: #b58900; font-weight: bold;">of</span> <span style="color: #2aa198;">LCD_Controller</span> <span style="color: #b58900; font-weight: bold;">is</span>
+    <span style="color: #b58900; font-weight: bold;">type</span> <span style="color: #268bd2;">state_t</span> <span style="color: #b58900; font-weight: bold;">is</span> (reset_s, start_s, en_s, write_s, hold_s);
+    <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">state</span>: state_t;
+    <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">data_start</span>: <span style="color: #268bd2;">std_logic_vector</span>(7 <span style="color: #b58900; font-weight: bold;">downto</span> 0);
+<span style="color: #b58900; font-weight: bold;">begin</span>
+    <span style="color: #b58900; font-weight: bold;">process</span>(clk)
+    <span style="color: #b58900; font-weight: bold;">begin</span>
+        <span style="color: #b58900; font-weight: bold;">if</span> reset=<span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+            state &lt;= reset_s;
+            busy &lt;= <span style="color: #dc322f;">'1'</span>;
+            LCD_RW &lt;= <span style="color: #dc322f;">'0'</span>;
+            LCD_EN &lt;= <span style="color: #dc322f;">'0'</span>;
+            LCD_RS &lt;= <span style="color: #dc322f;">'0'</span>;
+            LCD_Data &lt;= (<span style="color: #b58900; font-weight: bold;">others</span> =&gt; <span style="color: #dc322f;">'0'</span>);
+        <span style="color: #b58900; font-weight: bold;">elsif</span> <span style="color: #ff83fa;">rising_edge</span>(clk) <span style="color: #b58900; font-weight: bold;">and</span> clk_en=<span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+            <span style="color: #b58900; font-weight: bold;">case</span> state <span style="color: #b58900; font-weight: bold;">is</span> 
+                <span style="color: #b58900; font-weight: bold;">when</span> reset_s =&gt;
+                    state &lt;= start_s;
+                    busy &lt;= <span style="color: #dc322f;">'0'</span>;
+                    LCD_RW &lt;= RW;
+                    LCD_EN &lt;= <span style="color: #dc322f;">'0'</span>;
+                    LCD_RS &lt;= RS;
+                <span style="color: #b58900; font-weight: bold;">when</span> start_s =&gt;
+                    LCD_RW &lt;= RW;
+                    LCD_RS &lt;= RS;
+
+                    <span style="color: #b58900; font-weight: bold;">if</span> en = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+                        state &lt;= en_s;
+                        busy &lt;= <span style="color: #dc322f;">'1'</span>;
+                        LCD_EN &lt;= <span style="color: #dc322f;">'1'</span>;
+                        data_start &lt;= data;
+                    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+                <span style="color: #b58900; font-weight: bold;">when</span> en_s =&gt;
+                    state &lt;= write_s;
+                    busy &lt;= <span style="color: #dc322f;">'1'</span>;
+                    LCD_EN &lt;= <span style="color: #dc322f;">'1'</span>;
+                    LCD_Data &lt;= data_start;
+                <span style="color: #b58900; font-weight: bold;">when</span> write_s =&gt;
+                    state &lt;= hold_s;
+                    busy &lt;= <span style="color: #dc322f;">'1'</span>;
+                    LCD_EN &lt;= <span style="color: #dc322f;">'0'</span>;
+                    LCD_Data &lt;= data_start;
+                <span style="color: #b58900; font-weight: bold;">when</span> hold_s =&gt;
+                    state &lt;= start_s;
+                    busy &lt;= <span style="color: #dc322f;">'0'</span>;
+                    LCD_EN &lt;= <span style="color: #dc322f;">'0'</span>;
+                    LCD_RW &lt;= RW;
+                    LCD_RS &lt;= RS;
+            <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">case</span>;
+        <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">process</span>;
+
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #2aa198;">behavioral</span>; 
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgfcfbe78" class="outline-4">
+<h4 id="orgfcfbe78"><span class="section-number-4">4.2.2</span> User-Logic</h4>
+<div class="outline-text-4" id="text-4-2-2">
+<div class="org-src-container">
+<pre class="src src-vhdl"><span style="color: #b58900; font-weight: bold;">library</span> <span style="color: #ff83fa;">IEEE</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">IEEE</span>.<span style="color: #ff83fa;">STD_LOGIC_1164</span>.<span style="color: #b58900; font-weight: bold;">ALL</span>;
+
+<span style="color: #b58900; font-weight: bold;">package</span> <span style="color: #2aa198;">LCD_Screen</span> <span style="color: #b58900; font-weight: bold;">is</span> 
+    <span style="color: #859900;">-- </span><span style="color: #859900;">32 ascii values (8bit) on LCD screen.</span>
+    <span style="color: #b58900; font-weight: bold;">type</span> <span style="color: #268bd2;">screen</span> <span style="color: #b58900; font-weight: bold;">is</span> <span style="color: #b58900; font-weight: bold;">array</span>(31 <span style="color: #b58900; font-weight: bold;">downto</span> 0) <span style="color: #b58900; font-weight: bold;">of</span> <span style="color: #268bd2;">std_logic_vector</span>(7 <span style="color: #b58900; font-weight: bold;">downto</span> 0);
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #2aa198;">LCD_Screen</span>;
+
+<span style="color: #b58900; font-weight: bold;">library</span> <span style="color: #ff83fa;">IEEE</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">IEEE</span>.<span style="color: #ff83fa;">STD_LOGIC_1164</span>.<span style="color: #b58900; font-weight: bold;">ALL</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">IEEE</span>.<span style="color: #ff83fa;">NUMERIC_STD</span>.<span style="color: #b58900; font-weight: bold;">ALL</span>;
+<span style="color: #b58900; font-weight: bold;">use</span> <span style="color: #ff83fa;">work</span>.<span style="color: #2aa198;">LCD_Screen</span>.<span style="color: #b58900; font-weight: bold;">all</span>;
+
+<span style="color: #b58900; font-weight: bold;">entity</span> <span style="color: #2aa198;">LCD_Userlogic</span> <span style="color: #b58900; font-weight: bold;">is</span>
+    <span style="color: #b58900; font-weight: bold;">generic</span> (<span style="color: #dc322f;">freq_in</span>: <span style="color: #268bd2;">integer</span> := 50000000); <span style="color: #859900;">-- </span><span style="color: #859900;">The input clk frequency.</span>
+    <span style="color: #b58900; font-weight: bold;">port</span>(   
+        <span style="color: #dc322f;">clk</span>, <span style="color: #dc322f;">en</span>, <span style="color: #dc322f;">reset</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+        <span style="color: #dc322f;">iData</span>: <span style="color: #b58900; font-weight: bold;">in</span> screen;
+        <span style="color: #dc322f;">LCD_RW</span>,<span style="color: #dc322f;">LCD_en</span>,<span style="color: #dc322f;">LCD_RS</span> : <span style="color: #b58900; font-weight: bold;">out</span> <span style="color: #268bd2;">std_logic</span>;
+        <span style="color: #dc322f;">LCD_data</span> : <span style="color: #b58900; font-weight: bold;">out</span> <span style="color: #268bd2;">std_logic_vector</span>(7 <span style="color: #b58900; font-weight: bold;">downto</span> 0)
+    );
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #2aa198;">LCD_Userlogic</span>;
+
+<span style="color: #b58900; font-weight: bold;">architecture</span> <span style="color: #2aa198;">behavioral</span> <span style="color: #b58900; font-weight: bold;">of</span> <span style="color: #2aa198;">LCD_Userlogic</span> <span style="color: #b58900; font-weight: bold;">is</span>
+    <span style="color: #b58900; font-weight: bold;">component</span> <span style="color: #2aa198;">LCD_Controller</span> <span style="color: #b58900; font-weight: bold;">is</span> 
+        <span style="color: #b58900; font-weight: bold;">port</span>(
+            <span style="color: #dc322f;">clk</span>, <span style="color: #dc322f;">clk_en</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+            <span style="color: #dc322f;">en</span>, <span style="color: #dc322f;">reset</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+            <span style="color: #dc322f;">RS</span>, <span style="color: #dc322f;">RW</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+            <span style="color: #dc322f;">data</span>:<span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic_vector</span>(7 <span style="color: #b58900; font-weight: bold;">downto</span> 0);
+            <span style="color: #dc322f;">LCD_RW</span>, <span style="color: #dc322f;">LCD_EN</span>, <span style="color: #dc322f;">LCD_RS</span>: <span style="color: #b58900; font-weight: bold;">out</span> <span style="color: #268bd2;">std_logic</span>;
+            <span style="color: #dc322f;">LCD_Data</span>: <span style="color: #b58900; font-weight: bold;">out</span> <span style="color: #268bd2;">std_logic_vector</span>(7 <span style="color: #b58900; font-weight: bold;">downto</span> 0);
+            <span style="color: #dc322f;">busy</span>: <span style="color: #b58900; font-weight: bold;">out</span> <span style="color: #268bd2;">std_logic</span>
+        );
+    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">component</span>;
+
+    <span style="color: #859900;">-- </span><span style="color: #859900;">Produce a clk_enable signal at the specified output_frequency.</span>
+    <span style="color: #b58900; font-weight: bold;">component</span> <span style="color: #2aa198;">clk_enabler</span> <span style="color: #b58900; font-weight: bold;">is</span>
+        <span style="color: #b58900; font-weight: bold;">GENERIC</span> (
+            <span style="color: #b58900; font-weight: bold;">CONSTANT</span> <span style="color: #dc322f;">in_freq</span> : <span style="color: #268bd2;">integer</span> := 150000000; <span style="color: #859900;">--  </span><span style="color: #859900;">150 MHz </span>
+            <span style="color: #b58900; font-weight: bold;">CONSTANT</span> <span style="color: #dc322f;">out_freq</span> : <span style="color: #268bd2;">integer</span> := 1 <span style="color: #859900;">--  </span><span style="color: #859900;">1.0 Hz </span>
+        );      
+        <span style="color: #b58900; font-weight: bold;">port</span>(   
+            <span style="color: #dc322f;">clk</span>:        <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;
+            <span style="color: #dc322f;">clk_en</span>:     <span style="color: #b58900; font-weight: bold;">out</span> <span style="color: #268bd2;">std_logic</span>
+        );
+    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">component</span>;
+
+    <span style="color: #859900;">-- </span><span style="color: #859900;">Produce a reset signal for MAX_COUNT cyles when system initializes.</span>
+    <span style="color: #b58900; font-weight: bold;">component</span> <span style="color: #2aa198;">ResetDelay</span> <span style="color: #b58900; font-weight: bold;">is</span>
+        <span style="color: #b58900; font-weight: bold;">generic</span> (<span style="color: #dc322f;">MAX_COUNT</span>: <span style="color: #268bd2;">integer</span> := 20);
+        <span style="color: #b58900; font-weight: bold;">port</span> (
+        <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">clk</span>: <span style="color: #b58900; font-weight: bold;">in</span> <span style="color: #268bd2;">std_logic</span>;   
+        <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">reset</span>: <span style="color: #b58900; font-weight: bold;">out</span> <span style="color: #268bd2;">std_logic</span> := <span style="color: #dc322f;">'1'</span>
+        );
+    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">component</span>;
+
+    <span style="color: #b58900; font-weight: bold;">type</span> <span style="color: #268bd2;">state_t</span> <span style="color: #b58900; font-weight: bold;">is</span> (powerOn_s, initCmd_s, write_s, wait_s);
+    <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">state</span>: state_t := powerOn_s;
+    <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">lcd_cntl_clk_en</span>, <span style="color: #dc322f;">lcd_cntl_en</span>, <span style="color: #dc322f;">lcd_cntl_busy</span>: <span style="color: #268bd2;">std_logic</span>;
+    <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">powerOn_hold</span>, <span style="color: #dc322f;">initCmd_hold</span>: <span style="color: #268bd2;">std_logic</span>; <span style="color: #859900;">-- </span><span style="color: #859900;">Hold the powerOn and initCmd states.</span>
+    <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">data</span>: <span style="color: #268bd2;">std_logic_vector</span> (8 <span style="color: #b58900; font-weight: bold;">downto</span> 0); <span style="color: #859900;">-- </span><span style="color: #859900;">RS and 8bit ascii char.</span>
+    <span style="color: #b58900; font-weight: bold;">signal</span> <span style="color: #dc322f;">dataSel</span>: <span style="color: #268bd2;">integer</span> <span style="color: #b58900; font-weight: bold;">range</span> 0 <span style="color: #b58900; font-weight: bold;">to</span> 39 := 0; <span style="color: #859900;">-- </span><span style="color: #859900;">Select the data to send to the LCD controller.</span>
+
+<span style="color: #b58900; font-weight: bold;">begin</span> 
+    <span style="color: #859900;">-- </span><span style="color: #859900;">Hold for 15ms after power on.</span>
+    <span style="color: #2aa198;">hold_PowerOn</span>: <span style="color: #2aa198;">ResetDelay</span>
+        <span style="color: #b58900; font-weight: bold;">generic</span> <span style="color: #b58900; font-weight: bold;">map</span>(<span style="color: #dc322f;">MAX_COUNT</span> =&gt; freq_in/66 - 1) <span style="color: #859900;">-- </span><span style="color: #859900;">66Hz ~&gt; 15ms</span>
+        <span style="color: #b58900; font-weight: bold;">port</span> <span style="color: #b58900; font-weight: bold;">map</span>(<span style="color: #dc322f;">clk</span>=&gt;clk, <span style="color: #dc322f;">reset</span>=&gt;powerOn_hold);
+
+    <span style="color: #859900;">-- </span><span style="color: #859900;">Hold for 19.5ms (15ms + 4.5ms) after power on.</span>
+    <span style="color: #2aa198;">hold_initCmd</span>: <span style="color: #2aa198;">ResetDelay</span>
+        <span style="color: #b58900; font-weight: bold;">generic</span> <span style="color: #b58900; font-weight: bold;">map</span>(<span style="color: #dc322f;">MAX_COUNT</span> =&gt; freq_in/50 - 1) <span style="color: #859900;">-- </span><span style="color: #859900;">50Hz ~&gt; 19.5ms</span>
+        <span style="color: #b58900; font-weight: bold;">port</span> <span style="color: #b58900; font-weight: bold;">map</span>(<span style="color: #dc322f;">clk</span>=&gt;clk, <span style="color: #dc322f;">reset</span>=&gt;initCmd_hold);
+
+    <span style="color: #2aa198;">lcd_cntl_clk_enabler</span>: <span style="color: #2aa198;">clk_enabler</span>
+        <span style="color: #b58900; font-weight: bold;">generic</span> <span style="color: #b58900; font-weight: bold;">map</span> (<span style="color: #dc322f;">in_freq</span>=&gt;freq_in, <span style="color: #dc322f;">out_freq</span>=&gt;5000) <span style="color: #859900;">-- </span><span style="color: #859900;">Must wait 100us between ops, 5kHz -&gt; 200us</span>
+        <span style="color: #b58900; font-weight: bold;">port</span> <span style="color: #b58900; font-weight: bold;">map</span>(<span style="color: #dc322f;">clk</span>=&gt;clk, <span style="color: #dc322f;">clk_en</span>=&gt;lcd_cntl_clk_en);
+
+    <span style="color: #2aa198;">lcd</span>: <span style="color: #2aa198;">LCD_Controller</span>
+        <span style="color: #b58900; font-weight: bold;">port</span> <span style="color: #b58900; font-weight: bold;">map</span>(
+            <span style="color: #dc322f;">clk</span>=&gt;clk, <span style="color: #dc322f;">clk_en</span>=&gt;lcd_cntl_clk_en,
+            <span style="color: #dc322f;">en</span>=&gt;lcd_cntl_en, <span style="color: #dc322f;">reset</span>=&gt;<span style="color: #dc322f;">'0'</span>, <span style="color: #dc322f;">RS</span>=&gt;data(8), <span style="color: #dc322f;">RW</span>=&gt;<span style="color: #dc322f;">'0'</span>,
+            <span style="color: #dc322f;">data</span>=&gt;data(7 <span style="color: #b58900; font-weight: bold;">downto</span> 0), <span style="color: #dc322f;">LCD_RW</span>=&gt;LCD_RW, <span style="color: #dc322f;">LCD_EN</span>=&gt;LCD_EN,
+            <span style="color: #dc322f;">LCD_RS</span>=&gt;LCD_RS, <span style="color: #dc322f;">LCD_Data</span>=&gt;LCD_Data, <span style="color: #dc322f;">busy</span>=&gt;lcd_cntl_busy
+        );
+
+    <span style="color: #b58900; font-weight: bold;">process</span>(clk)
+    <span style="color: #b58900; font-weight: bold;">begin</span>
+        <span style="color: #b58900; font-weight: bold;">if</span> powerOn_hold = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+            state &lt;= powerOn_s;
+            lcd_cntl_en &lt;= <span style="color: #dc322f;">'0'</span>;
+            dataSel &lt;= 0;
+        <span style="color: #b58900; font-weight: bold;">elsif</span> <span style="color: #ff83fa;">rising_edge</span>(clk) <span style="color: #b58900; font-weight: bold;">then</span>
+            <span style="color: #b58900; font-weight: bold;">case</span> (state) <span style="color: #b58900; font-weight: bold;">is</span> 
+                <span style="color: #859900;">-- </span><span style="color: #859900;">Wait for Module to initialize.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> powerOn_s =&gt;
+                    lcd_cntl_en &lt;= <span style="color: #dc322f;">'0'</span>;
+                    dataSel &lt;= 0;
+
+                    <span style="color: #b58900; font-weight: bold;">if</span> powerOn_hold = <span style="color: #dc322f;">'0'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+                        state &lt;= initCmd_s;
+
+                        <span style="color: #859900;">-- </span><span style="color: #859900;">Pulse one write of the first data.</span>
+                        dataSel &lt;= 0;
+                        lcd_cntl_en &lt;= <span style="color: #dc322f;">'1'</span>;
+                    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+
+                <span style="color: #859900;">-- </span><span style="color: #859900;">Send/Hold first command</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> initCmd_s =&gt;
+                    <span style="color: #b58900; font-weight: bold;">if</span> initCmd_hold = <span style="color: #dc322f;">'0'</span> <span style="color: #b58900; font-weight: bold;">then</span> 
+                        state &lt;= write_s;
+                    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+
+                    <span style="color: #859900;">-- </span><span style="color: #859900;">Only perform one data write.</span>
+                    <span style="color: #b58900; font-weight: bold;">if</span> lcd_cntl_busy = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+                        lcd_cntl_en &lt;= <span style="color: #dc322f;">'0'</span>;
+                    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+
+                <span style="color: #859900;">-- </span><span style="color: #859900;">Write current data.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> write_s =&gt;
+                    lcd_cntl_en &lt;= <span style="color: #dc322f;">'1'</span>;
+
+                    <span style="color: #859900;">-- </span><span style="color: #859900;">The current write operation started.</span>
+                    <span style="color: #b58900; font-weight: bold;">if</span> lcd_cntl_busy = <span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+                        state &lt;= wait_s;
+                        <span style="color: #859900;">-- </span><span style="color: #859900;">Run initialization sequence.</span>
+                        <span style="color: #b58900; font-weight: bold;">if</span> reset=<span style="color: #dc322f;">'1'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+                            dataSel &lt;= 0;
+
+                        <span style="color: #859900;">-- </span><span style="color: #859900;">reset to first screen value.</span>
+                        <span style="color: #b58900; font-weight: bold;">elsif</span> dataSel=39 <span style="color: #b58900; font-weight: bold;">then</span>
+                            dataSel &lt;= 6;
+
+                        <span style="color: #859900;">-- </span><span style="color: #859900;">Move to next data.</span>
+                        <span style="color: #b58900; font-weight: bold;">else</span>
+                            dataSel &lt;= dataSel + 1;
+                        <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+                    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+                <span style="color: #b58900; font-weight: bold;">when</span> wait_s =&gt;
+                    lcd_cntl_en &lt;= <span style="color: #dc322f;">'1'</span>;
+
+                    <span style="color: #859900;">-- </span><span style="color: #859900;">The current write operation finished.</span>
+                    <span style="color: #b58900; font-weight: bold;">if</span> lcd_cntl_busy = <span style="color: #dc322f;">'0'</span> <span style="color: #b58900; font-weight: bold;">then</span>
+                        state &lt;= write_s;
+                    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+            <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">case</span>;
+        <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">if</span>;
+    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">process</span>;
+
+    <span style="color: #b58900; font-weight: bold;">process</span>(dataSel)
+    <span style="color: #b58900; font-weight: bold;">begin</span>
+        <span style="color: #b58900; font-weight: bold;">case</span> dataSel <span style="color: #b58900; font-weight: bold;">is</span>
+            <span style="color: #b58900; font-weight: bold;">when</span> 0 =&gt; data &lt;= <span style="color: #dc322f;">'0'</span> &amp; X<span style="color: #dc322f;">"30"</span>; <span style="color: #859900;">-- </span><span style="color: #859900;">Function Set (interface=8bit, N=2 lines, F=8/5 dot font)</span>
+            <span style="color: #b58900; font-weight: bold;">when</span> 1 =&gt; data &lt;= <span style="color: #dc322f;">'0'</span> &amp; X<span style="color: #dc322f;">"30"</span>; <span style="color: #859900;">-- </span><span style="color: #859900;">Function Set (interface=8bit, N=2 lines, F=8/5 dot font)</span>
+            <span style="color: #b58900; font-weight: bold;">when</span> 2 =&gt; data &lt;= <span style="color: #dc322f;">'0'</span> &amp; X<span style="color: #dc322f;">"38"</span>; <span style="color: #859900;">-- </span><span style="color: #859900;">Function Set (interface=8bit, N=2 lines, F=8/5 dot font)</span>
+            <span style="color: #b58900; font-weight: bold;">when</span> 3 =&gt; data &lt;= <span style="color: #dc322f;">'0'</span> &amp; X<span style="color: #dc322f;">"0C"</span>; <span style="color: #859900;">-- </span><span style="color: #859900;">Display Control (Display on, cursor and blinking off)</span>
+            <span style="color: #b58900; font-weight: bold;">when</span> 4 =&gt; data &lt;= <span style="color: #dc322f;">'0'</span> &amp; X<span style="color: #dc322f;">"01"</span>; <span style="color: #859900;">-- </span><span style="color: #859900;">Clear Display</span>
+            <span style="color: #b58900; font-weight: bold;">when</span> 5 =&gt; data &lt;= <span style="color: #dc322f;">'0'</span> &amp; X<span style="color: #dc322f;">"07"</span>; <span style="color: #859900;">-- </span><span style="color: #859900;">Entry Mode Set (Cursor move fwd and shift enable)</span>
+            <span style="color: #b58900; font-weight: bold;">when</span> 6 =&gt; data &lt;= <span style="color: #dc322f;">'0'</span> &amp; X<span style="color: #dc322f;">"02"</span>; <span style="color: #859900;">-- </span><span style="color: #859900;">reset cursor to HOME.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 7 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(0); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 0.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 8 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(1); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 1.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 9 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(2); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 2.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 10 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(3); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 3.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 11 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(4); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 4.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 12 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(5); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 5.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 13 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(6); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 6.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 14 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(7); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 7.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 15 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(8); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 8.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 16 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(9); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 9.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 17 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(10); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 10.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 18 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(11); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 11.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 19 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(12); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 12.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 20 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(13); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 13.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 21 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(14); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 14.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 22 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(15); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 15.</span>
+            <span style="color: #b58900; font-weight: bold;">when</span> 23 =&gt; data &lt;= <span style="color: #dc322f;">'0'</span> &amp; X<span style="color: #dc322f;">"C0"</span>;
+                <span style="color: #b58900; font-weight: bold;">when</span> 24 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(16); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 16.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 25 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(17); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 17.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 26 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(18); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 18.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 27 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(19); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 19.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 28 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(20); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 20.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 29 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(21); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 21.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 30 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(22); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 22.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 31 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(23); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 23.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 32 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(24); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 24.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 33 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(25); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 25.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 34 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(26); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 26.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 35 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(27); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 27.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 36 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(28); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 28.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 37 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(29); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 29.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 38 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(30); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 30.</span>
+                <span style="color: #b58900; font-weight: bold;">when</span> 39 =&gt; data &lt;= <span style="color: #dc322f;">'1'</span> &amp; iData(31); <span style="color: #859900;">-- </span><span style="color: #859900;">User data 31.</span>
+            <span style="color: #b58900; font-weight: bold;">when</span> <span style="color: #b58900; font-weight: bold;">others</span>=&gt; data &lt;= <span style="color: #dc322f;">'0'</span> &amp; X<span style="color: #dc322f;">"30"</span>;
+        <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">case</span>;
+    <span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #b58900; font-weight: bold;">process</span>;
+
+<span style="color: #b58900; font-weight: bold;">end</span> <span style="color: #2aa198;">behavioral</span>;
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org48a11e5" class="outline-3">
+<h3 id="org48a11e5"><span class="section-number-3">4.3</span> Hangman Software</h3>
+<div class="outline-text-3" id="text-4-3">
+<div class="org-src-container">
+<pre class="src src-java"><span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">java</span>.<span style="color: #859900;">io</span>.<span style="color: #268bd2;">BufferedReader</span>;
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">java</span>.<span style="color: #859900;">io</span>.<span style="color: #268bd2;">FileReader</span>;
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">java</span>.<span style="color: #859900;">io</span>.<span style="color: #268bd2;">IOException</span>;
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">java</span>.<span style="color: #859900;">awt</span>.*;
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">java</span>.<span style="color: #859900;">awt</span>.<span style="color: #859900;">event</span>.*;  
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">java</span>.<span style="color: #859900;">awt</span>.<span style="color: #268bd2;">Graphics</span>;
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">java</span>.<span style="color: #859900;">awt</span>.<span style="color: #268bd2;">Graphics2D</span>;
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">java</span>.<span style="color: #859900;">awt</span>.<span style="color: #859900;">geom</span>.<span style="color: #268bd2;">Line2D</span>;
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">javax</span>.<span style="color: #859900;">swing</span>.*;  
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">java</span>.<span style="color: #859900;">awt</span>.<span style="color: #268bd2;">Graphics</span>;
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">java</span>.<span style="color: #859900;">util</span>.<span style="color: #268bd2;">Arrays</span>; 
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">java</span>.<span style="color: #859900;">lang</span>.<span style="color: #268bd2;">Object</span>;
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">java</span>.<span style="color: #859900;">awt</span>.<span style="color: #859900;">geom</span>.*;
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">java</span>.<span style="color: #859900;">awt</span>.<span style="color: #859900;">geom</span>.<span style="color: #268bd2;">Ellipse2D</span>;
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">com</span>.<span style="color: #859900;">fazecast</span>.<span style="color: #859900;">jSerialComm</span>.*;
+<span style="color: #b58900; font-weight: bold;">import</span> <span style="color: #859900;">java</span>.<span style="color: #859900;">awt</span>.<span style="color: #268bd2;">Robot</span>;
+
+<span style="color: #b58900; font-weight: bold;">public</span> <span style="color: #b58900; font-weight: bold;">class</span> <span style="color: #268bd2;">HangMan1</span> <span style="color: #b58900; font-weight: bold;">extends</span> <span style="color: #268bd2;">JFrame</span>{  
+    <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">char</span> <span style="color: #dc322f;">keyboardinput</span>;
+    <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">boolean</span> <span style="color: #dc322f;">gameover</span> = <span style="color: #859900;">true</span>;    
+    <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">int</span> <span style="color: #dc322f;">correctpuzzles</span> = 0;
+    <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">int</span> <span style="color: #dc322f;">incorrectpuzzles</span> = 0;
+    <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">String</span>[] <span style="color: #dc322f;">wordarray</span> = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">String</span>[9];
+    <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">char</span>[] <span style="color: #dc322f;">guessedvalues</span> = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">char</span>[30];
+    <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">char</span>[] <span style="color: #dc322f;">values</span> = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">char</span>[30];
+    <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">char</span>[] <span style="color: #dc322f;">incorrectguessedvalues</span> = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">char</span>[6];
+    <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">int</span> <span style="color: #dc322f;">j</span> = 0;
+    <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">int</span> <span style="color: #dc322f;">incorrectguesses</span> = 0;
+    <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">int</span> <span style="color: #dc322f;">currentmatrixnum</span> = 0;
+    <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">String</span> <span style="color: #dc322f;">underscores</span>;
+    <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">JLabel</span> <span style="color: #dc322f;">label</span>;
+    <span style="color: #268bd2;">JPanel</span> <span style="color: #dc322f;">main</span>;
+    <span style="color: #268bd2;">JFrame</span> <span style="color: #dc322f;">frame</span>;
+
+    <span style="color: #2aa198;">HangMan1</span>() {  
+        main  = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">JPanel</span>();  
+        label = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">JLabel</span>(<span style="color: #dc322f;">"s"</span>);
+        label.setText(<span style="color: #dc322f;">"press Y to begin HangMan"</span>);
+        main.add(label);
+        getContentPane().add(main);
+        addKeyListener(<span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">MyKeyListener</span>());
+        setSize(<span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">Dimension</span>(1200,600));
+    }
+
+    <span style="color: #b58900; font-weight: bold;">public</span> <span style="color: #268bd2;">void</span> <span style="color: #2aa198;">paint</span>(<span style="color: #268bd2;">Graphics</span> <span style="color: #dc322f;">g</span>) {
+        <span style="color: #b58900; font-weight: bold;">super</span>.paint(g);  <span style="color: #859900;">// </span><span style="color: #859900;">fixes the immediate problem.</span>
+        <span style="color: #268bd2;">Graphics2D</span> <span style="color: #dc322f;">g2</span> = (<span style="color: #268bd2;">Graphics2D</span>) g;
+        <span style="color: #268bd2;">Line2D</span> <span style="color: #dc322f;">lin</span> = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #859900;">Line2D</span>.<span style="color: #268bd2;">Float</span>(200, 400, 300, 400);
+        g2.draw(lin);
+
+        lin = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #859900;">Line2D</span>.<span style="color: #268bd2;">Float</span>(250, 400, 250, 50);
+        g2.draw(lin);
+
+        lin = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #859900;">Line2D</span>.<span style="color: #268bd2;">Float</span>(250, 50, 350, 50);
+        g2.draw(lin);
+        lin = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #859900;">Line2D</span>.<span style="color: #268bd2;">Float</span>(350, 50, 350, 150);
+        g2.draw(lin);
+
+        <span style="color: #b58900; font-weight: bold;">if</span>(incorrectguesses &gt; 0){
+            <span style="color: #268bd2;">Shape</span> <span style="color: #dc322f;">circle</span> = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #859900;">Ellipse2D</span>.<span style="color: #268bd2;">Float</span>(325, 150, 50, 50);
+            g2.draw(circle);
+        }
+        <span style="color: #b58900; font-weight: bold;">if</span>(incorrectguesses &gt; 1){
+            lin = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #859900;">Line2D</span>.<span style="color: #268bd2;">Float</span>(350, 200, 350, 300);
+            g2.draw(lin);
+        }
+        <span style="color: #b58900; font-weight: bold;">if</span>(incorrectguesses &gt; 2){
+            lin = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #859900;">Line2D</span>.<span style="color: #268bd2;">Float</span>(350, 235, 315, 215);
+            g2.draw(lin);
+        }
+        <span style="color: #b58900; font-weight: bold;">if</span>(incorrectguesses &gt; 3){
+            lin = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #859900;">Line2D</span>.<span style="color: #268bd2;">Float</span>(350, 235, 385, 215);
+            g2.draw(lin);
+        }
+        <span style="color: #b58900; font-weight: bold;">if</span>(incorrectguesses &gt; 4){
+            lin = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #859900;">Line2D</span>.<span style="color: #268bd2;">Float</span>(350, 300, 315, 330);
+            g2.draw(lin);
+        }
+        <span style="color: #b58900; font-weight: bold;">if</span>(incorrectguesses &gt; 5){
+            lin = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #859900;">Line2D</span>.<span style="color: #268bd2;">Float</span>(350, 300, 385, 330);
+            g2.draw(lin);
+        }
+    }
+
+    <span style="color: #b58900; font-weight: bold;">public</span> <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">void</span> <span style="color: #2aa198;">setunderscores</span>(<span style="color: #268bd2;">String</span> <span style="color: #dc322f;">word</span>){
+        underscores = <span style="color: #dc322f;">""</span>; 
+        <span style="color: #b58900; font-weight: bold;">for</span>(<span style="color: #268bd2;">int</span> <span style="color: #dc322f;">i</span>= 0; i&lt; word.<span style="color: #268bd2;">length</span>(); i++){
+            underscores += <span style="color: #dc322f;">" _ "</span>;
+        }
+        label.setText(underscores);
+    }
+    <span style="color: #b58900; font-weight: bold;">private</span> <span style="color: #268bd2;">char</span>[] <span style="color: #2aa198;">getCharArray</span>(<span style="color: #268bd2;">char</span>[] <span style="color: #dc322f;">array</span>) {
+        <span style="color: #268bd2;">String</span> <span style="color: #dc322f;">_array</span> = <span style="color: #dc322f;">""</span>;
+        <span style="color: #b58900; font-weight: bold;">for</span>(<span style="color: #268bd2;">int</span> <span style="color: #dc322f;">i</span> = 0; i &lt; array.<span style="color: #268bd2;">length</span>; i++) {
+            <span style="color: #859900;">// </span><span style="color: #859900;">check if a char already exist, if not exist then return -1</span>
+            <span style="color: #b58900; font-weight: bold;">if</span>(_array.indexOf(array[i]) == -1)
+
+                _array = _array+array[i];      <span style="color: #859900;">// </span><span style="color: #859900;">add new char</span>
+        }
+        <span style="color: #b58900; font-weight: bold;">return</span> _array.toCharArray();
+    }
+
+    <span style="color: #b58900; font-weight: bold;">class</span> <span style="color: #268bd2;">MyKeyListener</span> <span style="color: #b58900; font-weight: bold;">extends</span> <span style="color: #268bd2;">KeyAdapter</span> {
+        <span style="color: #b58900; font-weight: bold;">public</span> <span style="color: #268bd2;">void</span> <span style="color: #2aa198;">keyPressed</span>(<span style="color: #268bd2;">KeyEvent</span> <span style="color: #dc322f;">evt</span>) {
+            <span style="color: #268bd2;">boolean</span> <span style="color: #dc322f;">continue2</span> = <span style="color: #859900;">true</span>;
+            <span style="color: #268bd2;">boolean</span> <span style="color: #dc322f;">incorrect</span> = <span style="color: #859900;">true</span>;
+            <span style="color: #268bd2;">boolean</span> <span style="color: #dc322f;">tracking</span> = <span style="color: #859900;">true</span>;
+            <span style="color: #268bd2;">int</span> <span style="color: #dc322f;">correctguesses</span> = 0;
+            <span style="color: #b58900; font-weight: bold;">if</span>(evt.getKeyChar() != incorrectguessedvalues[0] &amp;&amp;
+               evt.getKeyChar() != incorrectguessedvalues[1] &amp;&amp;
+               evt.getKeyChar() != incorrectguessedvalues[2] &amp;&amp;
+               evt.getKeyChar() != incorrectguessedvalues[3] &amp;&amp;
+               evt.getKeyChar() != incorrectguessedvalues[4] &amp;&amp;
+               evt.getKeyChar() != incorrectguessedvalues[5] &amp;&amp;
+               incorrectguesses != 6 &amp;&amp; gameover != <span style="color: #859900;">true</span>)
+                {
+
+                    <span style="color: #b58900; font-weight: bold;">for</span>(<span style="color: #268bd2;">int</span> <span style="color: #dc322f;">w</span> = 0; w &lt; 26; w++){
+                        <span style="color: #b58900; font-weight: bold;">if</span>(guessedvalues[w] == evt.getKeyChar()){
+                            continue2 = <span style="color: #859900;">false</span>;
+                        }
+                    }
+                    <span style="color: #b58900; font-weight: bold;">if</span>(continue2){
+
+                        j++;
+                        guessedvalues[j] = evt.getKeyChar();
+                        getCharArray(guessedvalues);
+                        underscores = <span style="color: #dc322f;">""</span>;
+                        <span style="color: #b58900; font-weight: bold;">for</span>(<span style="color: #268bd2;">int</span> <span style="color: #dc322f;">i</span> =0; i&lt; <span style="color: #268bd2;">wordarray</span>[currentmatrixnum].length();i++){
+                            <span style="color: #b58900; font-weight: bold;">for</span>(<span style="color: #268bd2;">int</span> <span style="color: #dc322f;">k</span> =0; k &lt; 30; k++){ 
+                                <span style="color: #b58900; font-weight: bold;">if</span>(guessedvalues[k] == wordarray[currentmatrixnum].charAt(i) &amp;&amp; guessedvalues[k] != evt.getKeyChar()){
+                                    underscores += <span style="color: #dc322f;">" "</span> + guessedvalues[k] + <span style="color: #dc322f;">" "</span>;
+                                    tracking = <span style="color: #859900;">false</span>;
+                                    correctguesses++;
+                                }}
+                            <span style="color: #b58900; font-weight: bold;">if</span>(evt.getKeyChar() == wordarray[currentmatrixnum].charAt(i)){
+                                underscores += <span style="color: #dc322f;">" "</span> + evt.getKeyChar() + <span style="color: #dc322f;">" "</span>;
+                                tracking = <span style="color: #859900;">false</span>;
+                                incorrect = <span style="color: #859900;">false</span>;
+                                correctguesses++;
+                            }
+                            <span style="color: #b58900; font-weight: bold;">if</span>(tracking){
+                                underscores += <span style="color: #dc322f;">" _ "</span>;
+                            }
+                            tracking = <span style="color: #859900;">true</span>;
+                        }
+                        <span style="color: #b58900; font-weight: bold;">if</span>(incorrect){
+                            incorrectguessedvalues[incorrectguesses] = evt.getKeyChar();
+                            incorrectguesses++;
+                        }
+                        label.setText(underscores);
+                    }
+                }
+            <span style="color: #b58900; font-weight: bold;">if</span>(incorrectguesses == 6 &amp;&amp; gameover == <span style="color: #859900;">false</span>){
+                underscores = <span style="color: #dc322f;">"Sorry! The correct word was "</span> + wordarray[currentmatrixnum] + <span style="color: #dc322f;">". You have solved "</span> + correctpuzzles + <span style="color: #dc322f;">" puzzles out of "</span> + currentmatrixnum +<span style="color: #dc322f;">". Press Y to start a new game"</span>;
+                label.setText(underscores);
+                gameover = <span style="color: #859900;">true</span>;
+            }   
+            <span style="color: #b58900; font-weight: bold;">if</span>(correctguesses == wordarray[currentmatrixnum].length() &amp;&amp; gameover == <span style="color: #859900;">false</span>){
+                correctpuzzles++;
+                underscores = <span style="color: #dc322f;">"Well done! You have solved "</span> + correctpuzzles + <span style="color: #dc322f;">" puzzles out of "</span> + currentmatrixnum +<span style="color: #dc322f;">". Press Y to start a new game"</span>;
+                gameover = <span style="color: #859900;">true</span>;
+
+                label.setText(underscores);
+            }
+            <span style="color: #859900;">////////////</span><span style="color: #859900;">reset</span>
+            <span style="color: #b58900; font-weight: bold;">if</span>(evt.getKeyChar() == <span style="color: #dc322f;">'y'</span> &amp;&amp; gameover &amp;&amp; currentmatrixnum+1 != wordarray.length){
+                j = 0;
+                currentmatrixnum++;
+                guessedvalues = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">char</span>[30];
+                incorrectguessedvalues = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">char</span>[6];
+                setunderscores(wordarray[currentmatrixnum]);
+                gameover = <span style="color: #859900;">false</span>;
+                incorrectguesses = 0;
+
+            }
+
+            <span style="color: #b58900; font-weight: bold;">if</span>(currentmatrixnum+1 == wordarray.length &amp;&amp; gameover &amp;&amp; evt.getKeyChar() == <span style="color: #dc322f;">'n'</span>){
+                underscores = <span style="color: #dc322f;">"GAME OVER, you have solved"</span> + correctpuzzles + <span style="color: #dc322f;">" puzzles out of "</span> + currentmatrixnum;
+                j = 0;
+                currentmatrixnum++;
+                guessedvalues = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">char</span>[30];
+                incorrectguessedvalues = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">char</span>[6];
+                gameover = <span style="color: #859900;">false</span>;
+                label.setText(underscores);
+            }
+            revalidate();
+            repaint();
+
+            System.out.println(<span style="color: #dc322f;">"Check for key characters: "</span> + evt.getKeyChar());
+
+        }
+    }
+    <span style="color: #859900;">/////////////////////////////////////////////////////////////////////////////////</span>
+
+
+
+    <span style="color: #b58900; font-weight: bold;">public</span> <span style="color: #b58900; font-weight: bold;">static</span> <span style="color: #268bd2;">void</span> <span style="color: #2aa198;">main</span>(<span style="color: #268bd2;">String</span> <span style="color: #dc322f;">args</span>[])
+    {
+        SwingUtilities.invokeLater(<span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">Runnable</span>() {
+                <span style="color: #b58900; font-weight: bold;">public</span> <span style="color: #268bd2;">void</span> <span style="color: #2aa198;">run</span>() {
+                    <span style="color: #268bd2;">HangMan1</span> <span style="color: #dc322f;">Hang</span> = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">HangMan1</span>();
+                    Hang.setVisible(<span style="color: #859900;">true</span>);
+
+
+        <span style="color: #268bd2;">int</span> <span style="color: #dc322f;">count</span> = 0;
+        <span style="color: #268bd2;">BufferedReader</span> <span style="color: #dc322f;">reader</span>;
+        <span style="color: #b58900; font-weight: bold;">try</span> {
+            reader = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">BufferedReader</span>(<span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">FileReader</span>(<span style="color: #dc322f;">"hangmanwords.txt"</span>));
+            <span style="color: #268bd2;">String</span> <span style="color: #dc322f;">line</span> = reader.readLine();
+            <span style="color: #b58900; font-weight: bold;">while</span> (line != <span style="color: #859900;">null</span>) {
+                System.out.println(line);
+                wordarray[count] = line;
+                line = reader.readLine();
+                count++;
+            }
+            reader.close();
+        } <span style="color: #b58900; font-weight: bold;">catch</span> (<span style="color: #268bd2;">IOException</span> <span style="color: #dc322f;">e</span>) {
+            e.printStackTrace();
+        }
+
+                }});
+
+        <span style="color: #268bd2;">SerialPort</span> <span style="color: #dc322f;">comPort</span> = SerialPort.getCommPort(<span style="color: #dc322f;">"./virtual-tty"</span>);
+        comPort.openPort();
+        comPort.addDataListener(<span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">SerialPortDataListener</span>() {
+
+                <span style="color: #859900;">@Override</span>
+                <span style="color: #b58900; font-weight: bold;">public</span> <span style="color: #268bd2;">int</span> <span style="color: #2aa198;">getListeningEvents</span>() { <span style="color: #b58900; font-weight: bold;">return</span> <span style="color: #859900;">SerialPort</span>.LISTENING_EVENT_DATA_AVAILABLE; }
+                <span style="color: #859900;">@Override</span>
+                <span style="color: #b58900; font-weight: bold;">public</span> <span style="color: #268bd2;">void</span> <span style="color: #2aa198;">serialEvent</span>(<span style="color: #268bd2;">SerialPortEvent</span> <span style="color: #dc322f;">event</span>)
+                {
+                    <span style="color: #859900;">// </span><span style="color: #859900;">if (event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE)</span>
+                    <span style="color: #859900;">//     </span><span style="color: #859900;">return;</span>
+                    <span style="color: #268bd2;">byte</span>[] <span style="color: #dc322f;">newData</span> = <span style="color: #b58900; font-weight: bold;">new</span> <span style="color: #268bd2;">byte</span>[comPort.bytesAvailable()];
+                    <span style="color: #268bd2;">int</span> <span style="color: #dc322f;">numRead</span> = comPort.readBytes(newData, newData.length);
+                    <span style="color: #268bd2;">int</span> <span style="color: #dc322f;">i</span>=newData[0];
+                    System.out.println(Character.toChars(i));
+                }
+            });     
+    }
+}
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: \today</p>
+<p class="author">Author: Lewis Collum</p>
+<p class="date">Created: 2019-04-03 Wed 23:22</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

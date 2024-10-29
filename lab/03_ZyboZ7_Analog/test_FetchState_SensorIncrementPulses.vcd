@@ -1,0 +1,332 @@
+$date
+  Wed Mar  6 15:45:27 2019
+$end
+$version
+  GHDL v0
+$end
+$timescale
+  1 fs
+$end
+$var reg 3 ! runner[0:2] $end
+$comment buttoncontroller is not handled $end
+$scope module unit $end
+$var reg 1 " clock $end
+$var reg 1 # reset $end
+$comment state is not handled $end
+$comment unfilteredbutton is not handled $end
+$comment filteredbutton is not handled $end
+$comment debounced is not handled $end
+$comment toggled is not handled $end
+$comment pulsed is not handled $end
+$var reg 1 $ isfetching $end
+$scope module setsensorincrementenabler $end
+$var reg 1 % input $end
+$var reg 1 & enable $end
+$var reg 1 ' output $end
+$upscope $end
+$scope module setclockenableenabler $end
+$var reg 1 ( input $end
+$var reg 1 ) enable $end
+$var reg 1 * output $end
+$upscope $end
+$scope module setdebouncedreset $end
+$var reg 1 + clock $end
+$var reg 1 , reset $end
+$var reg 1 - input $end
+$var reg 1 . output $end
+$comment counter is not handled $end
+$var reg 1 / istimerbusy $end
+$scope module debouncetimer $end
+$var reg 1 0 clock $end
+$var reg 1 1 reset $end
+$var reg 1 2 isdone $end
+$var integer 32 3 count $end
+$upscope $end
+$scope module timerclockenabler $end
+$var reg 1 4 input $end
+$var reg 1 5 enable $end
+$var reg 1 6 output $end
+$upscope $end
+$upscope $end
+$scope module setdebouncedsensorincrement $end
+$var reg 1 7 clock $end
+$var reg 1 8 reset $end
+$var reg 1 9 input $end
+$var reg 1 : output $end
+$comment counter is not handled $end
+$var reg 1 ; istimerbusy $end
+$scope module debouncetimer $end
+$var reg 1 < clock $end
+$var reg 1 = reset $end
+$var reg 1 > isdone $end
+$var integer 32 ? count $end
+$upscope $end
+$scope module timerclockenabler $end
+$var reg 1 @ input $end
+$var reg 1 A enable $end
+$var reg 1 B output $end
+$upscope $end
+$upscope $end
+$scope module setdebouncedclockenable $end
+$var reg 1 C clock $end
+$var reg 1 D reset $end
+$var reg 1 E input $end
+$var reg 1 F output $end
+$comment counter is not handled $end
+$var reg 1 G istimerbusy $end
+$scope module debouncetimer $end
+$var reg 1 H clock $end
+$var reg 1 I reset $end
+$var reg 1 J isdone $end
+$var integer 32 K count $end
+$upscope $end
+$scope module timerclockenabler $end
+$var reg 1 L input $end
+$var reg 1 M enable $end
+$var reg 1 N output $end
+$upscope $end
+$upscope $end
+$scope module setclockenabletoggle $end
+$var reg 1 O toggle $end
+$var reg 1 P reset $end
+$var reg 1 Q output $end
+$upscope $end
+$scope module setpulsedsensorincrement $end
+$var reg 1 R clock $end
+$var reg 1 S reset $end
+$var reg 1 T input $end
+$var reg 1 U output $end
+$var reg 1 V isidle $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+bZZZ !
+1"
+U#
+0$
+U%
+0&
+0'
+U(
+0)
+0*
+1+
+U,
+0-
+U.
+U/
+00
+U1
+U2
+b0 3
+14
+U5
+06
+17
+U8
+09
+U:
+U;
+0<
+U=
+U>
+b0 ?
+1@
+UA
+0B
+1C
+UD
+0E
+UF
+UG
+0H
+UI
+UJ
+b0 K
+1L
+UM
+0N
+UO
+UP
+UQ
+1R
+US
+UT
+UU
+UV
+#10000000
+0"
+0+
+04
+07
+0@
+0C
+0L
+0R
+#15000000
+1#
+0%
+0(
+1,
+18
+1D
+1P
+0Q
+1S
+0U
+1V
+#20000000
+1"
+1+
+0.
+0/
+11
+02
+14
+05
+17
+0:
+0;
+1=
+0>
+1@
+0A
+1C
+0F
+0G
+1I
+0J
+1L
+0M
+0O
+1R
+0T
+#30000000
+0"
+0+
+04
+07
+0@
+0C
+0L
+0R
+#35000000
+0#
+1$
+1&
+1)
+0,
+08
+19
+0D
+0P
+0S
+#40000000
+1"
+1+
+14
+17
+1:
+1;
+1<
+0=
+b1 ?
+1@
+1A
+1B
+1C
+1L
+1R
+1T
+#50000000
+0"
+0+
+04
+07
+0<
+0@
+0B
+0C
+0L
+0R
+#55000000
+09
+#60000000
+1"
+1%
+1'
+1+
+14
+17
+1<
+b10 ?
+1@
+1B
+1C
+1L
+1R
+1U
+0V
+#70000000
+0"
+0+
+04
+07
+0<
+0@
+0B
+0C
+0L
+0R
+#75000000
+#80000000
+1"
+0%
+0'
+1+
+14
+17
+1<
+b11 ?
+1@
+1B
+1C
+1L
+1R
+0U
+#90000000
+0"
+0+
+04
+07
+0<
+0@
+0B
+0C
+0L
+0R
+#95000000
+#100000000
+1"
+1+
+14
+17
+1<
+b100 ?
+1@
+1B
+1C
+1L
+1R
+#110000000
+0"
+0+
+04
+07
+0<
+0@
+0B
+0C
+0L
+0R

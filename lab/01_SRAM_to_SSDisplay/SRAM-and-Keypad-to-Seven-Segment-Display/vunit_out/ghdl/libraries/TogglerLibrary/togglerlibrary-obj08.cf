@@ -1,0 +1,7 @@
+v 4
+file / "/home/charon/repos/SRAM-and-Keypad-to-Seven-Segment-Display/source/Toggler/TestToggler.vhd" "feea490e2c8656b9e146f361916bdf9929b34c8b" "20190123030939.092":
+  entity testtoggler at 1( 0) + 0 on 41;
+  architecture testbench of testtoggler at 14( 216) + 0 on 42;
+file / "/home/charon/repos/SRAM-and-Keypad-to-Seven-Segment-Display/source/Toggler/Toggler.vhd" "e2e2ba70e41efa99372862e1d396cadd83acd6ba" "20190123024326.514":
+  entity toggler at 1( 0) + 0 on 11;
+  architecture behavioral of toggler at 12( 193) + 0 on 12;

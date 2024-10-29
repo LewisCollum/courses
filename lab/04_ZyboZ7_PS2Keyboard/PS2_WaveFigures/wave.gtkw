@@ -1,0 +1,104 @@
+[*]
+[*] GTKWave Analyzer v3.3.94 (w)1999-2018 BSI
+[*] Wed Apr  3 22:51:37 2019
+[*]
+[dumpfile] "/home/charon/vivado/HardwareHangman/vunit_out/test_output/ps2.testps2controller.waveform_5b3449ec27ce46c09cab4324f9e90bc12a08ffe7/ghdl/wave.ghw"
+[dumpfile_mtime] "Thu Mar 14 16:00:17 2019"
+[dumpfile_size] 3642848
+[savefile] "/home/charon/lab/04_ZyboZ7_PS2Keyboard/PS2_WaveFigures/wave.gtkw"
+[timestart] 12678200000
+[size] 1280 1080
+[pos] -1025 -1
+*-26.933878 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.testps2controller.
+[treeopen] top.testps2controller.unitps2controller.
+[sst_width] 334
+[signals_width] 270
+[sst_expanded] 1
+[sst_vpaned_height] 318
+@200
+-State Controller
+-(INPUT FLAGS)
+@28
+top.testps2controller.unitps2controller.statecontroller.flag.isreadytostore
+top.testps2controller.unitps2controller.statecontroller.flag.isreadytofetch
+top.testps2controller.unitps2controller.statecontroller.flag.isbitcounterdone
+top.testps2controller.unitps2controller.statecontroller.flag.isnewdata
+@200
+-(OUTPUT)
+@420
+top.testps2controller.unitps2controller.statecontroller.state
+@200
+-
+-Bit Counter
+-(INPUT STATE)
+@420
+top.testps2controller.unitps2controller.bitcounter.state
+@200
+-(OUTPUT FLAG)
+@28
+top.testps2controller.unitps2controller.bitcounter.isdone
+@200
+-(INTERNAL)
+@28
+top.testps2controller.unitps2controller.bitcounter.timercounterinstance.clock
+@420
+top.testps2controller.unitps2controller.bitcounter.timercounterinstance.count
+@28
+top.testps2controller.unitps2controller.bitcounter.timercounterinstance.reset
+@200
+-
+-Peripheral Clock Edge Detector
+-(INPUT)
+@420
+top.testps2controller.unitps2controller.peripheralclockedgedetector.state
+@28
+top.testps2controller.unitps2controller.peripheralclockedgedetector.clockperipheral
+@200
+-(INTERNAL CLOCK SYNCHRONIZER)
+@28
+top.testps2controller.unitps2controller.peripheralclockedgedetector.clocksynced
+@200
+-(OUTPUT FLAG)
+@28
+top.testps2controller.unitps2controller.peripheralclockedgedetector.flag.isfalling
+top.testps2controller.unitps2controller.peripheralclockedgedetector.flag.isrising
+@200
+-
+-Peripheral Data Reader
+-(INPUT)
+@420
+top.testps2controller.unitps2controller.peripheraldatareader.state
+@28
+top.testps2controller.unitps2controller.peripheraldatareader.dataperipheral
+@200
+-(INTERNAL DATA SYNCHRONIZER)
+@28
+top.testps2controller.unitps2controller.peripheraldatareader.datasynced
+@200
+-(SIPO Shift Register)
+@c00028
+#{top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[10:0]} top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[10] top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[9] top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[8] top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[7] top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[6] top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[5] top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[4] top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[3] top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[2] top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[1] top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[0]
+@28
+top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[10]
+top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[9]
+top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[8]
+top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[7]
+top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[6]
+top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[5]
+top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[4]
+top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[3]
+top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[2]
+top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[1]
+top.testps2controller.unitps2controller.peripheraldatareader.siposhiftregister.output[0]
+@1401200
+-group_end
+@200
+-(OUTPUT)
+@28
+top.testps2controller.unitps2controller.peripheraldatareader.flag.isnewdata
+@22
+#{top.testps2controller.unitps2controller.peripheraldatareader.data[7:0]} top.testps2controller.unitps2controller.peripheraldatareader.data[7] top.testps2controller.unitps2controller.peripheraldatareader.data[6] top.testps2controller.unitps2controller.peripheraldatareader.data[5] top.testps2controller.unitps2controller.peripheraldatareader.data[4] top.testps2controller.unitps2controller.peripheraldatareader.data[3] top.testps2controller.unitps2controller.peripheraldatareader.data[2] top.testps2controller.unitps2controller.peripheraldatareader.data[1] top.testps2controller.unitps2controller.peripheraldatareader.data[0]
+[pattern_trace] 1
+[pattern_trace] 0
