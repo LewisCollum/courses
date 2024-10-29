@@ -1,0 +1,151 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018/Arch Linux) (preloaded format=prv_formula 2019.2.14)  14 FEB 2019 02:41
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**&prv_formula _region_.tex
+(./_region_.tex
+LaTeX2e <2018-04-01> patch level 5
+CUSTOMISED FORMAT. Preloaded files:
+        .
+ article.cls    2014/09/29 v1.4h Standard LaTeX document class
+  size10.clo    2014/09/29 v1.4h Standard LaTeX file (size option)
+myformula.sty    2019/01/30 Package for formulas
+ amsmath.sty    2017/09/02 v2.17a AMS math features
+ amstext.sty    2000/06/29 v2.01 AMS text
+  amsgen.sty    1999/11/30 v2.0 generic functions
+  amsbsy.sty    1999/11/29 v1.2d Bold Symbols
+  amsopn.sty    2016/03/08 v2.02 operator names
+ amssymb.sty    2013/01/14 v3.01 AMS font symbols
+amsfonts.sty    2013/01/14 v3.01 Basic AMSFonts support
+setspace.sty    2011/12/19 v6.7a set line spacing
+geometry.sty    2018/04/16 v5.8 Page Geometry
+  keyval.sty    2014/10/28 v1.15 key=value parser (DPC)
+   ifpdf.sty    2018/09/07 v3.3 Provides the ifpdf switch
+  ifvtex.sty    2016/05/16 v1.6 Detect VTeX and its facilities (HO)
+ ifxetex.sty    2010/09/12 v0.6 Provides ifxetex conditional
+fancyhdr.sty    2017/06/30 v3.9a Extensive control of page headers and footers
+multicol.sty    2018/04/20 v1.8s multicolumn formatting (FMi)
+enumitem.sty    2018/11/30 v3.6 Customized lists
+etoolbox.sty    2018/08/19 v2.5f e-TeX tools for LaTeX (JAW)
+titlesec.sty    2016/03/21 v2.10.2 Sectioning titles
+tabularx.sty    2016/02/03 v2.11b `tabularx' package (DPC)
+   array.sty    2018/04/30 v2.4h Tabular extension package (FMi)
+  xcolor.sty    2016/05/11 v2.12 LaTeX color extensions (UK)
+   color.cfg    2016/01/02 v1.6 sample color configuration
+  pdftex.def    2018/01/08 v1.0l Graphics/color driver for pdftex
+    umsa.fd    2013/01/14 v3.01 AMS symbols A
+    umsb.fd    2013/01/14 v3.01 AMS symbols B
+        .
+No file _region_.aux.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 4.
+LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 4.
+LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 4.
+LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 4.
+LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 4.
+LaTeX Font Info:    ... okay on input line 4.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 4.
+LaTeX Font Info:    ... okay on input line 4.
+(/home/charon/.emacs.d/.cask/26.1/elpa/auctex-12.1.1/latex/preview.sty
+Package: preview 2017/04/24 12.1 (AUCTeX/preview-latex)
+ (/usr/share/texmf-dist/tex/generic/luatex85/luatex85.sty
+Package: luatex85 2016/06/15 v1.4 pdftex aliases for luatex
+) (/home/charon/.emacs.d/.cask/26.1/elpa/auctex-12.1.1/latex/prtightpage.def
+\PreviewBorder=\dimen142
+) (/home/charon/.emacs.d/.cask/26.1/elpa/auctex-12.1.1/latex/prauctex.def
+No auxiliary output files.
+
+
+\hbadness=\count115
+\hfuzz=\dimen143
+(/home/charon/.emacs.d/.cask/26.1/elpa/auctex-12.1.1/latex/prauctex.cfg)) (/home/charon/.emacs.d/.cask/26.1/elpa/auctex-12.1.1/latex/prfootnotes.def)
+\pr@snippet=\count116
+\pr@box=\box58
+\pr@output=\toks25
+
+Preview: Fontsize 10pt
+Preview: PDFoutput 1
+)
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: letterpaper
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: landscape 
+* h-part:(L,W,R)=(18.06749pt, 758.835pt, 18.06749pt)
+* v-part:(T,H,B)=(36.135pt, 560.09251pt, 18.06749pt)
+* \paperwidth=794.96999pt
+* \paperheight=614.295pt
+* \textwidth=758.835pt
+* \textheight=560.09251pt
+* \oddsidemargin=-54.2025pt
+* \evensidemargin=-54.2025pt
+* \topmargin=-55.36243pt
+* \headheight=12.0pt
+* \headsep=7.22743pt
+* \topskip=10.0pt
+* \footskip=30.0pt
+* \marginparwidth=65.0pt
+* \marginparsep=11.0pt
+* \columnsep=10.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+(/usr/share/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count117
+\scratchdimen=\dimen144
+\scratchbox=\box59
+\nofMPsegments=\count118
+\nofMParguments=\count119
+\everyMPshowfont=\toks26
+\MPscratchCnt=\count120
+\MPscratchDim=\dimen145
+\MPnumerator=\count121
+\makeMPintoPDFobject=\count122
+\everyMPtoPDFconversion=\toks27
+)  !name(formula.tex) !offset(72) 
+! Preview: Snippet 1 started.
+<-><->
+      
+l.7 $
+     \alpha$
+Not a real error.
+
+Preview: Tightpage -32891 -32891 32891 32891
+! Preview: Snippet 1 ended.(282168+0x421661).
+<-><->
+      
+l.7 $\alpha$
+            
+Not a real error.
+
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]  !name(formula.tex) !offset(75)  ) 
+Here is how much of TeX's memory you used:
+ 479 strings out of 489092
+ 6777 string characters out of 6090865
+ 132265 words of memory out of 5000000
+ 7858 multiletter control sequences out of 15000+600000
+ 7422 words of font info for 29 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 22i,4n,24p,164b,50s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
+Output written on _region_.pdf (1 page, 8273 bytes).
+PDF statistics:
+ 12 PDF objects out of 1000 (max. 8388607)
+ 7 compressed objects within 1 object stream
+ 0 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+

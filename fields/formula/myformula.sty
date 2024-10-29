@@ -1,0 +1,57 @@
+\ProvidesPackage{myformula}[2019/01/30 Package for formulas]
+
+\usepackage[fleqn]{amsmath}
+\usepackage{amssymb}
+\usepackage{setspace}
+\usepackage[left=0.25in, right=0.25in, top=0.5in, bottom=.25in, landscape]{geometry}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\usepackage{multicol}
+\usepackage{enumitem}
+\usepackage{etoolbox}
+\usepackage{titlesec}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{xcolor}
+
+\renewcommand{\[}{\begin{equation}}
+    \renewcommand{\]}{\end{equation}}
+\renewcommand{\@seccntformat}[1]{}
+
+\titlespacing{\section}{0mm}{1mm}{0mm}
+\titleformat*{\section}{\rmfamily\small\bfseries}
+
+\titlespacing{\subsection}{0mm}{1mm}{0mm}
+\titleformat*{\subsection}{\rmfamily\scriptsize\bfseries}
+
+\newcommand{\eqd}[1]{\tag*{{\tiny #1}}}
+\newcommand{\sfont}[1]{{\scriptsize #1}}
+\newcommand{\zerodisplayskips}{%
+  \setlength{\abovedisplayskip}{2pt}%
+  \setlength{\belowdisplayskip}{2pt}%
+  \setlength{\abovedisplayshortskip}{2pt}%
+  \setlength{\belowdisplayshortskip}{2pt}}
+
+\appto{\normalsize}{\zerodisplayskips}
+\appto{\small}{\zerodisplayskips}
+\appto{\scriptsize}{\zerodisplayskips}
+\appto{\footnotesize}{\zerodisplayskips}
+
+\geometry{headsep=0.1in}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\setlength{\mathindent}{0pt}
+\setlength{\extrarowheight}{3pt}
+%\setlength{\textfloatsep}{-10mm}
+% \setlength{\tabcolsep}{2pt}
+\setlength{\partopsep}{0pt}
+\setlength{\columnseprule}{1pt}
+\def\columnseprulecolor{\color{black!5}}
+
+\setlist[itemize]{leftmargin=*}
+\renewcommand{\labelitemi}{-}
+
+\lhead{\small Lewis Collum}
+\chead{\small\textbf{\jobname}}
+\rhead{\small Updated: \today}
+

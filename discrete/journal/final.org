@@ -1,0 +1,6 @@
+#+latex_header:\documentclass{article}
+#+latex_header:\usepackage{../myjournal}
+
+
+\[x+2=y-4\]
+

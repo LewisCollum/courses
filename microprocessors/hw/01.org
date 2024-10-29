@@ -1,0 +1,18 @@
+1. Cold brew coffee analyzer
+- uses infared to detect chemical content.
+- Allows cold brew coffee to steep for just the right amount of time
+without over-steeping or under-steeping.
+
+2. $25.99
+
+3. A cheap AVR or PIC may work. Not sure.
+
+4. Analog to digital converter. A clock that can sample fast enough to
+get a good wave result. Low power mode so the device can be battery
+powered (The device will likely be in the refrigerator).
+
+5. Analog to Digital converter. Watchdog timer. infrared sensor.
+
+6. Single PCB holding the microcontroller and the peripheral infrared sensor.
+
+7. microcontroller.
