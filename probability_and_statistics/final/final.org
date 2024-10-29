@@ -1,0 +1,162 @@
+#+latex_class_options: [fleqn]
+#+latex_header: \usepackage{../homework}
+#+options: num:t
+#+bind: org-latex-minted-options (("rulecolor" "gray") ("frame" "leftline") ("fontsize" "\\scriptsize") ("xleftmargin" "20pt") ("baselinestretch" "0.9"))
+#+bind: org-latex-image-default-width "0.4\\linewidth"
+#+options: num:t tags:nil
+#+property: header-args :exports both :eval no-export :results output latex
+
+
+#+title: Final
+#+author: Lewis Collum
+#+date: Updated: \today
+
+
+* Part 1:
+  - 9: RBD Anova
+
+  - 13: Exponential
+  - 14: Normal
+  - 15: Exponential
+  - 16: Poisson
+  - 17: Binomial
+
+  
+* 1
+** Hypotheses:
+   C: Clarkson
+
+   R: RPI
+   \[H_0: \mu_{C} = \mu_{R}\]
+   \[H_A: \mu_{C} > \mu_{R}\]
+** Two Sample T-Test:
+  #+begin_src python :results output drawer
+import pandas
+from scipy import stats
+
+data = pandas.read_excel('data.xlsx')
+print(f'variance p-value = {stats.levene(data.Clarkson, data.RPI).pvalue:.3f}')
+tScore, pTwoTailed = stats.ttest_ind(data.Clarkson, data.RPI, equal_var = False)
+
+pOneTailed = pTwoTailed/2
+print(f"\nt-test p-value = {pOneTailed:.2f}")
+  #+end_src
+
+  #+RESULTS:
+  :results:
+  variance p-value = 0.000
+
+  t-test p-value = 0.19
+  :end:
+
+** Conclusion
+   Since the p-value is greater than the significance level (0.05), we
+   fail to reject the null hypothesis. That is, we cannot conclude
+   that Clarkson students have a higher starting salary on average
+   than those at RPI.
+  
+* 2
+** Hypotheses:
+   \noindent
+   \[H_0: \mu = 30\]
+   \[H_A: \mu > 30\]   
+** One sample T-Test:
+  #+begin_src python :results output drawer
+import pandas
+from scipy import stats
+
+data = pandas.read_excel('data.xlsx', sheet_name=1)
+
+tScore, pTwoTailed = stats.ttest_1samp(data.Mileage, 30)
+pOneTailed = pTwoTailed/2
+print(f't-score = {tScore:.2f}')
+print(f"\np-value = {pOneTailed:.10f}")
+  #+end_src
+
+  #+RESULTS:
+  :results:
+  t-score = 6.11
+
+  p-value = 0.0000013019
+  :end:
+** Conclusion
+   Since the p-value is less than the significance level (0.05), we
+   reject the null hypothesis. Evidence suggests that the mileage is
+   over 30 mpg for the sedan.
+* 3
+** Hypotheses:
+   \noindent
+   \[H_0: \mu_D = \mu_P\]
+   \[H_A: \mu_D < \mu_P\]   
+** Paired T-Test:
+  #+begin_src python :results output drawer
+import pandas
+from scipy import stats
+
+data = pandas.read_excel('data.xlsx', sheet_name=2)
+
+tScore, pTwoTailed = stats.ttest_rel(data.Placebo, data.Drug)
+pOneTailed = pTwoTailed/2
+print(f't-score = {tScore:.2f}')
+print(f"\np-value = {pOneTailed:.10f}")
+  #+end_src
+
+  #+RESULTS:
+  :results:
+  t-score = 10.33
+
+  p-value = 0.0000000000
+  :end:
+** Conclusion
+   Since the p-value is less than the significance level (0.05), we
+   reject the null hypothesis. Evidence suggests that the drug does
+   aid in weight loss.
+* 4
+** Hypotheses:
+   I: Idaho
+
+   W: Washington
+
+   O: Oregon
+
+   N: Wisconsin
+
+   D: North Dakota
+
+   \[H_0: \mu_{I} = \mu_{W} = \mu_{O} = \mu_{N} = \mu_{D}\]
+   \[H_A: \mu_{I} > \mu_{i} \texttt{ for i in [W, 0, N, D]}\]
+** Multiple Two Sample T-Test:
+  #+begin_src python :results output drawer
+import pandas
+from scipy import stats
+
+data = pandas.read_excel('data.xlsx', sheet_name = 3)
+#print(f'variance p-value = {stats.levene(data.Clarkson, data.RPI).pvalue:.3f}')
+#tScore, pTwoTailed = stats.ttest_ind(data.Clarkson, data.RPI, equal_var = False)
+
+#pOneTailed = pTwoTailed/2
+#print(f"\nt-test p-value = {pOneTailed:.2f}")
+  #+end_src
+
+  #+RESULTS:
+  :results:
+  :end:
+
+  Ran out of time
+** Conclusion
+   Since the p-value is greater than the significance level (0.05), we
+   fail to reject the null hypothesis. Evidence suggests that Idaho
+   Potato Growers Association potatoes have the highest satisfaction.
+  
+* 5 
+** (a)
+   [[./figure/5-a.png]]
+** (b)
+   [[./figure/5-b.png]]
+* 6
+** (a)
+   Test 1: \(P(D) = 0.25 \cdot 0.79\)
+
+   Test 2: \(P(D) = 0.25 \cdot 0.76\)
+
+** (b) ran out of time 

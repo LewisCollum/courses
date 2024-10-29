@@ -27,10 +27,10 @@ function init() {
     gl.enable(gl.DEPTH_TEST)
 
     drawer.setupWithGlAndShaders(gl, shaderProgram)
-    drawer.strategy = gl.TRIANGLES
+    drawer.strategy = gl.LINE_LOOP
     
     shape = {
-        points: radial.make3d(40, 40),
+        points: radial.make3d(4,1),
         position: matrix.Identity(4),
         rotation: matrix.Identity(4),
         scale: form.Scale.all(0.8),

@@ -3,5 +3,5 @@
 
 #+title: 
 #+author: Lewis Collum
-#+date: Updated: \today"
+#+date: Updated: \today
 

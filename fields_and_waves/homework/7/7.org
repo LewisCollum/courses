@@ -1,6 +1,6 @@
 #+latex_class_options: [fleqn, twocolumn]
 #+latex_header: \usepackage{../homework}
-#+property: header-args :exports both :cache yes 
+#+property: header-args :exports both :eval no-export
 #+bind: org-latex-minted-options (("bgcolor" "codeBackground")("fontsize" "\\scriptsize"))
 #+options: num:t tags:nil
 #+bind: org-latex-image-default-width "\\linewidth"
@@ -35,4 +35,91 @@
    \newpage
 * 4 - Sliding Bar
   [[./figure/4.png]]
-* 5 - 
+* 5 - Magnetic Vector Potential
+  #+begin_src python :results silent :tangle my.py :exports none
+import matplotlib.pyplot as pyplot
+import numpy
+
+def makeGrid():
+    fieldLength = 10
+    arrowSpacing = 1
+    
+    return numpy.meshgrid(
+        numpy.arange(-fieldLength, fieldLength+1, arrowSpacing),
+        numpy.arange(-fieldLength, fieldLength+1, arrowSpacing))
+
+def makePolarGrid(start, stop):
+    fieldLength = 5
+    arrowSpacing = 1
+    radii = numpy.linspace(start,stop,10)
+    thetas = numpy.linspace(0,2*numpy.pi,20)
+    
+    return numpy.meshgrid(thetas, radii)
+
+def plotField(x, y, xComponent, yComponent):
+    fig, ax = pyplot.subplots()
+    ax.set_aspect('equal')
+    q = ax.quiver(x, y, xComponent, yComponent)
+    ax.quiverkey(q, X=0.3, Y=1.1, U=10,
+                 label='Quiver key, length = 10', labelpos='E')
+
+def plotPolarField(theta, r, thetaComponent, rComponent):
+    fig = pyplot.figure()
+    ax = fig.add_subplot(111, polar=True)
+    ax.set_aspect('equal')
+    q = ax.quiver(
+        theta,
+        r,
+        rComponent * numpy.cos(theta) - thetaComponent * numpy.sin(theta),
+        rComponent * numpy.sin(theta) + thetaComponent * numpy.cos(theta))
+    # ax.quiverkey(q, X=0.3, Y=1.1, U=1,label='Quiver key, length = 1', labelpos='E')
+  #+end_src
+
+** Magnetic Field Intensity
+   From Ampere's law applied to an infinite wire:
+   \[\vec{B} = \hat{\phi} \dfrac{I}{2\pi r}\]
+  #+begin_src python :results silent :async :eval no-export
+import matplotlib.pyplot as pyplot
+import numpy
+
+import my #some helper functions I made
+
+phi, r = my.makePolarGrid(start=0.5, stop=2)
+
+I = 1
+H = I/2/numpy.pi/r
+
+my.plotPolarField(phi, r, H, 0)
+pyplot.xlabel('theta')
+pyplot.ylabel('r')
+pyplot.title('Magnetic Field Intensity of Infinite Wire')
+#pyplot.show()
+
+pyplot.savefig('./5-a.png')
+  #+end_src
+  [[./5-a.png]]
+** Magnetic Vector Potential
+   \[\vec{A} = \hat{\phi} \dfrac{I}{2\pi}\cdot \ln(r)\]
+  #+begin_src python :results silent :eval no-export
+import matplotlib.pyplot as pyplot
+import numpy
+
+import my
+
+phi, r = my.makePolarGrid(start=0.5, stop=2.5)
+
+I = 1
+A = I/2/numpy.pi * numpy.log(r)
+
+my.plotPolarField(phi, r, A, 0)
+pyplot.xlabel('theta')
+pyplot.ylabel('r')
+pyplot.title('Magnetic Vector Potential of Infinite Wire')
+#pyplot.show()
+
+pyplot.savefig('5-b.png')
+  #+end_src
+  
+  [[./5-b.png]]
+
+  
